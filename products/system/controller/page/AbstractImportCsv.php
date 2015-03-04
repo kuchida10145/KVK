@@ -25,25 +25,29 @@ abstract class AbstractImportCsv extends Page{
 			$this->_data[$key] = $value;
 	}
 
-	public function executeImport($filename) {
+	public function executeImport($filename, $testFlg) {
+		$result = true;
 
 		// 拡張子チェック
 		$error = $this->checkExtension($csvFile);
 		if(!$error) {
-			$this->set($Message, 'CSVファイルを取り込んでください。<br>');
+			$this->set('errorMessage', 'CSVファイルを取り込んでください。<br>');
+			$this->set('resultMessage', '失敗<br>');
 			return false;
 		}
 		// CSVデータ取得
 		$csvData = $this->getCsvData($csvFile);
 		// CSVデータ行数チェック
 		if (count($csvData) < 2) {
-			$this->set($Message, 'CSVファイルにデータがありません。<br>');
+			$this->set('errorMessage', 'CSVファイルにデータがありません。<br>');
+			$this->set('resultMessage', '失敗<br>');
 			return false;
 		}
 		// CSVカラム数チェック
 		$error = $this->csvColumnCheck(count($csvData[0]));
 		if(!$error) {
-			$this->set($Message, 'CSVファイルの項目数が一致しません。<br>');
+			$this->set('errorMessage', 'CSVファイルの項目数が一致しません。<br>');
+			$this->set('resultMessage', '失敗<br>');
 			return false;
 		}
 		// CSVデータチェック取得
@@ -52,7 +56,11 @@ abstract class AbstractImportCsv extends Page{
 			return false;
 		}
 		// シュミレーションモードでなければDB更新。
-		if($dbFlg) {
+		// true：シュミレーション（DB更新しない）	false：csv取込（DB更新を行う）
+		if($testFlg) {
+			$this->set('errorMessage', '');
+			$this->set('resultMessage', '成功<br>');
+		} else {
 			//削除フラグチェック
 			if($checkData[3]){
 				// DB削除処理
@@ -64,21 +72,27 @@ abstract class AbstractImportCsv extends Page{
 					// Update処理
 				}
 			}
+
+			if($dbCheck) {
+				$this->set('errorMessage', '');
+				$this->set('resultMessage', '成功<br>');
+			} else {
+				$this->set('errorMessage', 'データベースエラーが発生しました。<br>');
+				$this->set('resultMessage', '失敗<br>');
+				$result = false;
+			}
 		}
-
-		// エラーなし
-		$importCsv->Message = '成功';
-		// エラーあり
-		$importCsv->Message = '失敗';
-
+		return $result;
 	}
 
+	// エラーメッセージ取得
 	public function getErrorMessage() {
-
+		return $this->get('errorMessage');
 	}
 
-	public function getHtmlErrorMessage() {
-
+	// 結果メッセージ取得
+	public function getResultMessage() {
+		return $this->get('resultMessage');
 	}
 
 	/**
@@ -187,7 +201,7 @@ abstract class AbstractImportCsv extends Page{
 			foreach ($errorMessage as $val) {
 				$setMessage = $setMessage.$val;
 			}
-			$this->set('Message', $setMessage);
+			$this->set('errorMessage', $setMessage);
 		}
 
 		return $result;

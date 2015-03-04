@@ -4,16 +4,22 @@
 	// セッション
 	session_start();
 
-	$message = "";
+	$resultMessage	= "";
+	$errorMessage	= "";
 
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
+		$testFlg = false;
+		// 取込テスト判定
+		if(issset($_POST['test_button']) && $_POST['test_button'] == "test") {
+			$testFlg = true;
+		}
+
 		$importCsv = new ImportCsvCategory();
 		$csvFile = $_FILES["file"]["tmp_name"];
-		$result = $importCsv->executeImport($csvFile);
-		if (!result) {
-			$message = $importCsv->getHtmlErrorMessage();
-		}
+		$result = $importCsv->executeImport($csvFile, $testFlg);
+		$resultMessage	= $importCsv->getResultMessage();
+		$errorMessage	= $importCsv->getErrorMessage();
 	}
 ?>
 <!DOCTYPE html>
@@ -65,16 +71,16 @@
 							</div>
 						</div>
 						<div align="center">
-							<button type="button" class="btn btn-default" onclick="document.form.submit();">CSV 取込</button>
-							<!-- <button type="button" class="btn btn-success">Success</button> -->
+							<button type="button" class="btn btn-default" onclick="document.form.submit();" name="test_button" value="test">取込テスト</button>
+							<button type="button" class="btn btn-success"  onclick="document.form.submit();" name="run_button" value="run">CSV 取込</button>
 							<!-- <button type="button" class="btn btn-warning">CSV ダウンロード</button> -->
 						</div>
 						<div>
-							実行結果：<?php echo $result_view ?>
+							実行結果：<?php echo $resultMessage ?>
 						</div>
 						<div>
 							[メッセージ]<br>
-							<?php echo $importCsv->Message ?>
+							<?php echo $errorMessage ?>
 						</div>
 					</form>
 				</div>
