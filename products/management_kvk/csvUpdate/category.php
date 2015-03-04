@@ -1,3 +1,21 @@
+<?php
+	include_once('../../system/controller/page/importcsv/ImportCsvCategory.php');
+
+	// セッション
+	session_start();
+
+	$message = "";
+
+	// csv取込処理実行
+	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
+		$importCsv = new ImportCsvCategory();
+		$csvFile = $_FILES["file"]["tmp_name"];
+		$result = $importCsv->executeImport($csvFile);
+		if (!result) {
+			$message = $importCsv->getHtmlErrorMessage();
+		}
+	}
+?>
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -7,7 +25,7 @@
 		<title>Navs</title>
 
 		<!-- Bootstrap -->
-		<link href="sample_code/css/bootstrap.min.css" rel="stylesheet">
+		<link href="../../system/style_code/css/bootstrap.min.css" rel="stylesheet">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->

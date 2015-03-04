@@ -3,7 +3,7 @@
  * ページコントローラー基本クラス
  *
  */
-require_once(dirname(__FILE__).'/system/Management.php');
+require_once(dirname(__FILE__).'/controller/Management.php');
 abstract class Page
 {
 	public $manager = NULL;
