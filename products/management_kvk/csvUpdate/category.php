@@ -11,7 +11,7 @@
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
 		$testFlg = false;
 		// 取込テスト判定
-		if(issset($_POST['test_button']) && $_POST['test_button'] == "test") {
+		if(isset($_POST['test_button']) && $_POST['test_button'] == "test") {
 			$testFlg = true;
 		}
 
@@ -53,7 +53,7 @@
 					</ul>
 				</div>
 				<div>
-					<form class="form-horizontal well" action="admin_category.php" method="post" name="form" enctype="multipart/form-data">
+					<form class="form-horizontal well" action="category.php" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
 						<div class="form-group">
 							<label for="upload" class="col-sm-2 control-label">CSVファイル</label>

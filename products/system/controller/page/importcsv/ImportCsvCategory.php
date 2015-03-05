@@ -44,10 +44,14 @@
 	 * @return $result		チェック結果
 	 */
 	protected function dataDBCheck($checkData, $line_count) {
+		$deleteFlg = "";
 		$result = true;
 
+		// 削除フラグ取得
+		$deleteFlg = $this->convertDeleteFlg($checkData[3]);
+
 		// 削除フラグ
-		if($checkData[3]){
+		if($deleteFlg){
 			$result = $this->manager->db_manager->get('parent_category')->checkData($checkData[0]);
 		}
 

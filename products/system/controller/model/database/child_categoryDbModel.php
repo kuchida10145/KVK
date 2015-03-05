@@ -18,6 +18,7 @@ class child_categoryDbModel extends DbModel
 				'category_name',
 				'category_image',
 				'parent_id',
+				'view_status',
 		);
 		return $data;
 	}
@@ -37,5 +38,41 @@ class child_categoryDbModel extends DbModel
 		$sql = "SELECT * FROM child_category WHERE parent_id ='{$parent_id}'";
 
 		return $this->db->getAllData($sql);
+	}
+
+	/**
+	 * 取込データをDBに登録する。
+	 *
+	 * @param array $category_array csvから取り込んだ親カテゴリ情報
+	 * @return Array
+	 */
+	public function insertChildCategory($category_array) {
+		$table = 'child_category';
+
+		$this->db->startTran();				// トランザクション開始
+
+		$insert_result = $this->db->insert($table, $category_array);
+
+		$this->db->endTran($insert_result);	// トランザクション終了
+
+		return $insert_result;
+	}
+
+	/**
+	 * データチェック
+	 * @param $category_id	検索キー
+	 * @return $result		検索結果(true：データなし false：データあり)
+	 */
+	public function checkData($category_id) {
+		$result = true;
+		$table = 'child_category';
+
+		$sql = "SELECT * FROM {$table} WHERE parent_id = {$category_id}";
+		$dataCount = $this->db->getCount($sql);
+
+		if($dataCount != 0) {
+			$result = false;
+		}
+		return $result;
 	}
 }

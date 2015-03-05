@@ -24,7 +24,7 @@ define('DB_CHARSET','utf8');
 |--------------------------------------------------------------------------
  */
 
-define('HEADER_COUNT_CATEGORY', '3');
+define('HEADER_COUNT_CATEGORY', '5');
 define('ERROR_MSG_NODATA', 'csvファイルにデータがありません。');
 define('ERROR_MSG_HEADER_COUNT_CATEGORY', 'csvファイルの項目数が足りません。');
 /*----------------------------

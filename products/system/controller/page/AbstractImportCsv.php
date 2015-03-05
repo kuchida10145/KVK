@@ -1,7 +1,7 @@
 <?php
 include_once('/../../Page.php');
 abstract class AbstractImportCsv extends Page{
-	protected abstract function dataFormCheck($checkData, $line_count);	// cavデータ形式チェック
+	protected abstract function dataFormCheck($checkData, $line_count);		// cavデータ形式チェック
 	protected abstract function dataDBCheck($checkData, $line_count);		// cavデータDBチェック
 
 	private $_data = array();
@@ -27,16 +27,20 @@ abstract class AbstractImportCsv extends Page{
 
 	public function executeImport($filename, $testFlg) {
 		$result = true;
+		$line_count = 0;			// csvファイル行数カウント用
+		$where = "";				// sql実行用のwhere句
+		$parentID = "";				// 親カテゴリID格納用
+		$dbCheck = "";				// db操作結果
 
 		// 拡張子チェック
-		$error = $this->checkExtension($csvFile);
+		$error = $this->checkExtension($filename);
 		if(!$error) {
 			$this->set('errorMessage', 'CSVファイルを取り込んでください。<br>');
 			$this->set('resultMessage', '失敗<br>');
 			return false;
 		}
 		// CSVデータ取得
-		$csvData = $this->getCsvData($csvFile);
+		$csvData = $this->getCsvData($filename);
 		// CSVデータ行数チェック
 		if (count($csvData) < 2) {
 			$this->set('errorMessage', 'CSVファイルにデータがありません。<br>');
@@ -61,16 +65,18 @@ abstract class AbstractImportCsv extends Page{
 			$this->set('errorMessage', '');
 			$this->set('resultMessage', '成功<br>');
 		} else {
-			//削除フラグチェック
-			if($checkData[3]){
-				// DB削除処理
-			} else {
-				$dbCheck = $this->manager->db_manager->get('parent_category')->checkData($checkData[0]);
-				if(!$dbCheck) {
-					// DBinsert処理
+			// csvファイル全データに対してDB処理を行う。
+			foreach ($csvData as $row) {
+				// 親カテゴリID取得
+				$parentID = $row[2];
+				if($parentID == '0') {
+					// 親カテゴリDB処理
+					$dbCheck = $this->runParentCategory($row);
 				} else {
-					// Update処理
+					// 子カテゴリDB処理
+					$dbCheck = $this->runChildCategory($row);
 				}
+				$line_count++;
 			}
 
 			if($dbCheck) {
@@ -83,6 +89,79 @@ abstract class AbstractImportCsv extends Page{
 			}
 		}
 		return $result;
+	}
+
+	/**
+	 * 親カテゴリDB処理
+	 * @param	$targetArray 対象データ（csvファイル1行分）
+	 * @return	$dbCheck DB処理結果（true：成功	false：失敗）
+	 */
+	protected function runParentCategory($targetArray) {
+		$dataArray = array();		// 更新データ格納用の配列
+		$dbCheck = "";				// DB動作結果
+
+		// 配列を連想配列に変換
+		$dataArray = array('category_id'=>$targetArray[0], 'parent_name'=>$targetArray[1], 'parent_image'=>$targetArray[3], 'view_status'=>$targetArray[4]);
+		// 親カテゴリのキーは'category_id'
+		$where = "category_id = {$dataArray['category_id']}";
+		// ヘッダー行はチェックしない
+		if($line_count != 0) {
+			$deleteFlg = $this->convertDeleteFlg($dataArray['view_status']);	// 削除フラグ取得
+			//削除フラグチェック
+			if($deleteFlg){
+				// DB削除処理(表示フラグ更新)
+				$dbCheck = $this->manager->db_manager->get('parent_category')->update($dataArray, $where);
+			} else {
+				$dbCheck = $this->manager->db_manager->get('parent_category')->checkData($dataArray['category_id']);
+				// 同じカテゴリIDのデータが存在する場合：Update
+				// 同じカテゴリIDのデータが存在しない場合：Insert
+				if($dbCheck) {
+					// Update処理
+					$dbCheck = $this->manager->db_manager->get('parent_category')->update($dataArray, $where);
+				} else {
+					// DBinsert処理
+					$dbCheck = $this->manager->db_manager->get('parent_category')->insertParentCategory($dataArray);
+				}
+			}
+		}
+		return $dbCheck;
+	}
+
+	/**
+	 * 子カテゴリDB処理
+	 * @param	$targetArray 対象データ（csvファイル1行分）
+	 * @return	$dbCheck DB処理結果（true：成功	false：失敗）
+	 */
+	protected function runChildCategory($targetArray) {
+		$dataArray = array();		// 更新データ格納用の配列
+		$dbCheck = "";				// DB動作結果
+
+		// 配列を連想配列に変換
+		$dataArray = array('category_id'=>$targetArray[0], 'category_name'=>$targetArray[1],
+				'category_image'=>$targetArray[3], 'parent_id'=>$targetArray[2], 'view_status'=>$targetArray[4]);
+		// 親カテゴリのキーは'category_id'
+		$where = "category_id = {$dataArray['category_id']}";
+		// ヘッダー行はチェックしない
+		if($line_count != 0) {
+			$deleteFlg = $this->convertDeleteFlg($dataArray['view_status']);	// 削除フラグ取得
+			//削除フラグチェック
+			if($deleteFlg){
+				// DB削除処理(表示フラグ更新)
+				$dbCheck = $this->manager->db_manager->get('child_category')->update($dataArray, $where);
+			} else {
+				$dbCheck = $this->manager->db_manager->get('child_category')->checkData($dataArray['category_id']);
+				// 同じカテゴリIDのデータが存在する場合：Update
+				// 同じカテゴリIDのデータが存在しない場合：Insert
+				if($dbCheck) {
+					// Update処理
+					$dbCheck = $this->manager->db_manager->get('child_category')->update($dataArray, $where);
+				} else {
+					// DBinsert処理
+					$dbCheck = $this->manager->db_manager->get('child_category')->insertChildCategory($dataArray);
+				}
+			}
+		}
+		return $dbCheck;
 	}
 
 	// エラーメッセージ取得
@@ -231,6 +310,21 @@ abstract class AbstractImportCsv extends Page{
 			$this->$checkData[0] = $checkData[0];
 			$result = false;
 		}
+		return $result;
+	}
+
+	/**
+	 * 削除フラグ変換
+	 * @param	$dalete_flg	削除フラグ
+	 * @return	$result		変換後削除フラグ（true：非表示（データ削除扱い）, false：表示）
+	 */
+	public function convertDeleteFlg($dalete_flg){
+		$result = false;
+
+		if ($dalete_flg == '1'){
+			$result = true;
+		}
+
 		return $result;
 	}
 }
