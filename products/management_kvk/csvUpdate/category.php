@@ -4,22 +4,31 @@
 	// セッション
 	session_start();
 
-	$resultMessage	= "";
-	$errorMessage	= "";
+	$resultMessage	= "";	// 実行結果
+	$errorMessage	= "";	// エラーメッセージ
 
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
-		$testFlg = false;
-		// 取込テスト判定
+		// csv取込処理インスタンス化
+		$importCsv = new ImportCsvCategory();
+		$filePath		= "";	// csvファイルパス
+		$fileName		= "";	// csvファイル名
+		$testFlg = false;		// 取込処理フラグ
+		// 取込テスト判定（true：取込テスト、false：csv取込）
 		if(isset($_POST['test_button']) && $_POST['test_button'] == "test") {
 			$testFlg = true;
 		}
 
-		$importCsv = new ImportCsvCategory();
-		$csvFile = $_FILES["file"]["tmp_name"];
-		$result = $importCsv->executeImport($csvFile, $testFlg);
-		$resultMessage	= $importCsv->getResultMessage();
-		$errorMessage	= $importCsv->getErrorMessage();
+		$filePath = $_FILES["file"]["tmp_name"];
+		$fileName = $_FILES["file"]["name"];
+
+		// csv取込処理実行
+		$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
+		// メッセージ取得
+		$resultMessage	= $importCsv->getResultMessage($result);
+		if(!$result) {
+			$errorMessage	= $importCsv->getErrorMessage();
+		}
 	}
 ?>
 <!DOCTYPE html>
@@ -71,8 +80,8 @@
 							</div>
 						</div>
 						<div align="center">
-							<button type="button" class="btn btn-default" onclick="document.form.submit();" name="test_button" value="test">取込テスト</button>
-							<button type="button" class="btn btn-success"  onclick="document.form.submit();" name="run_button" value="run">CSV 取込</button>
+							<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="test_button" value="test">取込テスト</button>
+							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="run_button" value="run">CSV 取込</button>
 							<!-- <button type="button" class="btn btn-warning">CSV ダウンロード</button> -->
 						</div>
 						<div>

@@ -6,12 +6,13 @@ register_shutdown_function( 'my_shutdown_handler' );
 require_once(dirname(__FILE__).'/config.php');
 require_once(dirname(__FILE__).'/core/DatabaseManager.php');
 require_once(dirname(__FILE__).'/core/Validation.php');
+require_once(dirname(__FILE__).'/core/ValidationColumns.php');
 
 class Management
 {
 	var $db_manager;
 	var $validation;
-	var $view;
+	var $validationColumns;
 
 	/**
 	 * コンストラクタ(プライベート)
@@ -20,6 +21,7 @@ class Management
 	{
 		$this->db_manager = new DatabaseManager();
 		$this->validation = new Validation();
+		$this->validationColumns = new ValidationColumns() ;
 	}
 
 	/**

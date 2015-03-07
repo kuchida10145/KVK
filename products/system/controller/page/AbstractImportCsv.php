@@ -1,57 +1,76 @@
 <?php
 include_once('/../../Page.php');
 abstract class AbstractImportCsv extends Page{
-	protected abstract function dataFormCheck($checkData, $line_count);		// cavデータ形式チェック
+
+	function __construct() {
+		parent::__construct();
+	}
+
+
 	protected abstract function dataDBCheck($checkData, $line_count);		// cavデータDBチェック
 
 	private $_data = array();
 
+	/** GETTERメソッド
+	 * @param	$key				取得するデータのkey項目
+	 * @return	$this->get($key)	指定したkeyの値
+	 */
 	public function __get($key){
 			return $this->get($key);
 	}
 
+	/** SETTERメソッド
+	 * @param $key		key項目
+	 * @param $value	key項目にセットする値
+	 */
 	public function __set($key,$value){
 			$this->set($key,$value);
 	}
 
-	public function get($key,$default=null){
-			if(array_key_exist($key,$this->var)){
+	// GETTERメソッド詳細
+	protected function get($key,$default=null){
+			if(array_key_exists($key,$this->_data)){
 					return $this->_data[$key];
 			}
 			return $default;
 	}
 
-	public function set($key,$value){
+	// SETTERメソッド詳細
+	protected function set($key,$value){
 			$this->_data[$key] = $value;
 	}
 
-	public function executeImport($filename, $testFlg) {
-		$result = true;
+	/**
+	 * csvファイル取込メイン処理
+	 * @param 	$filePath	取込csvファイルパス
+	 * @param 	$fileName	取込csvファイル名
+	 * @param	$testFlg	取込テスト判定
+	 * @return	$result		取込結果（true：csv取込成功	false：csv取込失敗）
+	 */
+	public function executeImport($filePath, $fileName, $testFlg) {
 		$line_count = 0;			// csvファイル行数カウント用
 		$where = "";				// sql実行用のwhere句
 		$parentID = "";				// 親カテゴリID格納用
 		$dbCheck = "";				// db操作結果
+		$error = true;				// errorフラグ（true：エラーなし、false：エラーあり）
 
 		// 拡張子チェック
-		$error = $this->checkExtension($filename);
+		$error = $this->checkExtension($fileName);
 		if(!$error) {
-			$this->set('errorMessage', 'CSVファイルを取り込んでください。<br>');
-			$this->set('resultMessage', '失敗<br>');
+			$this->__set(KEY_ERROR_MESSAGE, 'CSVファイルを取り込んでください。<br>');
 			return false;
 		}
 		// CSVデータ取得
-		$csvData = $this->getCsvData($filename);
+		$csvData = $this->getCsvData($filePath);
 		// CSVデータ行数チェック
 		if (count($csvData) < 2) {
-			$this->set('errorMessage', 'CSVファイルにデータがありません。<br>');
-			$this->set('resultMessage', '失敗<br>');
+			$this->__set(KEY_ERROR_MESSAGE, 'CSVファイルにデータがありません。<br>');
 			return false;
 		}
 		// CSVカラム数チェック
 		$error = $this->csvColumnCheck(count($csvData[0]));
 		if(!$error) {
-			$this->set('errorMessage', 'CSVファイルの項目数が一致しません。<br>');
-			$this->set('resultMessage', '失敗<br>');
+			$this->{KEY_ERROR_MESSAGE} = 'CSVファイルの項目数が一致しません。<br>';
 			return false;
 		}
 		// CSVデータチェック取得
@@ -62,8 +81,7 @@ abstract class AbstractImportCsv extends Page{
 		// シュミレーションモードでなければDB更新。
 		// true：シュミレーション（DB更新しない）	false：csv取込（DB更新を行う）
 		if($testFlg) {
-			$this->set('errorMessage', '');
-			$this->set('resultMessage', '成功<br>');
+			return true;
 		} else {
 			// csvファイル全データに対してDB処理を行う。
 			foreach ($csvData as $row) {
@@ -79,16 +97,12 @@ abstract class AbstractImportCsv extends Page{
 				$line_count++;
 			}
 
-			if($dbCheck) {
-				$this->set('errorMessage', '');
-				$this->set('resultMessage', '成功<br>');
-			} else {
-				$this->set('errorMessage', 'データベースエラーが発生しました。<br>');
-				$this->set('resultMessage', '失敗<br>');
-				$result = false;
+			if(!$dbCheck) {
+				$this->__set(KEY_ERROR_MESSAGE, 'データベースエラーが発生しました。<br>');
+				return false;
 			}
 		}
-		return $result;
+		return true;
 	}
 
 	/**
@@ -166,12 +180,23 @@ abstract class AbstractImportCsv extends Page{
 
 	// エラーメッセージ取得
 	public function getErrorMessage() {
-		return $this->get('errorMessage');
+		return $this->{KEY_ERROR_MESSAGE};
 	}
 
-	// 結果メッセージ取得
-	public function getResultMessage() {
-		return $this->get('resultMessage');
+	/** 結果メッセージ取得
+	 * @param	$result		取込結果(true：成功 false：失敗)
+	 * @return	$message	実行結果
+	 */
+	public function getResultMessage($result) {
+		$message = "";
+
+		if($result) {
+			$message = "成功<br>";
+		} else {
+			$message = "失敗<br>";
+		}
+
+		return $message;
 	}
 
 	/**
@@ -180,11 +205,11 @@ abstract class AbstractImportCsv extends Page{
 	 * @return $result	チェック結果(true：正常、false：異常)
 	 */
 	protected function checkExtension($csvFile) {
-		$result = false;
-		$csvFile = end(explode('.', $csvFile));
+		$result = true;
+		$checkVal = pathinfo($csvFile, PATHINFO_EXTENSION);
 
-		if($csvFile == 'csv') {
-			$result = true;
+		if($checkVal != 'csv') {
+			$result = false;
 		}
 		return $result;
 	}
@@ -199,14 +224,15 @@ abstract class AbstractImportCsv extends Page{
 		// csvから取り込んだデータをUTF-8に変換する
 		$data = file_get_contents($csvFile);
 		$data = mb_convert_encoding($data, 'UTF-8', 'sjis-win');
+		$temp = tmpfile();
 
-		fwrite($temp, $data);
-		rewind($temp);
+ 		fwrite($temp, $data);
+ 		rewind($temp);
 
 		while (($data = fgetcsv($temp, 0, ",")) !== FALSE) {
 			$csv[] = $data;
 		}
-		fclose($temp);
+ 		fclose($temp);
 
 		return $csv;
 	}
@@ -232,7 +258,7 @@ abstract class AbstractImportCsv extends Page{
 	 */
 	protected function csvColumnCheck($dataCount) {
 		$result = true;
-		if($dataCount == HEADER_COUNT_CATEGORY){
+		if($dataCount != HEADER_COUNT_CATEGORY){
 			$result = false;
 		}
 		return $result;
@@ -253,24 +279,30 @@ abstract class AbstractImportCsv extends Page{
 		foreach ($csvData as $row) {
 			// ヘッダー行はチェックしない
 			if($line_count != 0) {
+				// データ項目数チェック
 				$errorLineCount = $line_count + 1;
 				$result = $this->dataColumnCheck($row);
 				if(!$result) {
 					$errorMessage[] = "登録するデータ項目数が一致しません。 {$errorLineCount}行目<br>";
 					continue;
 				}
-				$result = $this->dataFormCheck($row, $errorLineCount);
+
+				// データ型チェック
+				$result = $this->manager->validationColumns->resetError();
+				$result = $this->manager->validationColumns->run($row);
 				if(!$result) {
-					$errorMessage[] = $this->get('dataFormCheckMessage');
+					$errorMessage[] = $this->manager->validationColumns->getErrorMessageColumn($errorLineCount, $msg_rules);
 				}
-				$result = $this->dataPrimaryCheck($row);
+				// 重複データチェック
+				$result = $this->dataPrimaryCheck($row, $errorLineCount);
 				if(!$result) {
-					$errorMessage[] = "{$this->$row[0]}行目とデータが重複しています。 {$errorLineCount}行目<br>";
+					$errorMessage[] = "{$this->{$row[CATEGORY_ID_COLUMN_CATEGORY]}}行目とデータが重複しています。 {$errorLineCount}行目<br>";
 					continue;
 				}
+				// DBチェック
 				$result = $this->dataDBCheck($row, $line_count);
 				if(!$result) {
-					$errorMessage[] = $this->get('dataDBCheckMessage');
+					$errorMessage[] = $this->{KEY_DB_CHECK_MESSAGE};
 				}
 			}
 			$line_count++;
@@ -280,7 +312,7 @@ abstract class AbstractImportCsv extends Page{
 			foreach ($errorMessage as $val) {
 				$setMessage = $setMessage.$val;
 			}
-			$this->set('errorMessage', $setMessage);
+			$this->__set(KEY_ERROR_MESSAGE, $setMessage);
 		}
 
 		return $result;
@@ -302,13 +334,15 @@ abstract class AbstractImportCsv extends Page{
 	/**
 	 * cavデータ重複データチェック
 	 * @param	$checkData	チェック対象データ
+	 * @param	$lineCount	現在のcsvの行数
 	 * @return	$result		チェック結果
 	 */
-	protected function dataPrimaryCheck($checkData) {
+	protected function dataPrimaryCheck($checkData, $lineCount) {
 		$result = true;
-		if (!isset($this->$checkData[0])) {
-			$this->$checkData[0] = $checkData[0];
+		if ($this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} == null) {
 			$result = false;
+		} else {
+			$this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} = $lineCount;
 		}
 		return $result;
 	}
