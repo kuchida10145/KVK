@@ -6,7 +6,6 @@ abstract class AbstractImportCsv extends Page{
 		parent::__construct();
 	}
 
-
 	protected abstract function dataDBCheck($checkData, $line_count);		// cavデータDBチェック
 
 	private $_data = array();
@@ -57,20 +56,20 @@ abstract class AbstractImportCsv extends Page{
 		// 拡張子チェック
 		$error = $this->checkExtension($fileName);
 		if(!$error) {
-			$this->__set(KEY_ERROR_MESSAGE, 'CSVファイルを取り込んでください。<br>');
+			$this->{KEY_ERROR_MESSAGE} =  ERROR_MSG_FILE_ERROR;
 			return false;
 		}
 		// CSVデータ取得
 		$csvData = $this->getCsvData($filePath);
 		// CSVデータ行数チェック
-		if (count($csvData) < 2) {
-			$this->__set(KEY_ERROR_MESSAGE, 'CSVファイルにデータがありません。<br>');
+		if (count($csvData) < CSV_DATA_MIN) {
+			$this->{KEY_ERROR_MESSAGE} =  ERROR_MSG_NODATA;
 			return false;
 		}
 		// CSVカラム数チェック
-		$error = $this->csvColumnCheck(count($csvData[0]));
+		$error = $this->csvColumnCheck(count($csvData[CSV_HEADER_LINE]));
 		if(!$error) {
-			$this->{KEY_ERROR_MESSAGE} = 'CSVファイルの項目数が一致しません。<br>';
+			$this->{KEY_ERROR_MESSAGE} = ERROR_MSG_COLUMN_ERROR;
 			return false;
 		}
 		// CSVデータチェック取得
@@ -81,24 +80,22 @@ abstract class AbstractImportCsv extends Page{
 		// シュミレーションモードでなければDB更新。
 		// true：シュミレーション（DB更新しない）	false：csv取込（DB更新を行う）
 		if($testFlg) {
+			$this->{KEY_ERROR_MESSAGE} = MSG_CHECK_OK;
 			return true;
 		} else {
 			// csvファイル全データに対してDB処理を行う。
 			foreach ($csvData as $row) {
-				// 親カテゴリID取得
-				$parentID = $row[2];
-				if($parentID == '0') {
-					// 親カテゴリDB処理
-					$dbCheck = $this->runParentCategory($row);
-				} else {
-					// 子カテゴリDB処理
-					$dbCheck = $this->runChildCategory($row);
+				if($line_count != 0){
+					// 親カテゴリID取得
+					$parentID = $row[PARENT_ID_COLUMN_CATEGORY];
+					// カテゴリDB処理
+					$dbCheck = $this->runCategory($row, $parentID);
 				}
 				$line_count++;
 			}
 
 			if(!$dbCheck) {
-				$this->__set(KEY_ERROR_MESSAGE, 'データベースエラーが発生しました。<br>');
+				$this->{KEY_ERROR_MESSAGE} = ERROR_MSG_DB;
 				return false;
 			}
 		}
@@ -107,93 +104,86 @@ abstract class AbstractImportCsv extends Page{
 
 	/**
 	 * 親カテゴリDB処理
-	 * @param	$targetArray 対象データ（csvファイル1行分）
-	 * @return	$dbCheck DB処理結果（true：成功	false：失敗）
+	 * @param	$targetArray	対象データ（csvファイル1行分）
+	 * @param	$parentID		親カテゴリID（0：親カテゴリ、0以外：子カテゴリ）
+	 * @return	$dbCheck		DB処理結果（true：成功	false：失敗）
 	 */
-	protected function runParentCategory($targetArray) {
+	protected function runCategory($targetArray, $parentID) {
 		$dataArray = array();		// 更新データ格納用の配列
 		$dbCheck = "";				// DB動作結果
+		$table = "";				// テーブル名
+		$where = "";				// SQL実行用のwhere句
+		$key = "";					// DB検索用Key
 
-		// 配列を連想配列に変換
-		$dataArray = array('category_id'=>$targetArray[0], 'parent_name'=>$targetArray[1], 'parent_image'=>$targetArray[3], 'view_status'=>$targetArray[4]);
-		// 親カテゴリのキーは'category_id'
-		$where = "category_id = {$dataArray['category_id']}";
-		// ヘッダー行はチェックしない
-		if($line_count != 0) {
-			$deleteFlg = $this->convertDeleteFlg($dataArray['view_status']);	// 削除フラグ取得
-			//削除フラグチェック
-			if($deleteFlg){
-				// DB削除処理(表示フラグ更新)
-				$dbCheck = $this->manager->db_manager->get('parent_category')->update($dataArray, $where);
+		// 親カテゴリor子カテゴリの設定をする。
+		if($parentID == 0) {
+			// 親カテゴリDB登録データ生成
+			$dataArray = array(	COLUMN_NAME_PARENT_ID=>$targetArray[CATEGORY_ID_COLUMN_CATEGORY],
+								COLUMN_NAME_PARENT_NAME=>$targetArray[CATEGORY_NAME_COLUMN_CATEGORY],
+					 			COLUMN_NAME_PARENT_IMAGE=>$targetArray[IMAGE_COLUMN_CATEGORY],
+								COLUMN_NAME_VIEW_STATUS=>$targetArray[DELETE_COLUMN_CATEGORY] );
+			// 親カテゴリテーブル
+			$table = TABLE_NAME_PARENT_CATEGORY;
+			// key項目設定
+			$key = $dataArray[COLUMN_NAME_PARENT_ID];
+			// where句生成
+			$where = "parent_id = {$key}";
+		} else {
+			// 子カテゴリDB登録データ生成
+			$dataArray = array(
+					COLUMN_NAME_CATEGORY_ID=>$targetArray[CATEGORY_ID_COLUMN_CATEGORY],
+					COLUMN_NAME_CATEGORY_NAME=>$targetArray[CATEGORY_NAME_COLUMN_CATEGORY],
+					COLUMN_NAME_CATEGORY_IMAGE=>$targetArray[IMAGE_COLUMN_CATEGORY],
+					COLUMN_NAME_PARENT_ID=>$targetArray[PARENT_ID_COLUMN_CATEGORY],
+					COLUMN_NAME_VIEW_STATUS=>$targetArray[DELETE_COLUMN_CATEGORY] );
+			// 子カテゴリテーブル
+			$table = TABLE_NAME_CHILD_CATEGORY;
+			// key項目設定
+			$key = $dataArray[COLUMN_NAME_CATEGORY_ID];
+			// where句生成
+			$where = "category_id = {$key}";
+		}
+
+		// 削除フラグ取得
+		$deleteFlg = $this->convertDeleteFlg($dataArray[COLUMN_NAME_VIEW_STATUS]);
+		//削除フラグチェック
+		if($deleteFlg){
+			// DB削除処理(表示フラグ更新)
+			$dbCheck = $this->manager->db_manager->get($table)->update($dataArray, $where);
+		} else {
+			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
+			$dbCheck = $this->manager->db_manager->get($table)->checkData($key);
+			if($dbCheck) {
+				// DBUpdate処理
+				$dbCheck = $this->manager->db_manager->get($table)->update($dataArray, $where);
 			} else {
-				$dbCheck = $this->manager->db_manager->get('parent_category')->checkData($dataArray['category_id']);
-				// 同じカテゴリIDのデータが存在する場合：Update
-				// 同じカテゴリIDのデータが存在しない場合：Insert
-				if($dbCheck) {
-					// Update処理
-					$dbCheck = $this->manager->db_manager->get('parent_category')->update($dataArray, $where);
-				} else {
-					// DBinsert処理
-					$dbCheck = $this->manager->db_manager->get('parent_category')->insertParentCategory($dataArray);
-				}
+				// DBinsert処理
+				$dbCheck = $this->manager->db_manager->get($table)->insertCategory($dataArray);
 			}
 		}
 		return $dbCheck;
 	}
 
 	/**
-	 * 子カテゴリDB処理
-	 * @param	$targetArray 対象データ（csvファイル1行分）
-	 * @return	$dbCheck DB処理結果（true：成功	false：失敗）
+	 * エラーメッセージ取得
+	 * @return	$message	エラーメッセージ
 	 */
-	protected function runChildCategory($targetArray) {
-		$dataArray = array();		// 更新データ格納用の配列
-		$dbCheck = "";				// DB動作結果
-
-		// 配列を連想配列に変換
-		$dataArray = array('category_id'=>$targetArray[0], 'category_name'=>$targetArray[1],
-				'category_image'=>$targetArray[3], 'parent_id'=>$targetArray[2], 'view_status'=>$targetArray[4]);
-		// 親カテゴリのキーは'category_id'
-		$where = "category_id = {$dataArray['category_id']}";
-		// ヘッダー行はチェックしない
-		if($line_count != 0) {
-			$deleteFlg = $this->convertDeleteFlg($dataArray['view_status']);	// 削除フラグ取得
-			//削除フラグチェック
-			if($deleteFlg){
-				// DB削除処理(表示フラグ更新)
-				$dbCheck = $this->manager->db_manager->get('child_category')->update($dataArray, $where);
-			} else {
-				$dbCheck = $this->manager->db_manager->get('child_category')->checkData($dataArray['category_id']);
-				// 同じカテゴリIDのデータが存在する場合：Update
-				// 同じカテゴリIDのデータが存在しない場合：Insert
-				if($dbCheck) {
-					// Update処理
-					$dbCheck = $this->manager->db_manager->get('child_category')->update($dataArray, $where);
-				} else {
-					// DBinsert処理
-					$dbCheck = $this->manager->db_manager->get('child_category')->insertChildCategory($dataArray);
-				}
-			}
-		}
-		return $dbCheck;
-	}
-
-	// エラーメッセージ取得
 	public function getErrorMessage() {
 		return $this->{KEY_ERROR_MESSAGE};
 	}
 
-	/** 結果メッセージ取得
+	/**
+	 * 結果メッセージ取得
 	 * @param	$result		取込結果(true：成功 false：失敗)
-	 * @return	$message	実行結果
+	 * @return	$message	実行結果メッセージ
 	 */
 	public function getResultMessage($result) {
 		$message = "";
 
 		if($result) {
-			$message = "成功<br>";
+			$message = RESULT_MSG_OK;
 		} else {
-			$message = "失敗<br>";
+			$message = RESULT_MSG_NG;
 		}
 
 		return $message;
@@ -208,7 +198,7 @@ abstract class AbstractImportCsv extends Page{
 		$result = true;
 		$checkVal = pathinfo($csvFile, PATHINFO_EXTENSION);
 
-		if($checkVal != 'csv') {
+		if($checkVal != CSV_EXTENTION) {
 			$result = false;
 		}
 		return $result;
@@ -245,7 +235,7 @@ abstract class AbstractImportCsv extends Page{
 	protected function csvDataCountCheck($dataCount) {
 		$result = true;
 		// haader行 + データ行で最低2行は必要。
-		if($dataCount < 2){
+		if($dataCount < CSV_DATA_MIN){
 			$result = false;
 		}
 		return $result;
@@ -281,28 +271,30 @@ abstract class AbstractImportCsv extends Page{
 			if($line_count != 0) {
 				// データ項目数チェック
 				$errorLineCount = $line_count + 1;
-				$result = $this->dataColumnCheck($row);
-				if(!$result) {
+				if(!$this->dataColumnCheck($row)) {
 					$errorMessage[] = "登録するデータ項目数が一致しません。 {$errorLineCount}行目<br>";
+					$result = false;
+					$line_count++;
 					continue;
 				}
 
 				// データ型チェック
-				$result = $this->manager->validationColumns->resetError();
-				$result = $this->manager->validationColumns->run($row);
-				if(!$result) {
-					$errorMessage[] = $this->manager->validationColumns->getErrorMessageColumn($errorLineCount, $msg_rules);
+				$this->manager->validationColumns->resetError();
+				if(!$this->manager->validationColumns->run($row)) {
+					$errorMessage[] = $this->manager->validationColumns->getErrorMessageColumn($errorLineCount, $this->msg_rules);
+					$result = false;
 				}
 				// 重複データチェック
-				$result = $this->dataPrimaryCheck($row, $errorLineCount);
-				if(!$result) {
+				if(!$this->dataPrimaryCheck($row, $errorLineCount)) {
 					$errorMessage[] = "{$this->{$row[CATEGORY_ID_COLUMN_CATEGORY]}}行目とデータが重複しています。 {$errorLineCount}行目<br>";
+					$result = false;
+					$line_count++;
 					continue;
 				}
 				// DBチェック
-				$result = $this->dataDBCheck($row, $line_count);
-				if(!$result) {
+				if(!$this->dataDBCheck($row, $line_count)) {
 					$errorMessage[] = $this->{KEY_DB_CHECK_MESSAGE};
+					$result = false;
 				}
 			}
 			$line_count++;
@@ -310,9 +302,15 @@ abstract class AbstractImportCsv extends Page{
 
 		if(!$result){
 			foreach ($errorMessage as $val) {
-				$setMessage = $setMessage.$val;
+				if(is_array($val)) {
+					foreach ($val as $item) {
+						$setMessage = $setMessage.$item;
+					}
+				} else {
+					$setMessage = $setMessage.$val;
+				}
 			}
-			$this->__set(KEY_ERROR_MESSAGE, $setMessage);
+			$this->{KEY_ERROR_MESSAGE} = $setMessage;
 		}
 
 		return $result;
@@ -339,7 +337,8 @@ abstract class AbstractImportCsv extends Page{
 	 */
 	protected function dataPrimaryCheck($checkData, $lineCount) {
 		$result = true;
-		if ($this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} == null) {
+		// キー項目が前にチェックしたデータにあったかチェックする
+		if ($this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} != null) {
 			$result = false;
 		} else {
 			$this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} = $lineCount;
@@ -355,7 +354,7 @@ abstract class AbstractImportCsv extends Page{
 	public function convertDeleteFlg($dalete_flg){
 		$result = false;
 
-		if ($dalete_flg == '1'){
+		if ($dalete_flg == DELETE_FLG){
 			$result = true;
 		}
 

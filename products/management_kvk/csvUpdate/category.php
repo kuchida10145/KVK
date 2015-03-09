@@ -6,6 +6,7 @@
 
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
+	$viewFilePath	= "";	// 画面表示用csvファイルパス
 
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
@@ -26,9 +27,9 @@
 		$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
 		// メッセージ取得
 		$resultMessage	= $importCsv->getResultMessage($result);
-		if(!$result) {
-			$errorMessage	= $importCsv->getErrorMessage();
-		}
+		$errorMessage	= $importCsv->getErrorMessage();
+		// 画面表示用csvファイルパス設定
+		$viewFilePath = $_POST['filepath'];
 	}
 ?>
 <!DOCTYPE html>
@@ -68,10 +69,10 @@
 							<label for="upload" class="col-sm-2 control-label">CSVファイル</label>
 							<div class="col-sm-10">
 								<!-- input[type=file] を非表示にする -->
-								<input type="file" class="hidden" id="upload" name="file">
+								<input type="file" class="hidden" id="upload" name="file" value="<?php echo $viewFilePath ?>">
 								<!-- 代わりに input[type=text] と ボタンを表示 -->
 								<div class="input-group">
-									<input type="text" id="filepath" name="filepath" class="form-control">
+									<input type="text" id="filepath" name="filepath" class="form-control" value="<?php echo $viewFilePath ?>">
 									<span class="input-group-btn">
 										<!-- ボタンを押したときに input[type=file] を押したことにする -->
 										<a class="btn btn-default" onclick="document.getElementById('upload').click()">ファイル選択</a>

@@ -13,6 +13,13 @@
 			$this->manager->validationColumns->setRule(IMAGE_COLUMN_CATEGORY, 'required');
 			// 削除フラグ
 			$this->manager->validationColumns->setRule(DELETE_COLUMN_CATEGORY, 'numeric|digit|pnumeric');
+			// エラーメッセージ作成用配列
+			$this->msg_rules = array(
+										'required'=>ERROR_MSG_FORM_ERROR,
+										'numeric'=>ERROR_MSG_NUM_ERROR,
+										'digit'=>ERROR_MSG_NUM_ERROR,
+										'pnumeric'=>ERROR_MSG_NUM_ERROR
+									);
 		}
 
 	/**
@@ -22,14 +29,22 @@
 	 */
 	protected function dataDBCheck($checkData, $line_count) {
 		$deleteFlg = "";
+		$table = "";
 		$result = true;
+
+		// テーブル判定
+		if($checkData[PARENT_ID_COLUMN_CATEGORY] == 0) {
+			$table = TABLE_NAME_PARENT_CATEGORY;
+		} else {
+			$table = TABLE_NAME_CHILD_CATEGORY;
+		}
 
 		// 削除フラグ取得
 		$deleteFlg = $this->convertDeleteFlg($checkData[DELETE_COLUMN_CATEGORY]);
 
 		// 削除フラグ
 		if($deleteFlg){
-			$result = $this->manager->db_manager->get('parent_category')->checkData($checkData[CATEGORY_ID_COLUMN_CATEGORY]);
+			$result = $this->manager->db_manager->get($table)->checkData($checkData[CATEGORY_ID_COLUMN_CATEGORY]);
 		}
 
 		if(!$result) {

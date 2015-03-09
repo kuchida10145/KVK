@@ -43,15 +43,16 @@ class child_categoryDbModel extends DbModel
 	/**
 	 * 取込データをDBに登録する。
 	 *
-	 * @param array $category_array csvから取り込んだ親カテゴリ情報
-	 * @return Array
+	 * @param array $categoryArray	csvから取り込んだ親カテゴリ情報
+	 * @return $insertResult		DB取り込み結果
 	 */
-	public function insertChildCategory($category_array) {
+	public function insertCategory($categoryArray) {
 		$table = 'child_category';
+		$insert_result = "";
 
 		$this->db->startTran();				// トランザクション開始
 
-		$insert_result = $this->db->insert($table, $category_array);
+		$insert_result = $this->db->insert($table, $categoryArray);
 
 		$this->db->endTran($insert_result);	// トランザクション終了
 
@@ -60,17 +61,19 @@ class child_categoryDbModel extends DbModel
 
 	/**
 	 * データチェック
-	 * @param $category_id	検索キー
-	 * @return $result		検索結果(true：データなし false：データあり)
+	 * @param	$key	検索対象key項目
+	 * @return	$result	検索結果(true：データあり false：データなし)
 	 */
-	public function checkData($category_id) {
+	public function checkData($key) {
 		$result = true;
 		$table = 'child_category';
+		$sql = "";
+		$dataCount = array();
 
-		$sql = "SELECT * FROM {$table} WHERE parent_id = {$category_id}";
+		$sql = "SELECT * FROM {$table} WHERE parent_id = {$key}";
 		$dataCount = $this->db->getCount($sql);
 
-		if($dataCount != 0) {
+		if(count($dataCount) == 0) {
 			$result = false;
 		}
 		return $result;
