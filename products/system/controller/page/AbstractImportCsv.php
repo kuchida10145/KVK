@@ -7,6 +7,7 @@ abstract class AbstractImportCsv extends Page{
 	}
 
 	protected abstract function dataDBCheck($checkData, $line_count);		// cavデータDBチェック
+	protected abstract function dataPrimaryCheck($checkData, $lineCount); 	// cavデータ重複データチェック
 
 	private $_data = array();
 
@@ -248,7 +249,7 @@ abstract class AbstractImportCsv extends Page{
 	 */
 	protected function csvColumnCheck($dataCount) {
 		$result = true;
-		if($dataCount != HEADER_COUNT_CATEGORY){
+		if($dataCount != $this->headerCount){
 			$result = false;
 		}
 		return $result;
@@ -323,7 +324,7 @@ abstract class AbstractImportCsv extends Page{
 	 */
 	protected function dataColumnCheck($checkData) {
 		$result = true;
-		if(sizeof($checkData) != HEADER_COUNT_CATEGORY){
+		if(sizeof($checkData) != $this->headerCount){
 			$result = false;
 		}
 		return $result;

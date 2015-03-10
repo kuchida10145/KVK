@@ -20,10 +20,9 @@ class parts_listDbModel extends DbModel
 				'parts_name',
 				'price',
 				'price_zei',
-				'haiban_status',
-				'daigae_status',
-				'view_status',
 				'item_id',
+				'file_name',
+				'view_status',
 				'note',
 				'regist_date',
 				'update_date',
@@ -46,5 +45,27 @@ class parts_listDbModel extends DbModel
 		$sql = "SELECT * FROM parts_list WHERE item_id ='{$item_id}'";
 
 		return $this->db->getAllData($sql);
+	}
+
+/**
+	 * データチェック
+	 * @param	$keyNo			取込対象key項目（表示順）
+	 * @param	$keyFileName	取込対象key項目（ファイル名順）
+	 * @return	$result	検索結果(true：データあり false：データなし)
+	 */
+	public function checkData($keyNo, $keyFileName) {
+		$result = true;
+		$category_id = "";
+		$sql = "";
+		$dataCount = array();
+
+		$sql = "SELECT * FROM parts_list WHERE parts_no = {$keyNo} AND file_name = {$keyFileName}";
+
+		$dataCount = $this->db->getData($sql);
+
+		if(count($dataCount) == 0) {
+			$result = false;
+		}
+		return $result;
 	}
 }

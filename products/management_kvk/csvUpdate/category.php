@@ -57,9 +57,9 @@
 				<h1>KVK 管理画面</h1>
 				<div>
 					<ul class="nav nav-tabs">
-						<li><a href="admin_item.php">商品データ</a></li>
+						<li><a href="item.php">商品データ</a></li>
 						<li class="active"><a href="#">カテゴリデータ</a></li>
-						<li><a href="admin_parts.php">部品データ</a></li>
+						<li><a href="parts.php">部品データ</a></li>
 					</ul>
 				</div>
 				<div>

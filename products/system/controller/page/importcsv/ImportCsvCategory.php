@@ -20,6 +20,8 @@
 										'digit'=>ERROR_MSG_NUM_ERROR,
 										'pnumeric'=>ERROR_MSG_NUM_ERROR
 									);
+			// csvヘッダー項目数
+			$this->headerCount = HEADER_COUNT_CATEGORY;
 		}
 
 	/**
@@ -49,6 +51,23 @@
 
 		if(!$result) {
 			$this->{KEY_DB_CHECK_MESSAGE} = "対象のデータが存在しません。 {$line_count}行目<br>";
+		}
+		return $result;
+	}
+
+	/**
+	 * cavデータ重複データチェック
+	 * @param	$checkData	チェック対象データ
+	 * @param	$lineCount	現在のcsvの行数
+	 * @return	$result		チェック結果
+	 */
+	protected function dataPrimaryCheck($checkData, $lineCount) {
+		$result = true;
+		// キー項目が前にチェックしたデータにあったかチェックする
+		if ($this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} != null) {
+			$result = false;
+		} else {
+			$this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} = $lineCount;
 		}
 		return $result;
 	}

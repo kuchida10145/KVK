@@ -39,6 +39,9 @@ define('KEY_ERROR_MESSAGE', 'errorMessage');
 /** DBチェックメッセージ取得key */
 define('KEY_DB_CHECK_MESSAGE', 'dataDBCheckMessage');
 
+/** 取込結果メッセージ取得key */
+define('KEY_TORIKOMI_MESSAGE', 'torikomiMessage');
+
 /** csv拡張子 */
 define('CSV_EXTENTION', 'csv');
 
@@ -66,9 +69,6 @@ define('IMAGE_COLUMN_CATEGORY', '3');
 /** カラム番号：削除フラグ */
 define('DELETE_COLUMN_CATEGORY', '4');
 
-/** 取込結果メッセージ取得key */
-define('KEY_TORIKOMI_MESSAGE', 'torikomiMessage');
-
 /** 親カテゴリテーブル */
 define('TABLE_NAME_PARENT_CATEGORY', 'parent_category');
 
@@ -95,6 +95,72 @@ define('COLUMN_NAME_CATEGORY_NAME', 'category_name');
 
 /** 子カテゴリ画像 */
 define('COLUMN_NAME_CATEGORY_IMAGE', 'category_image');
+
+/**
+ * 部品系
+ */
+/** 部品データCSVのカラム数 */
+define('HEADER_COUNT_PARTS', '8');
+
+/** カラム番号：ページ */
+define('PAGE_COLUMN_PARTS', '0');
+
+/** カラム番号：番号（部品表示順） */
+define('NO_COLUMN_PARTS', '1');
+
+/** カラム番号：品番 */
+define('PARTS_ID_COLUMN_PARTS', '2');
+
+/** カラム番号：希望小売価格（税抜き） */
+define('PRICE_COLUMN_PARTS', '3');
+
+/** カラム番号：希望小売価格（税込み） */
+define('PRICE_ZEI_COLUMN_PARTS', '4');
+
+/** カラム番号：備考 */
+define('NOTE_COLUMN_PARTS', '5');
+
+/** カラム番号：ファイル名 */
+define('FILE_COLUMN_PARTS', '6');
+
+/** カラム番号：削除フラグ */
+define('DELETE_COLUMN_PARTS', '7');
+
+/** 部品図テーブル */
+define('TABLE_NAME_PARTS_LIST', 'parts_list');
+
+/** ID */
+define('COLUMN_NAME_ID', 'id');
+
+/** 番号（部品表示順） */
+define('COLUMN_NAME_NO', 'parts_no');
+
+/** 品番（パーツ） */
+define('COLUMN_NAME_PARTS_ID', 'parts_id');
+
+/** 品名（パーツ） */
+define('COLUMN_NAME_PARTS_NAME', 'parts_name');
+
+/** 希望小売価格 */
+define('COLUMN_NAME_PRICE', 'price');
+
+/** 希望小売価格（税込み） */
+define('COLUMN_NAME_PRICE_ZEI', 'price_zei');
+
+/** 品番（商品） */
+define('COLUMN_NAME_ITEM_ID', 'item_id');
+
+/** ファイル名 */
+define('COLUMN_NAME_FILE_NAME', 'file_name');
+
+/** 備考 */
+define('COLUMN_NAME_NOTE', 'note');
+
+/** 登録日 */
+define('COLUMN_NAME_REGIST_DATE', 'regist_date');
+
+/** 更新日 */
+define('COLUMN_NAME_UPDATE_DATE', 'update_date');
 
 /**
  * メッセージ
