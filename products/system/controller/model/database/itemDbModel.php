@@ -2,7 +2,8 @@
 /**
  * 商品DB管理クラス
  */
-class itemDbModel extends DbModel
+include_once('/../../core/database/DbModel.php');
+class ItemDbModel extends DbModel
 {
 	var $use_sequence = false;
 
@@ -28,12 +29,9 @@ class itemDbModel extends DbModel
 				'shower_data',
 				'buy_status',
 				'catalog_link',
-				'relevance_data',
 				'parent_variation',
 				'variation_no',
-				'item_detail',
 				'item_image',
-				'relevance_item',
 				'category_id',
 				'pdf_status',
 				'regist_date',

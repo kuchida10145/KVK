@@ -2,7 +2,8 @@
 /**
  * 子カテゴリDB管理クラス
  */
-class child_categoryDbModel extends DbModel
+include_once('/../../core/database/DbModel.php');
+class Child_categoryDbModel extends DbModel
 {
 	var $use_sequence = false;
 

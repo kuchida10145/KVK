@@ -1,18 +1,33 @@
 <?php
 	include_once('/../AbstractImportCsv.php');
-	class ImportCsvCategory extends AbstractImportCsv {
+	class ImportCsvItem extends AbstractImportCsv {
 		function __construct() {
 			parent::__construct();
+			// 品番
+			$this->manager->validationColumns->setRule(ITEM_ID_COLUMN_ITEM, 'required');
+			// 品名
+			$this->manager->validationColumns->setRule(ITEM_NAME_COLUMN_ITEM, 'required');
+			// 写真
+			$this->manager->validationColumns->setRule(ITEM_ID_COLUMN_ITEM, 'required');
+			// 購入
+			$this->manager->validationColumns->setRule(BUY_STATUS_COLUMN_ITEM, 'numeric|digit|pnumeric');
+			// 代替
+			$this->manager->validationColumns->setRule(DAIGAE_COLUMN_ITEM, 'numeric|digit|pnumeric');
+			// 価格
+			$this->manager->validationColumns->setRule(PRICE_COLUMN_ITEM, 'numeric|digit|pnumeric');
+			// 価格（税込）
+			$this->manager->validationColumns->setRule(PRICE_ZEI_COLUMN_ITEM, 'numeric|digit|pnumeric');
+			// バリエーション順序
+			$this->manager->validationColumns->setRule(VARIATION_NO_COLUMN_ITEM, 'numeric|digit|pnumeric');
+			// カタログ年度
+			$this->manager->validationColumns->setRule(CATALOG_YEAR_COLUMN_ITEM, 'required|numeric|digit|pnumeric');
+			// カタログページ
+			$this->manager->validationColumns->setRule(CATALOG_PAGE_COLUMN_ITEM, 'required|numeric|digit|pnumeric');
+			// 削除
+			$this->manager->validationColumns->setRule(DELETE_COLUMN_ITEM, 'numeric|digit|pnumeric');
 			// カテゴリID
-			$this->manager->validationColumns->setRule(CATEGORY_ID_COLUMN_CATEGORY, 'required|numeric|digit|pnumeric');
-			// カテゴリ名
-			$this->manager->validationColumns->setRule(CATEGORY_NAME_COLUMN_CATEGORY, 'required');
-			// 親カテゴリID
-			$this->manager->validationColumns->setRule(PARENT_ID_COLUMN_CATEGORY, 'required|numeric|digit|pnumeric');
-			// イメージ画像
-			$this->manager->validationColumns->setRule(IMAGE_COLUMN_CATEGORY, 'required');
-			// 削除フラグ
-			$this->manager->validationColumns->setRule(DELETE_COLUMN_CATEGORY, 'numeric|digit|pnumeric');
+			$this->manager->validationColumns->setRule(CATEGORY_ID_COLUMN_ITEM, 'required|numeric|digit|pnumeric');
+
 			// エラーメッセージ作成用配列
 			$this->msg_rules = array(
 										'required'=>ERROR_MSG_FORM_ERROR,
@@ -21,7 +36,7 @@
 										'pnumeric'=>ERROR_MSG_NUM_ERROR
 									);
 			// csvヘッダー項目数
-			$this->headerCount = HEADER_COUNT_CATEGORY;
+			$this->headerCount = HEADER_COUNT_ITEM;
 		}
 
 	/**
@@ -31,22 +46,15 @@
 	 */
 	protected function dataDBCheck($checkData, $line_count) {
 		$deleteFlg = "";
-		$table = "";
+		$table = TABLE_NAME_ITEM;
 		$result = true;
 
-		// テーブル判定
-		if($checkData[PARENT_ID_COLUMN_CATEGORY] == 0) {
-			$table = TABLE_NAME_PARENT_CATEGORY;
-		} else {
-			$table = TABLE_NAME_CHILD_CATEGORY;
-		}
-
 		// 削除フラグ取得
-		$deleteFlg = $this->convertDeleteFlg($checkData[DELETE_COLUMN_CATEGORY]);
+		$deleteFlg = $this->convertDeleteFlg($checkData[DELETE_COLUMN_ITEM]);
 
 		// 削除フラグ
 		if($deleteFlg){
-			$result = $this->manager->db_manager->get($table)->checkData($checkData[CATEGORY_ID_COLUMN_CATEGORY]);
+			$result = $this->manager->db_manager->get($table)->checkData($checkData[ITEM_ID_COLUMN_ITEM]);
 		}
 
 		if(!$result) {
@@ -64,11 +72,11 @@
 	protected function dataPrimaryCheck($checkData, $lineCount) {
 		$result = true;
 		// キー項目が前にチェックしたデータにあったかチェックする
-		if ($this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} != null) {
-			$this->{DUPLICATION_LINE} = $this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]};
+		if ($this->{$checkData[ITEM_ID_COLUMN_ITEM]} != null) {
+			$this->{DUPLICATION_LINE} = $this->{$checkData[ITEM_ID_COLUMN_ITEM]};
 			$result = false;
 		} else {
-			$this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} = $lineCount;
+			$this->{$checkData[ITEM_ID_COLUMN_ITEM]} = $lineCount;
 		}
 		return $result;
 	}

@@ -7,14 +7,12 @@ class DbModel
 	var $db;
 	var $table;
 	var $use_sequence = false;
-	
-	
-	
+
 	public function getField()
 	{
 		return array('*');
 	}
-	
+
 	/**
 	 * コンストラクタ
 	 *
@@ -25,7 +23,7 @@ class DbModel
 		$this->db = $db;
 		$this->table = $table;
 	}
-	
+
 	/**
 	 * データの挿入
 	 *
@@ -40,7 +38,7 @@ class DbModel
 			$id = $this->createSeaquence($this->table);
 			$param['id'] = $id;
 		}
-		
+
 		if(!isset($param['regist_date']) || $param['regist_date'] == '')
 		{
 			$param['regist_date'] = 'NOW()';
@@ -49,10 +47,10 @@ class DbModel
 		{
 			$param['update_date'] = 'NOW()';
 		}
-		
+
 		//余計な配列を取り除く
 		$data = $this->setRecord($this->getField(),$param);
-		
+
 		if($this->db->insert($this->table,$data) === false)
 		{
 			return false;
@@ -67,11 +65,11 @@ class DbModel
 			return $temp['id'];
 		}
 	}
-	
-	
+
+
 	/**
 	 * シークエンスを生成
-	 * 
+	 *
 	 * @param String $table シークエンスのテーブル
 	 * @return Int シークエンス
 	 */
@@ -81,7 +79,7 @@ class DbModel
 		$c_s= $this->db->GetData('SELECT LAST_INSERT_ID() as id');
 		return $c_s['id'];
 	}
-	
+
 	/**
 	 * リミットの作成
 	 *
@@ -97,7 +95,7 @@ class DbModel
 			$now = 0;
 		}
 		$now = ($now <= 0) ? 0:$now-1;
-		
+
 		if(is_numeric($cnt) && $cnt > 0)
 		{
 			$now = $now*$cnt;
@@ -105,7 +103,7 @@ class DbModel
 		}
 		return $limit;
 	}
-	
+
 	/**
 	 * INSERT UPDATE用データ配列の生成
 	 *
@@ -130,25 +128,25 @@ class DbModel
 		}
 		return $data;
 	}
-	
-	
+
+
 	/**
 	 * IDから商品を取得
-	 * 
+	 *
 	 * @param int $id ID
 	 * @return Array 結果
 	 */
 	function findById($id)
 	{
-		
+
 		$id = $this->db->escape_string($id);
 		$feild = implode(',',$this->getField());
 		$sql = "SELECT {$feild} FROM {$this->table} WHERE id = '{$id}'";
-		
+
 		return $this->db->getData($sql);
 	}
-	
-	
+
+
 	/**
 	 * DB用に文字列をエスケープ
 	 *
@@ -159,8 +157,8 @@ class DbModel
 	{
 		return $this->db->escape_string($str);
 	}
-	
-	
+
+
 	/**
 	 * すべてのデータを無条件で取得
 	 *
@@ -170,10 +168,10 @@ class DbModel
 	{
 		$feild = implode(',',$this->getField());
 		$sql = "SELECT {$feild} FROM {$this->table}";
-		
+
 		return $this->db->getAllData($sql);
 	}
-	
+
 	/**
 	 * IDを使ってデータ更新
 	 *
@@ -187,14 +185,14 @@ class DbModel
 		$where = " id = '{$id}'";
 		$param['update_date'] = 'NOW()';
 		$param = $this->setRecord($this->getField(),$param,'isset');
-		
+
 		if($this->db->update($this->table,$param,$where) !== false)
 		{
 			return $id;
 		}
 		return false;
 	}
-	
+
 	/**
 	 * IDを使って削除
 	 *
@@ -207,7 +205,7 @@ class DbModel
 		$where = " id = '{$id}'";
 		return $this->db->delete($this->table,$where);
 	}
-	
+
 	/**
 	 * where句を指定して削除
 	 *
@@ -218,11 +216,11 @@ class DbModel
 	{
 		return $this->db->delete($this->table,$where);
 	}
-	
-	
+
+
 	/**
 	 * データの更新
-	 * 
+	 *
 	 * @param Array $param 更新するデータ
 	 * @param String $where 更新条件
 	 * @return Bool 結果
@@ -231,8 +229,8 @@ class DbModel
 	{
 		return $this->db->update($this->table,$param,$where);
 	}
-	
-	
+
+
 	/**
 	 * 検索条件の最大件数を取得する
 	 *
@@ -241,21 +239,21 @@ class DbModel
 	function searchMaxCnt($param)
 	{
 		$where = $this->createWhere($param);
-		
+
 		if(strpos(strtolower($where),'where') === false && $where !== '')
 		{
 			$where = 'WHERE '.$where;
 		}
-		
+
 		$sql = $this->searchSql()." {$where}";
-		
-		
-		
+
+
+
 		$count = $this->db->getCount($sql);
 		return $count;
 	}
-	
-	
+
+
 	/**
 	 * 検索して一覧で取得
 	 *
@@ -274,11 +272,11 @@ class DbModel
 		{
 			$where = 'WHERE '.$where;
 		}
-		
+
 		$sql = $this->searchSql()." {$where} {$order} {$limit}";
 		return $this->db->getAllData($sql);
 	}
-	
+
 	/**
 	 * 検索用SQL
 	 *
@@ -291,8 +289,8 @@ class DbModel
 		$sql = "SELECT * FROM {$this->table} ";
 		return $sql;
 	}
-	
-	
+
+
 	/**
 	 * WHERE文の生成
 	 *
@@ -310,20 +308,20 @@ class DbModel
 				$where = ' WHERE '.$where;
 			}
 		}
-		
+
 		return $where;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
 	/*=============================
 	 * 法人用
-	 * 
+	 *
 	 *=============================*/
 	 /**
 	 * 法人用検索処理
@@ -334,10 +332,10 @@ class DbModel
 		$field = implode(',',$this->getField());
 		$where = $this->manageSearchWhere($param,$id);
 		$sql = " SELECT {$field} FROM {$this->table} {$where} {$order} {$limit}";
-		
+
 		return $this->db->getAllData($sql);
 	}
-	
+
 	/**
 	 * 法人用検索結果数取得
 	 *
@@ -347,14 +345,14 @@ class DbModel
 		$where = $this->manageSearchWhere($param,$id);
 		$sql   = " SELECT count(id) as cnt FROM {$this->table} ".$where;
 		$temp  =  $this->db->getData($sql);
-		
+
 		if(!$temp)
 		{
 			return 0;
 		}
 		return $temp['cnt'];
 	}
-	
+
 	/**
 	 * 法人用検索結WHERE区生成処理
 	 *
@@ -362,62 +360,62 @@ class DbModel
 	protected function manageSearchWhere($param,$id)
 	{
 		$wheres[] = "company_id ='{$id}'";
-		
+
 		$where = implode(' AND ',$wheres);
-		
+
 		if($where != "")
 		{
 			$where = ' WHERE '.$where;
 		}
-		
+
 		return $where;
 	}
-	
-	
+
+
 	/*=============================
 	 * 管理者用
-	 * 
+	 *
 	 *=============================*/
 	public function adminSearch($param,$limit = "",$order = '')
 	{
-		
+
 		$field = implode(',',$this->getField());
-		
+
 		$where = $this->adminSearchWhere($param);
 		$sql = " SELECT {$field} FROM {$this->table} {$where} {$order} {$limit}";
 		return $this->db->getAllData($sql);
 	}
-	
-	
+
+
 	public function adminSearchCnt($param)
 	{
 		$where = $this->adminSearchWhere($param);
 		$sql   = " SELECT count(id) as cnt FROM {$this->table} ".$where;
 		$temp  =  $this->db->getData($sql);
-		
+
 		if(!$temp)
 		{
 			return 0;
 		}
 		return $temp['cnt'];
 	}
-	
+
 	protected function adminSearchWhere($param)
 	{
 		$wheres = array();
-		
+
 		$where = implode(' AND ',$wheres);
-		
+
 		if($where != "")
 		{
 			$where = ' WHERE '.$where;
 		}
-		
+
 		return $where;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * フロント検索用WHERE文の生成
 	 *
@@ -428,12 +426,12 @@ class DbModel
 	{
 		//s,*サロンテーブル
 		//c.*法人テーブル
-		
+
 		static $where;
 		$wheres = array();
 		$status = ST_APPLY;
 		$company = '';
-		
+
 		if($flg == true && $where != '')
 		{
 			//企業ＩＤ
@@ -443,16 +441,16 @@ class DbModel
 			}
 			return " WHERE ".$company.$where;
 		}
-		
-		
+
+
 		$wheres[] = " s.status = '{$status}' AND c.status = '{$status}' AND c.id = s.company_id AND view_status = '1' ";
-		
+
 		//企業ＩＤ
 		if(getParam($param,'company_id'))
 		{
 			$company = " s.company_id = '".getParam($param,'company_id')."' AND ";
 		}
-		
+
 		//都道府県
 		if(getParam($param,'pref_id') != '')
 		{
@@ -473,9 +471,9 @@ class DbModel
 		{
 			$wheres[] = " s.opening_staff = '".$this->escape_string(getParam($param,'opening_staff'))."' ";
 		}
-		
-		
-		
+
+
+
 		//雇用形態
 		if(is_array(getParam($param,'employment')) || getParam($param,'employment') != '')
 		{
@@ -485,7 +483,7 @@ class DbModel
 			{
 				$employment = array($employment);
 			}
-			
+
 			foreach($employment as $val)
 			{
 				$emp = $this->escape_string($val);
@@ -493,14 +491,14 @@ class DbModel
 				if(getParam($param,'job_category') != '' && !is_array(getParam($param,'job_category')))
 				{
 					$job =  $this->escape_string(getParam($param,'job_category'));
-					$val = "%\"{$job}:{$emp}\"%"; 
+					$val = "%\"{$job}:{$emp}\"%";
 				}
 				else
 				{
-					$val = "%:{$emp}\"%"; 
+					$val = "%:{$emp}\"%";
 				}
-				
-				
+
+
 				$temp_wheres[] = " s.job_employment LIKE '{$val}' ";
 			}
 			$wheres[] = "(".implode(' OR ',$temp_wheres).")";
@@ -511,8 +509,8 @@ class DbModel
 			$val = '"'.getParam($param,'job_category').'"';
 			$wheres[] = " s.job_category LIKE '%{$val}%'";
 		}
-		
-		
+
+
 		//特徴
 		if(is_array(getParam($param,'treatment')) || getParam($param,'treatment') != '')
 		{
@@ -522,7 +520,7 @@ class DbModel
 			{
 				$treatment = array($treatment);
 			}
-			
+
 			foreach($treatment as $val)
 			{
 				$val = $this->escape_string($val);
@@ -530,7 +528,7 @@ class DbModel
 			}
 			$wheres[] = implode(' AND ',$temp_wheres);
 		}
-		
+
 		//サロンのID配列
 		if(is_array(getParam($param,'salon_ids')))
 		{
@@ -538,10 +536,10 @@ class DbModel
 			$salon_ids_str = implode(',',$salon_ids);
 			$wheres[] = " s.id IN ({$salon_ids_str}) ";
 		}
-		
+
 		//路線・駅
 		$common_wheres = array();
-		
+
 		//路線の処理
 		if(is_array(getParam($param,'line_id')) || is_array(getParam($param,'line_id')) != '')
 		{
@@ -576,9 +574,9 @@ class DbModel
 				}
 			}
 		}
-		
-		
-		
+
+
+
 		//エリア・都市
 		//エリア
 		if(is_array(getParam($param,'area_id')) || is_array(getParam($param,'area_id')) != '')
@@ -589,14 +587,14 @@ class DbModel
 			{
 				$line = array($area);
 			}
-			
+
 			foreach($area as $area_id)
 			{
 				if($temp = $manager->db_manager->get('area_city')->findById($area_id))
 				{
 					$city   = json_decode($temp['city'],true);
 					$station = json_decode($temp['station'],true);
-					
+
 					if(count($city) !=0)
 					{
 						$common_wheres[] = " s.city_id IN (".implode(',',$city).") ";
@@ -615,7 +613,7 @@ class DbModel
 				}
 			}
 		}
-		
+
 		//都市
 		if(is_array(getParam($param,'city_id')) || is_array(getParam($param,'city_id')) != '')
 		{
@@ -634,11 +632,11 @@ class DbModel
 		{
 			$wheres[] = "(".implode(" OR ",$common_wheres).")";
 		}
-		
+
 		if(getParam($param,'keyword') != '')
 		{
 			$keyword = $this->escape_string(getParam($param,'keyword'));
-			
+
 			$words = array();
 			$words[] = " s.name LIKE '%{$keyword}%'";
 			$words[] = " s.name_kana LIKE '%{$keyword}%'";
@@ -652,11 +650,11 @@ class DbModel
 			$words[] = " c.name_kana LIKE '%{$keyword}%'";
 			$wheres[] = " (".implode(' OR ',$words).") ";
 		}
-		
-		
-		
+
+
+
 		$where = implode(' AND ',$wheres);
 		return " WHERE ".$company.$where;
 	}
-	
+
 }

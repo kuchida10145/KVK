@@ -60,15 +60,97 @@
 	 */
 	protected function dataPrimaryCheck($checkData, $lineCount) {
 		$result = true;
+		$setVal = $checkData[NO_COLUMN_PARTS].','.$checkData[FILE_COLUMN_PARTS];
+
 		// キー項目が前にチェックしたデータにあったかチェックする
-		if ($this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} != null) {
+		if ($this->{$setVal} != null) {
+			$this->{DUPLICATION_LINE} = $this->{$setVal};
 			$result = false;
 		} else {
-			$this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} = $lineCount;
+			$this->{$setVal} = $lineCount;
 		}
 		return $result;
 	}
 
+	/**
+	 * DB処理実行
+	 * @param	$targetArray	DB処理対象データ
+	 * @return	$result			チェック結果
+	 */
+	protected function runDB($targetArray) {
+		$dataArray = array();		// 更新データ格納用の配列
+		$itemCodeArray = array();	// 商品ID格納用の配列
+		$partsNameArray = array();	// パーツ名格納用の配列
+		$sequenceID = "";			// シーケンスID
+		$dbCheck = "";				// DB動作結果
+		$where = "";				// SQL実行用のwhere句
+		$keyNo = $targetArray[NO_COLUMN_PARTS];				// 検索Key(商品表示順)
+		$keyFileName = $targetArray[FILE_COLUMN_PARTS];		// 検索Key(ファイル名)
+		$keyItemID = $targetArray[PARTS_ID_COLUMN_PARTS];	// 検索key(品番：部品)
+		$limit = "";
+		$order = "";
+		$test = "parts_list";
+
+		// シーケンスID取得
+		$sequenceID = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->getSequenceId();
+
+		// 対象ファイル名から商品IDを取得
+		$getItemCodeArray = COLUMN_NAME_BUNKAI_DATA.' = "'.$keyFileName.'"';
+		$itemCodeArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->search($getItemCodeArray, $limit, $order);
+		$itemCodeRow = $itemCodeArray[0];
+
+		// 品番から品名を取得
+		$getPartsNameArray = COLUMN_NAME_ITEM_ID.' = "'.$keyItemID.'"';
+		$partsNameArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->search($getPartsNameArray, $limit, $order);
+		$partsNameRow = $partsNameArray[0];
+
+		// 部品リストDB登録データ生成
+		$dataArray = array(
+			// 番号（部品表示順）
+			COLUMN_NAME_NO=>$targetArray[NO_COLUMN_PARTS],
+			// 品番（パーツ）
+			COLUMN_NAME_PARTS_ID=>$targetArray[PARTS_ID_COLUMN_PARTS],
+			// 品名（パーツ）
+			COLUMN_NAME_PARTS_NAME=>$partsNameRow[COLUMN_NAME_ITEM_NAME],
+			// 希望小売価格
+			COLUMN_NAME_PRICE=>$targetArray[PRICE_COLUMN_PARTS],
+			// 希望小売価格（税込み）
+			COLUMN_NAME_PRICE_ZEI=>$targetArray[PRICE_ZEI_COLUMN_PARTS],
+			// 品番（商品）
+			COLUMN_NAME_ITEM_ID=>$itemCodeRow[COLUMN_NAME_ITEM_ID],
+			// ファイル名
+			COLUMN_NAME_FILE_NAME=>$targetArray[FILE_COLUMN_PARTS],
+			// 表示ステータス
+			COLUMN_NAME_VIEW_STATUS=>$targetArray[DELETE_COLUMN_PARTS],
+			// 備考
+			COLUMN_NAME_NOTE=>$targetArray[NOTE_COLUMN_PARTS],
+			// 更新日
+			COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
+		);
+
+		// where句生成
+		$where = COLUMN_NAME_NO." = {$keyNo} AND ".COLUMN_NAME_FILE_NAME." = '".$keyFileName."'";
+
+		// 削除フラグ取得
+		$deleteFlg = $this->convertDeleteFlg($targetArray[DELETE_COLUMN_PARTS]);
+		//削除フラグチェック
+		if($deleteFlg){
+			// DB削除処理(表示フラグ更新)
+			$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->update($dataArray, $where);
+		} else {
+			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
+			$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($keyNo, $keyFileName);
+			if($dbCheck) {
+				// DBUpdate処理
+				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->update($dataArray, $where);
+			} else {
+				// DBinsert処理
+				$dataArray[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日追加
+				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->insertParts($dataArray);
+			}
+		}
+		return $dbCheck;
+ 	}
 }
 
 ?>

@@ -1,5 +1,5 @@
 <?php
-	include_once('../../system/controller/page/importcsv/ImportCsvCategory.php');
+	include_once('../../system/controller/page/importcsv/ImportCsvItem.php');
 
 	// セッション
 	session_start();
@@ -57,8 +57,8 @@
 				<h1>KVK 管理画面</h1>
 				<div>
 					<ul class="nav nav-tabs">
-						<li><a href="item.php">商品データ</a></li>
-						<li class="active"><a href="#">カテゴリデータ</a></li>
+						<li class="active"><a href="#">商品データ</a></li>
+						<li><a href="category.php">カテゴリデータ</a></li>
 						<li><a href="parts.php">部品データ</a></li>
 					</ul>
 				</div>

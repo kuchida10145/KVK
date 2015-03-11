@@ -8,6 +8,7 @@ abstract class AbstractImportCsv extends Page{
 
 	protected abstract function dataDBCheck($checkData, $line_count);		// cavデータDBチェック
 	protected abstract function dataPrimaryCheck($checkData, $lineCount); 	// cavデータ重複データチェック
+	protected abstract function runDB($targetData);							// DB関連の処理実行
 
 	private $_data = array();
 
@@ -87,10 +88,8 @@ abstract class AbstractImportCsv extends Page{
 			// csvファイル全データに対してDB処理を行う。
 			foreach ($csvData as $row) {
 				if($line_count != 0){
-					// 親カテゴリID取得
-					$parentID = $row[PARENT_ID_COLUMN_CATEGORY];
-					// カテゴリDB処理
-					$dbCheck = $this->runCategory($row, $parentID);
+					// DB処理
+					$dbCheck = $this->runDB($row);
 				}
 				$line_count++;
 			}
@@ -101,68 +100,6 @@ abstract class AbstractImportCsv extends Page{
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * 親カテゴリDB処理
-	 * @param	$targetArray	対象データ（csvファイル1行分）
-	 * @param	$parentID		親カテゴリID（0：親カテゴリ、0以外：子カテゴリ）
-	 * @return	$dbCheck		DB処理結果（true：成功	false：失敗）
-	 */
-	protected function runCategory($targetArray, $parentID) {
-		$dataArray = array();		// 更新データ格納用の配列
-		$dbCheck = "";				// DB動作結果
-		$table = "";				// テーブル名
-		$where = "";				// SQL実行用のwhere句
-		$key = "";					// DB検索用Key
-
-		// 親カテゴリor子カテゴリの設定をする。
-		if($parentID == 0) {
-			// 親カテゴリDB登録データ生成
-			$dataArray = array(	COLUMN_NAME_PARENT_ID=>$targetArray[CATEGORY_ID_COLUMN_CATEGORY],
-								COLUMN_NAME_PARENT_NAME=>$targetArray[CATEGORY_NAME_COLUMN_CATEGORY],
-					 			COLUMN_NAME_PARENT_IMAGE=>$targetArray[IMAGE_COLUMN_CATEGORY],
-								COLUMN_NAME_VIEW_STATUS=>$targetArray[DELETE_COLUMN_CATEGORY] );
-			// 親カテゴリテーブル
-			$table = TABLE_NAME_PARENT_CATEGORY;
-			// key項目設定
-			$key = $dataArray[COLUMN_NAME_PARENT_ID];
-			// where句生成
-			$where = "parent_id = {$key}";
-		} else {
-			// 子カテゴリDB登録データ生成
-			$dataArray = array(
-					COLUMN_NAME_CATEGORY_ID=>$targetArray[CATEGORY_ID_COLUMN_CATEGORY],
-					COLUMN_NAME_CATEGORY_NAME=>$targetArray[CATEGORY_NAME_COLUMN_CATEGORY],
-					COLUMN_NAME_CATEGORY_IMAGE=>$targetArray[IMAGE_COLUMN_CATEGORY],
-					COLUMN_NAME_PARENT_ID=>$targetArray[PARENT_ID_COLUMN_CATEGORY],
-					COLUMN_NAME_VIEW_STATUS=>$targetArray[DELETE_COLUMN_CATEGORY] );
-			// 子カテゴリテーブル
-			$table = TABLE_NAME_CHILD_CATEGORY;
-			// key項目設定
-			$key = $dataArray[COLUMN_NAME_CATEGORY_ID];
-			// where句生成
-			$where = "category_id = {$key}";
-		}
-
-		// 削除フラグ取得
-		$deleteFlg = $this->convertDeleteFlg($dataArray[COLUMN_NAME_VIEW_STATUS]);
-		//削除フラグチェック
-		if($deleteFlg){
-			// DB削除処理(表示フラグ更新)
-			$dbCheck = $this->manager->db_manager->get($table)->update($dataArray, $where);
-		} else {
-			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
-			$dbCheck = $this->manager->db_manager->get($table)->checkData($key);
-			if($dbCheck) {
-				// DBUpdate処理
-				$dbCheck = $this->manager->db_manager->get($table)->update($dataArray, $where);
-			} else {
-				// DBinsert処理
-				$dbCheck = $this->manager->db_manager->get($table)->insertCategory($dataArray);
-			}
-		}
-		return $dbCheck;
 	}
 
 	/**
@@ -287,7 +224,7 @@ abstract class AbstractImportCsv extends Page{
 				}
 				// 重複データチェック
 				if(!$this->dataPrimaryCheck($row, $errorLineCount)) {
-					$errorMessage[] = "{$this->{$row[CATEGORY_ID_COLUMN_CATEGORY]}}行目とデータが重複しています。 {$errorLineCount}行目<br>";
+					$errorMessage[] = "{$this->{DUPLICATION_LINE}}行目とデータが重複しています。 {$errorLineCount}行目<br>";
 					$result = false;
 					$line_count++;
 					continue;
@@ -326,23 +263,6 @@ abstract class AbstractImportCsv extends Page{
 		$result = true;
 		if(sizeof($checkData) != $this->headerCount){
 			$result = false;
-		}
-		return $result;
-	}
-
-	/**
-	 * cavデータ重複データチェック
-	 * @param	$checkData	チェック対象データ
-	 * @param	$lineCount	現在のcsvの行数
-	 * @return	$result		チェック結果
-	 */
-	protected function dataPrimaryCheck($checkData, $lineCount) {
-		$result = true;
-		// キー項目が前にチェックしたデータにあったかチェックする
-		if ($this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} != null) {
-			$result = false;
-		} else {
-			$this->{$checkData[CATEGORY_ID_COLUMN_CATEGORY]} = $lineCount;
 		}
 		return $result;
 	}

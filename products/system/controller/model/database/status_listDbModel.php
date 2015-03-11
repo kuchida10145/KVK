@@ -2,7 +2,8 @@
 /**
  * ステータスリストDB管理クラス
 */
-class status_listDbModel extends DbModel
+include_once('/../../core/database/DbModel.php');
+class Status_listDbModel extends DbModel
 {
 	var $use_sequence = false;
 

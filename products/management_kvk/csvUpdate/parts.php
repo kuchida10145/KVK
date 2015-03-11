@@ -1,5 +1,5 @@
 <?php
-	include_once('../../system/controller/page/importcsv/ImportCsvCategory.php');
+	include_once('../../system/controller/page/importcsv/ImportCsvParts.php');
 
 	// セッション
 	session_start();
@@ -11,7 +11,7 @@
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
 		// csv取込処理インスタンス化
-		$importCsv = new ImportCsvCategory();
+		$importCsv = new ImportCsvParts();
 		$filePath		= "";	// csvファイルパス
 		$fileName		= "";	// csvファイル名
 		$testFlg = false;		// 取込処理フラグ
@@ -63,7 +63,7 @@
 					</ul>
 				</div>
 				<div>
-					<form class="form-horizontal well" action="category.php" method="post" name="form" enctype="multipart/form-data">
+					<form class="form-horizontal well" action="#" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
 						<div class="form-group">
 							<label for="upload" class="col-sm-2 control-label">CSVファイル</label>

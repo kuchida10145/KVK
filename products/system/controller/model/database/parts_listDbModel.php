@@ -2,7 +2,7 @@
 /**
  * 部品リストDB管理クラス
 */
-class parts_listDbModel extends DbModel
+class Parts_listDbModel extends DbModel
 {
 	var $use_sequence = false;
 
@@ -47,7 +47,7 @@ class parts_listDbModel extends DbModel
 		return $this->db->getAllData($sql);
 	}
 
-/**
+	/**
 	 * データチェック
 	 * @param	$keyNo			取込対象key項目（表示順）
 	 * @param	$keyFileName	取込対象key項目（ファイル名順）
@@ -59,7 +59,7 @@ class parts_listDbModel extends DbModel
 		$sql = "";
 		$dataCount = array();
 
-		$sql = "SELECT * FROM parts_list WHERE parts_no = {$keyNo} AND file_name = {$keyFileName}";
+		$sql = "SELECT * FROM parts_list WHERE parts_no = "."'".$keyNo."'"." AND file_name = "."'".$keyFileName."'";
 
 		$dataCount = $this->db->getData($sql);
 
@@ -67,5 +67,36 @@ class parts_listDbModel extends DbModel
 			$result = false;
 		}
 		return $result;
+	}
+
+	/**
+	 * 取込データをDBに登録する。
+	 *
+	 * @param	array	$targetArray	csvから取り込んだ親カテゴリ情報
+	 * @return	boolean	$insert_result	DB追加結果
+	 */
+	public function insertParts($targetArray) {
+		$table = 'parts_list';
+
+		$this->db->startTran();				// トランザクション開始
+
+		$insert_result = $this->db->insert($table, $targetArray);
+
+		$this->db->endTran($insert_result);	// トランザクション終了
+
+		return $insert_result;
+	}
+
+	/**
+	 * シーケンスID取得。
+	 *
+	 * @return	int	$sequenceID	DBに追加するシーケンスID
+	 */
+	public function getSequenceId(){
+		$sequenceArray = array();
+		$sequenceID = "";
+		$sequenceArray = $this->db->getLastId();
+		$sequenceID = $sequenceArray['id'] + 1;
+		return $sequenceID;
 	}
 }

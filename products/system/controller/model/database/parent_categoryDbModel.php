@@ -3,7 +3,7 @@
  * 親カテゴリーDB管理クラス
  */
 include_once('/../../core/database/DbModel.php');
-class parent_categoryDbModel extends DbModel
+class Parent_categoryDbModel extends DbModel
 {
 	var $use_sequence = false;
 

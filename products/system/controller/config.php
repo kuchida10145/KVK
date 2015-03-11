@@ -48,6 +48,30 @@ define('CSV_EXTENTION', 'csv');
 /** 削除フラグ（データ非表示フラグ） */
 define('DELETE_FLG', '1');
 
+/** 重複データ行数取得キー */
+define('DUPLICATION_LINE', 'duplicationLine');
+
+/** 品番（商品） */
+define('COLUMN_NAME_ITEM_ID', 'item_id');
+
+/** 希望小売価格 */
+define('COLUMN_NAME_PRICE', 'price');
+
+/** 希望小売価格（税込み） */
+define('COLUMN_NAME_PRICE_ZEI', 'price_zei');
+
+/** 表示ステータス */
+define('COLUMN_NAME_VIEW_STATUS', 'view_status');
+
+/** 備考 */
+define('COLUMN_NAME_NOTE', 'note');
+
+/** 登録日 */
+define('COLUMN_NAME_REGIST_DATE', 'regist_date');
+
+/** 更新日 */
+define('COLUMN_NAME_UPDATE_DATE', 'update_date');
+
 /**
  * カテゴリ系
  */
@@ -80,9 +104,6 @@ define('COLUMN_NAME_PARENT_NAME', 'parent_name');
 
 /** 親カテゴリ画像 */
 define('COLUMN_NAME_PARENT_IMAGE', 'parent_image');
-
-/** 表示ステータス */
-define('COLUMN_NAME_VIEW_STATUS', 'view_status');
 
 /** 子カテゴリテーブル */
 define('TABLE_NAME_CHILD_CATEGORY', 'child_category');
@@ -141,26 +162,125 @@ define('COLUMN_NAME_PARTS_ID', 'parts_id');
 /** 品名（パーツ） */
 define('COLUMN_NAME_PARTS_NAME', 'parts_name');
 
-/** 希望小売価格 */
-define('COLUMN_NAME_PRICE', 'price');
-
-/** 希望小売価格（税込み） */
-define('COLUMN_NAME_PRICE_ZEI', 'price_zei');
-
-/** 品番（商品） */
-define('COLUMN_NAME_ITEM_ID', 'item_id');
-
 /** ファイル名 */
 define('COLUMN_NAME_FILE_NAME', 'file_name');
 
-/** 備考 */
-define('COLUMN_NAME_NOTE', 'note');
+/**
+ * 商品系
+ */
+/** カテゴリーデータCSVのカラム数 */
+define('HEADER_COUNT_ITEM', '23');
 
-/** 登録日 */
-define('COLUMN_NAME_REGIST_DATE', 'regist_date');
+/** カラム番号：品番 */
+define('ITEM_ID_COLUMN_ITEM', '0');
 
-/** 更新日 */
-define('COLUMN_NAME_UPDATE_DATE', 'update_date');
+/** カラム番号：品名 */
+define('ITEM_NAME_COLUMN_ITEM', '1');
+
+/** カラム番号：写真 */
+define('ITEM_ID_COLUMN_ITEM', '2');
+
+/** カラム番号：図面 */
+define('MAP_COLUMN_ITEM', '3');
+
+/** カラム番号：取説 */
+define('TORISETSU_COLUMN_ITEM', '4');
+
+/** カラム番号：施工 */
+define('SEKOU_COLUMN_ITEM', '5');
+
+/** カラム番号：分解図 */
+define('BUNKAI_COLUMN_ITEM', '6');
+
+/** カラム番号：シャワー */
+define('SHOWER_COLUMN_ITEM', '7');
+
+/** カラム番号：購入フラグ */
+define('BUY_STATUS_COLUMN_ITEM', '8');
+
+/** カラム番号：代替品 */
+define('DAIGAE_COLUMN_ITEM', '9');
+
+/** カラム番号：価格 */
+define('PRICE_COLUMN_ITEM', '10');
+
+/** カラム番号：価格（税込） */
+define('PRICE_ZEI_COLUMN_ITEM', '11');
+
+/** カラム番号：販売時期 */
+define('SELL_KIKAN_COLUMN_ITEM', '12');
+
+/** カラム番号：取付寸法 */
+define('SUNPOU_COLUMN_ITEM', '13');
+
+/** カラム番号：備考 */
+define('NOTE_COLUMN_ITEM', '14');
+
+/** カラム番号：商品画像 */
+define('ITEM_IMAGE_COLUMN_ITEM', '15');
+
+/** カラム番号：バリエーション名 */
+define('VARIATION_NAME_COLUMN_ITEM', '16');
+
+/** カラム番号：バリエーション表示順 */
+define('VARIATION_NO_COLUMN_ITEM', '17');
+
+/** カラム番号：カタログ年度 */
+define('CATALOG_YEAR_COLUMN_ITEM', '18');
+
+/** カラム番号：カタログページ */
+define('CATALOG_PAGE_COLUMN_ITEM', '19');
+
+/** カラム番号：検索ワード */
+define('SEARCH_WORD_COLUMN_ITEM', '20');
+
+/** カラム番号：削除 */
+define('DELETE_COLUMN_ITEM', '21');
+
+/** カラム番号：カテゴリID */
+define('CATEGORY_ID_COLUMN_ITEM', '22');
+
+/** 品名 */
+define('COLUMN_NAME_ITEM_NAME', 'item_name');
+
+/** 商品ステータス */
+define('COLUMN_NAME_ITEM_STATUS', 'item_status');
+
+/** 図面データ */
+define('COLUMN_NAME_MAP_DATA', 'map_data');
+
+/** 取説データ */
+define('COLUMN_NAME_TORISETSU_DATA', 'torisetsu_data');
+
+/** 工説データ */
+define('COLUMN_NAME_KOUSETSU_DATA', 'kousetsu_data');
+
+/** 分解図データ */
+define('COLUMN_NAME_BUNKAI_DATA', 'bunkai_data');
+
+/** シャワーデータ */
+define('COLUMN_NAME_SHOWER_DATA', 'shower_data');
+
+/** 購入フラグ */
+define('COLUMN_NAME_BUY_STATUS', 'buy_status');
+
+/** カタログへのリンク */
+define('COLUMN_NAME_CATALOG_LINK', 'catalog_link');
+
+/** バリエーション親品番 */
+define('COLUMN_NAME_PARENT_VARIATION', 'parent_valiation');
+
+/** 商品イメージ画像 */
+define('COLUMN_NAME_ITEM_IMAGE', 'item_image');
+
+/** pdf作成ステータス */
+define('COLUMN_NAME_ITEM_IMAGE', 'item_image');
+
+/** バリエーション表示順 */
+define('COLUMN_NAME_VARIATION_NO', 'valiation_no');
+
+/** 商品テーブル */
+define('TABLE_NAME_ITEM', 'item');
 
 /**
  * メッセージ
