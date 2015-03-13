@@ -283,6 +283,16 @@ define('COLUMN_NAME_VARIATION_NO', 'valiation_no');
 define('TABLE_NAME_ITEM', 'item');
 
 /**
+ * 部品系（pdf）
+ */
+
+/** pdf部品図テーブル */
+define('TABLE_NAME_PDF_PARTS_LIST', 'pdf_parts_list');
+
+/** pdf商品テーブル */
+define('TABLE_NAME_PDF_ITEM', 'pdf_item');
+
+/**
  * メッセージ
  */
 /** csvデータ数不足エラーメッセージ */
