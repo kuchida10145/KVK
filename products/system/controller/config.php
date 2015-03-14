@@ -274,7 +274,7 @@ define('COLUMN_NAME_PARENT_VARIATION', 'parent_valiation');
 define('COLUMN_NAME_ITEM_IMAGE', 'item_image');
 
 /** pdf作成ステータス */
-define('COLUMN_NAME_ITEM_IMAGE', 'item_image');
+define('COLUMN_NAME_PDF_STATUS', 'pdf_status');
 
 /** バリエーション表示順 */
 define('COLUMN_NAME_VARIATION_NO', 'valiation_no');
@@ -315,6 +315,15 @@ define('MSG_CHECK_OK', 'CSV取込可能データです。<br>');
 
 /** DBエラーメッセージ */
 define('ERROR_MSG_DB', 'データベースエラーが発生しました。<br>');
+
+/** pdfデータ作成失敗メッセージ（商品データなし） */
+define('ERROR_MSG_NO_ITEM', 'pdfファイル作成対象データがありません。<br>');
+
+/** pdfデータ作成失敗メッセージ（部品データなし） */
+define('ERROR_MSG_NO_PARTS', '部品データがありません。品番：');
+
+/** pdfデータ作成失敗メッセージ */
+define('ERROR_MSG_MAKE_PDF', 'pdfファイルの作成に失敗しました。<br>');
 
 /** 実行結果メッセージ（成功） */
 define('RESULT_MSG_OK', '成功<br>');

@@ -35,7 +35,8 @@
 	 */
 	protected function dataDBCheck($checkData, $line_count) {
 		$deleteFlg = "";
-		$table = TABLE_NAME_PARTS_LIST;
+		$where = "";
+		$table = TABLE_NAME_PDF_PARTS_LIST;
 		$result = true;
 
 		// 削除フラグ取得
@@ -43,7 +44,9 @@
 
 		// 削除フラグ
 		if($deleteFlg){
-			$result = $this->manager->db_manager->get($table)->checkData($checkData[NO_COLUMN_PARTS], $checkData[FILE_COLUMN_PARTS]);
+			// where句生成
+			$where = COLUMN_NAME_NO." = '".$checkData[NO_COLUMN_PARTS]."' AND ".COLUMN_NAME_FILE_NAME." = '".$checkData[FILE_COLUMN_PARTS]."'";
+			$result = $this->manager->db_manager->get($table)->checkData($where);
 		}
 
 		if(!$result) {
@@ -81,7 +84,6 @@
 		$dataArray = array();		// 更新データ格納用の配列
 		$itemCodeArray = array();	// 商品ID格納用の配列
 		$partsNameArray = array();	// パーツ名格納用の配列
-		$sequenceID = "";			// シーケンスID
 		$dbCheck = "";				// DB動作結果
 		$where = "";				// SQL実行用のwhere句
 		$keyNo = $targetArray[NO_COLUMN_PARTS];				// 検索Key(商品表示順)
@@ -89,10 +91,6 @@
 		$keyItemID = $targetArray[PARTS_ID_COLUMN_PARTS];	// 検索key(品番：部品)
 		$limit = "";
 		$order = "";
-		$test = "parts_list";
-
-		// シーケンスID取得
-		$sequenceID = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->getSequenceId();
 
 		// 対象ファイル名から商品IDを取得
 		$getItemCodeArray = COLUMN_NAME_BUNKAI_DATA.' = "'.$keyFileName.'"';
@@ -136,17 +134,17 @@
 		//削除フラグチェック
 		if($deleteFlg){
 			// DB削除処理(表示フラグ更新)
-			$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->update($dataArray, $where);
+			$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->update($dataArray, $where);
 		} else {
 			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
-			$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($keyNo, $keyFileName);
+			$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->checkData($where);
 			if($dbCheck) {
 				// DBUpdate処理
-				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->update($dataArray, $where);
+				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->update($dataArray, $where);
 			} else {
 				// DBinsert処理
 				$dataArray[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日追加
-				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->insertParts($dataArray);
+				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->insertParts($dataArray);
 			}
 		}
 		return $dbCheck;

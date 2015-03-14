@@ -47,7 +47,7 @@ class Child_categoryDbModel extends DbModel
 	 * @param array $categoryArray	csvから取り込んだ親カテゴリ情報
 	 * @return $insertResult		DB取り込み結果
 	 */
-	public function insertCategory($categoryArray) {
+	public function insertDB($categoryArray) {
 		$table = 'child_category';
 		$insert_result = "";
 
@@ -62,16 +62,16 @@ class Child_categoryDbModel extends DbModel
 
 	/**
 	 * データチェック
-	 * @param	$key	検索対象key項目
+	 * @param	$where	データ検索用where句
 	 * @return	$result	検索結果(true：データあり false：データなし)
 	 */
-	public function checkData($key) {
+	public function checkData($where) {
 		$result = true;
 		$table = 'child_category';
 		$sql = "";
 		$dataCount = array();
 
-		$sql = "SELECT * FROM {$table} WHERE parent_id = {$key}";
+		$sql = "SELECT * FROM {$table} WHERE ".$where;
 		$dataCount = $this->db->getCount($sql);
 
 		if(count($dataCount) == 0) {

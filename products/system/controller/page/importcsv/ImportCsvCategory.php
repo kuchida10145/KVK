@@ -122,13 +122,13 @@
 			$dbCheck = $this->manager->db_manager->get($table)->update($dataArray, $where);
 		} else {
 			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
-			$dbCheck = $this->manager->db_manager->get($table)->checkData($key);
+			$dbCheck = $this->manager->db_manager->get($table)->checkData($where);
 			if($dbCheck) {
 				// DBUpdate処理
 				$dbCheck = $this->manager->db_manager->get($table)->update($dataArray, $where);
 			} else {
 				// DBinsert処理
-				$dbCheck = $this->manager->db_manager->get($table)->insertCategory($dataArray);
+				$dbCheck = $this->manager->db_manager->get($table)->insertDB($dataArray);
 			}
 		}
 		return $dbCheck;
