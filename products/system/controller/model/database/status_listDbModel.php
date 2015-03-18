@@ -38,4 +38,43 @@ class Status_listDbModel extends DbModel
 
 		return $this->db->getAllData($sql);
 	}
+
+	/**
+	 * データチェック
+	 * @param	$where	データ検索用where句
+	 * @return	$result	検索結果(true：データあり false：データなし)
+	 */
+	public function checkData($where) {
+		$result = true;
+		$table = TABLE_NAME_STATUS_LIST;
+		$sql = "";
+		$dataCount = array();
+
+		$sql = "SELECT * FROM {$table} WHERE ".$where;
+		$dataCount = $this->db->getCount($sql);
+
+		if(count($dataCount) == 0) {
+			$result = false;
+		}
+		return $result;
+	}
+
+	/**
+	 * 取込データをDBに登録する。
+	 *
+	 * @param array $categoryArray	csvから取り込んだ親カテゴリ情報
+	 * @return $insertResult		DB取り込み結果
+	 */
+	public function insertDB($categoryArray) {
+		$table = TABLE_NAME_STATUS_LIST;
+		$insert_result = "";
+
+		$this->db->startTran();				// トランザクション開始
+
+		$insert_result = $this->db->insert($table, $categoryArray);
+
+		$this->db->endTran($insert_result);	// トランザクション終了
+
+		return $insert_result;
+	}
 }

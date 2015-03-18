@@ -1,5 +1,5 @@
 <?php
-	include_once('../../system/controller/page/importcsv/ImportCsvParts.php');
+	include_once('../../system/controller/page/importcsv/ImportCsvItemStatus.php');
 
 	// セッション
 	session_start();
@@ -11,7 +11,7 @@
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
 		// csv取込処理インスタンス化
-		$importCsv = new ImportCsvParts();
+		$importCsv = new ImportCsvItemStatus();
 		$filePath		= "";	// csvファイルパス
 		$fileName		= "";	// csvファイル名
 		$testFlg = false;		// 取込処理フラグ
@@ -54,21 +54,21 @@
 		<div  class="container">
 		<!-- Tabs -->
 			<section>
-				<h1>KVK 管理画面（部品データ）</h1>
+				<h1>KVK 管理画面（商品ステータス）</h1>
 				<div>
 					<ul class="nav nav-tabs">
-						<li><a href="itemCsv.php">商品データ</a></li>
+						<li><a href="itemCSV.php">商品データ</a></li>
 						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
-						<li><a href="itemStatus.php">商品ステータス</a></li>
+						<li class="active"><a href="#">商品ステータス</a></li>
 						<li><a href="category.php">カテゴリデータ</a></li>
-						<li class="active"><a href="#">部品データ</a></li>
+						<li><a href="parts.php">部品データ</a></li>
 					</ul>
 				</div>
 				<div>
 					<form class="form-horizontal well" action="#" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">CSVファイル</label>
+							<label for="upload" class="col-sm-2 control-label">商品ステータスCSVファイル</label>
 							<div class="col-sm-10">
 								<!-- input[type=file] を非表示にする -->
 								<input type="file" class="hidden" id="upload" name="file" value="<?php echo $viewFilePath ?>">

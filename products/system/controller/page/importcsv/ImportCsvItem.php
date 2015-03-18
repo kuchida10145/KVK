@@ -9,20 +9,16 @@
 			$this->manager->validationColumns->setRule(ITEM_NAME_COLUMN_ITEM, 'required');
 			// 写真
 			$this->manager->validationColumns->setRule(ITEM_ID_COLUMN_ITEM, 'required');
-			// 購入
-			$this->manager->validationColumns->setRule(BUY_STATUS_COLUMN_ITEM, 'numeric|digit|pnumeric');
-			// 代替
-			$this->manager->validationColumns->setRule(DAIGAE_COLUMN_ITEM, 'numeric|digit|pnumeric');
 			// 価格
-			$this->manager->validationColumns->setRule(PRICE_COLUMN_ITEM, 'numeric|digit|pnumeric');
+			$this->manager->validationColumns->setRule(PRICE_COLUMN_ITEM, 'required');
 			// 価格（税込）
-			$this->manager->validationColumns->setRule(PRICE_ZEI_COLUMN_ITEM, 'numeric|digit|pnumeric');
+			$this->manager->validationColumns->setRule(PRICE_ZEI_COLUMN_ITEM, 'required');
 			// バリエーション順序
 			$this->manager->validationColumns->setRule(VARIATION_NO_COLUMN_ITEM, 'numeric|digit|pnumeric');
 			// カタログ年度
-			$this->manager->validationColumns->setRule(CATALOG_YEAR_COLUMN_ITEM, 'required|numeric|digit|pnumeric');
+			$this->manager->validationColumns->setRule(CATALOG_YEAR_COLUMN_ITEM, 'numeric|digit|pnumeric');
 			// カタログページ
-			$this->manager->validationColumns->setRule(CATALOG_PAGE_COLUMN_ITEM, 'required|numeric|digit|pnumeric');
+			$this->manager->validationColumns->setRule(CATALOG_PAGE_COLUMN_ITEM, 'numeric|digit|pnumeric');
 			// 削除
 			$this->manager->validationColumns->setRule(DELETE_COLUMN_ITEM, 'numeric|digit|pnumeric');
 			// カテゴリID
@@ -101,19 +97,19 @@
 		$limit = "";
 		$order = "";
 
-		// TODO：商品ステータス取得処理
 		// TODO：カテゴリリンク作成
+		$catalogLink = 'test';		// デバッグ用
 
 		// 商品DB登録データ生成
 		$dataArray = array(
 			// 品番（商品）
 			COLUMN_NAME_ITEM_ID=>$keyItemID,
 			// 品名
-			COLUMN_NAME_PARTS_ID=>$targetArray[ITEM_NAME_COLUMN_ITEM],
+			COLUMN_NAME_ITEM_NAME=>$targetArray[ITEM_NAME_COLUMN_ITEM],
 			// 表示ステータス
 			COLUMN_NAME_VIEW_STATUS=>$targetArray[DELETE_COLUMN_ITEM],
 			// 商品ステータス
-			COLUMN_NAME_ITEM_STATUS=>$targetArray[],
+			COLUMN_NAME_ITEM_STATUS=>"",
 			// 希望小売価格
 			COLUMN_NAME_PRICE=>$targetArray[PRICE_COLUMN_ITEM],
 			// 希望小売価格（税込み）
@@ -131,7 +127,7 @@
 			// 購入フラグ
 			COLUMN_NAME_BUY_STATUS=>$targetArray[BUY_STATUS_COLUMN_ITEM],
 			// カタログへのリンク
-			COLUMN_NAME_CATALOG_LINK=>$targetArray[],
+			COLUMN_NAME_CATALOG_LINK=>$catalogLink,
 			// バリエーション親品番
 			COLUMN_NAME_PARENT_VARIATION=>$targetArray[VARIATION_NAME_COLUMN_ITEM],
 			// バリエーション表示順
@@ -139,11 +135,29 @@
 			// 備考
 			COLUMN_NAME_NOTE=>$targetArray[NOTE_COLUMN_ITEM],
 			// 商品イメージ画像
-			COLUMN_NAME_ITEM_IMAGE=>$targetArray[],
+			COLUMN_NAME_ITEM_IMAGE=>"",
 			// カテゴリID
 			COLUMN_NAME_CATEGORY_ID=>$targetArray[CATEGORY_ID_COLUMN_ITEM],
 			// pdf作成ステータス
-			COLUMN_NAME_PDF_STATUS=>$targetArray[],
+			COLUMN_NAME_PDF_STATUS=>"",
+			// 検索ワード
+			COLUMN_NAME_SEARCH_WORD=>$targetArray[SEARCH_WORD_COLUMN_ITEM],
+			// 分岐金具1
+			COLUMN_NAME_BUNKI_KANAGU_1=>$targetArray[BUNKI_KANAGU_1_COLUMN_ITEM],
+			// 分岐金具2
+			COLUMN_NAME_BUNKI_KANAGU_2=>$targetArray[BUNKI_KANAGU_2_COLUMN_ITEM],
+			// 分岐金具3
+			COLUMN_NAME_BUNKI_KANAGU_3=>$targetArray[BUNKI_KANAGU_3_COLUMN_ITEM],
+			// 販売時期
+			COLUMN_NAME_SELL_TIME=>$targetArray[SELL_KIKAN_COLUMN_ITEM],
+			// 代替品
+			COLUMN_NAME_SUB_ITEM=>$targetArray[DAIGAE_COLUMN_ITEM],
+			// 本体取付穴
+			COLUMN_NAME_SUNPOU=>$targetArray[SUNPOU_COLUMN_ITEM],
+			// ピッチ
+			COLUMN_NAME_PITCH=>$targetArray[PITCH_COLUMN_ITEM],
+			// シャワー取付穴
+			COLUMN_NAME_SHOWER_SUNPOU=>$targetArray[SHOWER_SUNPOU_COLUMN_ITEM],
 			// 更新日
 			COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
 		);
@@ -166,7 +180,7 @@
 			} else {
 				// DBinsert処理
 				$dataArray[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日追加
-				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->insertParts($dataArray);
+				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->insertDB($dataArray);
 			}
 		}
 		return $dbCheck;

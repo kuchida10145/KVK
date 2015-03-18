@@ -54,10 +54,12 @@
 		<div  class="container">
 		<!-- Tabs -->
 			<section>
-				<h1>KVK 管理画面</h1>
+				<h1>KVK 管理画面（カテゴリデータ）</h1>
 				<div>
 					<ul class="nav nav-tabs">
-						<li><a href="item.php">商品データ</a></li>
+						<li><a href="itemCsv.php">商品データ</a></li>
+						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
+						<li><a href="itemStatus.php">商品ステータス</a></li>
 						<li class="active"><a href="#">カテゴリデータ</a></li>
 						<li><a href="parts.php">部品データ</a></li>
 					</ul>

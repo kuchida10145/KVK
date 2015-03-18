@@ -3,14 +3,8 @@
 	class ImportCsvParts extends AbstractImportCsv {
 		function __construct() {
 			parent::__construct();
-			// 番号（部品表示順）
-			$this->manager->validationColumns->setRule(NO_COLUMN_PARTS, 'required|numeric|digit|pnumeric');
 			// 品番（部品）
 			$this->manager->validationColumns->setRule(PARTS_ID_COLUMN_PARTS, 'required');
-			// 希望小売価格（税抜き）
-			$this->manager->validationColumns->setRule(PRICE_COLUMN_PARTS, 'required|numeric|digit|pnumeric');
-			// 希望小売価格（税込み）
-			$this->manager->validationColumns->setRule(PRICE_ZEI_COLUMN_PARTS, 'required|numeric|digit|pnumeric');
 			// ファイル名
 			$this->manager->validationColumns->setRule(FILE_COLUMN_PARTS, 'required');
 			// 表示フラグ
@@ -45,7 +39,7 @@
 		// 削除フラグ
 		if($deleteFlg){
 			// where句生成
-			$where = COLUMN_NAME_NO." = '".$checkData[NO_COLUMN_PARTS]."' AND ".COLUMN_NAME_FILE_NAME." = '".$checkData[FILE_COLUMN_PARTS]."'";
+			$where = COLUMN_NAME_NO." = '".$checkData[NO_COLUMN_PARTS]."' AND ".COLUMN_NAME_PARTS_ID." = '".$checkData[PARTS_ID_COLUMN_PARTS]."' AND ".COLUMN_NAME_FILE_NAME." = '".$checkData[FILE_COLUMN_PARTS]."'";
 			$result = $this->manager->db_manager->get($table)->checkData($where);
 		}
 
@@ -63,7 +57,7 @@
 	 */
 	protected function dataPrimaryCheck($checkData, $lineCount) {
 		$result = true;
-		$setVal = $checkData[NO_COLUMN_PARTS].','.$checkData[FILE_COLUMN_PARTS];
+		$setVal = $checkData[NO_COLUMN_PARTS].','.$checkData[PARTS_ID_COLUMN_PARTS].','.$checkData[FILE_COLUMN_PARTS];
 
 		// キー項目が前にチェックしたデータにあったかチェックする
 		if ($this->{$setVal} != null) {
@@ -97,11 +91,6 @@
 		$itemCodeArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->search($getItemCodeArray, $limit, $order);
 		$itemCodeRow = $itemCodeArray[0];
 
-		// 品番から品名を取得
-		$getPartsNameArray = COLUMN_NAME_ITEM_ID.' = "'.$keyItemID.'"';
-		$partsNameArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->search($getPartsNameArray, $limit, $order);
-		$partsNameRow = $partsNameArray[0];
-
 		// 部品リストDB登録データ生成
 		$dataArray = array(
 			// 番号（部品表示順）
@@ -109,7 +98,7 @@
 			// 品番（パーツ）
 			COLUMN_NAME_PARTS_ID=>$targetArray[PARTS_ID_COLUMN_PARTS],
 			// 品名（パーツ）
-			COLUMN_NAME_PARTS_NAME=>$partsNameRow[COLUMN_NAME_ITEM_NAME],
+			COLUMN_NAME_PARTS_NAME=>$targetArray[PARTS_NAME_COLUMN_PARTS],
 			// 希望小売価格
 			COLUMN_NAME_PRICE=>$targetArray[PRICE_COLUMN_PARTS],
 			// 希望小売価格（税込み）
@@ -127,7 +116,7 @@
 		);
 
 		// where句生成
-		$where = COLUMN_NAME_NO." = {$keyNo} AND ".COLUMN_NAME_FILE_NAME." = '".$keyFileName."'";
+		$where = COLUMN_NAME_NO." = '".$keyNo."' AND ".COLUMN_NAME_PARTS_ID." = '".$keyItemID."' AND ".COLUMN_NAME_FILE_NAME." = '".$keyFileName."'";
 
 		// 削除フラグ取得
 		$deleteFlg = $this->convertDeleteFlg($targetArray[DELETE_COLUMN_PARTS]);

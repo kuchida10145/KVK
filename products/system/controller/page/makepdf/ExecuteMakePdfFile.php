@@ -17,6 +17,9 @@
 			$keyArray = array();		// 検索キー配列
 			$keyPdfPartsList = "";		// テーブル検索用キー
 			$errorMessage = array();	// エラーメッセージ格納用
+			$oldPath = "";				// 現在のファイルパス
+			$newPath = "";				// 移動先ファイルパス
+			$backupFileName = "";		// バックアップ用のファイル名
 			$limit = "";
 			$order = "";
 
@@ -36,6 +39,12 @@
 					}
 				}
 			}
+			
+			// pdfファイル退避
+			$oldPath = "/../../../".PDF_FILE_PATH.$rowItem[COLUMN_NAME_BUNKAI_DATA];
+			$backupFileName = basename($rowItem[COLUMN_NAME_BUNKAI_DATA], '.pdf').date("YmdHis").".pdf";
+			$newPath = "/../../../".PDF_BACKUP_PATH.$backupFileName;
+			rename($oldPath, $newPath);
 
 			// TODO：pdf作成処理（仮）	※テスト後削除
 			$result = makePdf();

@@ -1,6 +1,6 @@
 <?php
 	include_once('../../system/controller/page/importcsv/ImportCsvItem.php');
-
+	include_once('../../system/controller/page/AbstractExportCsv.php');
 	// セッション
 	session_start();
 
@@ -10,26 +10,32 @@
 
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
-		// csv取込処理インスタンス化
-		$importCsv = new ImportCsvCategory();
-		$filePath		= "";	// csvファイルパス
-		$fileName		= "";	// csvファイル名
-		$testFlg = false;		// 取込処理フラグ
-		// 取込テスト判定（true：取込テスト、false：csv取込）
-		if(isset($_POST['test_button']) && $_POST['test_button'] == "test") {
-			$testFlg = true;
+		if(isset($_POST['download_button']) && $_POST['download_button'] == "download") {
+			// csv出力処理インスタンス化
+			$exportCsv = new AbstractExportCsv();
+			$exportCsv->executeExport();
+		} else {
+			// csv取込処理インスタンス化
+			$importCsv = new ImportCsvItem();
+			$filePath		= "";	// csvファイルパス
+			$fileName		= "";	// csvファイル名
+			$testFlg = false;		// 取込処理フラグ
+			// 取込テスト判定（true：取込テスト、false：csv取込）
+			if(isset($_POST['test_button']) && $_POST['test_button'] == "test") {
+				$testFlg = true;
+			}
+
+			$filePath = $_FILES["file"]["tmp_name"];
+			$fileName = $_FILES["file"]["name"];
+
+			// csv取込処理実行
+			$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
+			// メッセージ取得
+			$resultMessage	= $importCsv->getResultMessage($result);
+			$errorMessage	= $importCsv->getErrorMessage();
+			// 画面表示用csvファイルパス設定
+			$viewFilePath = $_POST['filepath'];
 		}
-
-		$filePath = $_FILES["file"]["tmp_name"];
-		$fileName = $_FILES["file"]["name"];
-
-		// csv取込処理実行
-		$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
-		// メッセージ取得
-		$resultMessage	= $importCsv->getResultMessage($result);
-		$errorMessage	= $importCsv->getErrorMessage();
-		// 画面表示用csvファイルパス設定
-		$viewFilePath = $_POST['filepath'];
 	}
 ?>
 <!DOCTYPE html>
@@ -54,10 +60,12 @@
 		<div  class="container">
 		<!-- Tabs -->
 			<section>
-				<h1>KVK 管理画面</h1>
+				<h1>KVK 管理画面（商品データ）</h1>
 				<div>
 					<ul class="nav nav-tabs">
 						<li class="active"><a href="#">商品データ</a></li>
+						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
+						<li><a href="itemStatus.php">商品ステータス</a></li>
 						<li><a href="category.php">カテゴリデータ</a></li>
 						<li><a href="parts.php">部品データ</a></li>
 					</ul>
@@ -66,7 +74,7 @@
 					<form class="form-horizontal well" action="#" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">CSVファイル</label>
+							<label for="upload" class="col-sm-2 control-label">商品CSVファイル</label>
 							<div class="col-sm-10">
 								<!-- input[type=file] を非表示にする -->
 								<input type="file" class="hidden" id="upload" name="file" value="<?php echo $viewFilePath ?>">
@@ -83,7 +91,7 @@
 						<div align="center">
 							<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="test_button" value="test">取込テスト</button>
 							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="run_button" value="run">CSV 取込</button>
-							<!-- <button type="button" class="btn btn-warning">CSV ダウンロード</button> -->
+							<button type="submit" class="btn btn-warning"  onclick="document.form.submit();" name="download_button" value="download">CSV ダウンロード</button>
 						</div>
 						<div>
 							実行結果：<?php echo $resultMessage ?>

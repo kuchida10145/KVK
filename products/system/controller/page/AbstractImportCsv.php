@@ -10,37 +10,6 @@ abstract class AbstractImportCsv extends Page{
 	protected abstract function dataPrimaryCheck($checkData, $lineCount); 	// cavデータ重複データチェック
 	protected abstract function runDB($targetData);							// DB関連の処理実行
 
-	private $_data = array();
-
-	/** GETTERメソッド
-	 * @param	$key				取得するデータのkey項目
-	 * @return	$this->get($key)	指定したkeyの値
-	 */
-	public function __get($key){
-			return $this->get($key);
-	}
-
-	/** SETTERメソッド
-	 * @param $key		key項目
-	 * @param $value	key項目にセットする値
-	 */
-	public function __set($key,$value){
-			$this->set($key,$value);
-	}
-
-	// GETTERメソッド詳細
-	protected function get($key,$default=null){
-			if(array_key_exists($key,$this->_data)){
-					return $this->_data[$key];
-			}
-			return $default;
-	}
-
-	// SETTERメソッド詳細
-	protected function set($key,$value){
-			$this->_data[$key] = $value;
-	}
-
 	/**
 	 * csvファイル取込メイン処理
 	 * @param 	$filePath	取込csvファイルパス
