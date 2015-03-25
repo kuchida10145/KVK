@@ -1,49 +1,48 @@
 <?php
-	include_once('../../system/controller/page/importcsv/ImportCsvItem.php');
-	include_once('../../system/controller/page/AbstractExportCsv.php');
-	include_once('../../system/Page.php');
+	include_once('../../system/controller/page/makepdf/GetMakePDFData.php');
+
 	// セッション
 	session_start();
 
 	$today			= date("Y/m/d");
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
-	$viewFilePath	= "";	// 画面表示用csvファイルパス
+
+	// インスタンス化
+	$makePdf = new CommonMakePDF();
+	$viewArray = $makePdf->getViewData();
 
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
-		if(isset($_POST['download_button']) && $_POST['download_button'] == "download") {
-			// csv出力処理インスタンス化
-			$exportCsv = new AbstractExportCsv();
-			$exportCsv->executeExport();
-		} else {
-			// csv取込処理インスタンス化
-			$importCsv = new ImportCsvItem();
-			$filePath		= "";	// csvファイルパス
-			$fileName		= "";	// csvファイル名
-			$testFlg = false;		// 取込処理フラグ
-			$result = true;			// 処理実行結果
-			// 取込テスト判定（true：取込テスト、false：csv取込）
-			if(isset($_POST['test_button']) && $_POST['test_button'] == "test") {
-				$testFlg = true;
-			} else {
-				$result = $importCsv->setPdfTime($_POST['dropdownDay'], $_POST['hour'], $_POST['min']);
-			}
+		$result = false;
 
-			$filePath = $_FILES["file"]["tmp_name"];
-			$fileName = $_FILES["file"]["name"];
-
-			if($result) {
-				// csv取込処理実行
-				$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
-			}
-			// メッセージ取得
-			$resultMessage	= $importCsv->getResultMessage($result);
-			$errorMessage	= $importCsv->getErrorMessage();
-			// 画面表示用csvファイルパス設定
-			$viewFilePath = $_POST['filepath'];
+		// pdf作成時間解除（true：時間設定解除）
+		if(isset($_POST['unset_button']) && $_POST['unset_button'] == "unset") {
+			$result = $makePdf->unsetSystemStatus($viewArray[COLUMN_NAME_SYSTEM_STATUS]);
 		}
+
+		// pdf作成時間設定（true：時間設定）
+		if(isset($_POST['set_button']) && $_POST['set_button'] == "set") {
+			$result = $makePdf->setPdfTime($_POST['dropdownDay'], $_POST['hour'], $_POST['min']);
+			if($result) {
+				$result = $makePdf->setSystemStatus($viewArray[COLUMN_NAME_SYSTEM_STATUS]);
+			}
+		}
+
+		// pdf作成中止（true：pdf作成中止）
+		if(isset($_POST['stop_button']) && $_POST['stop_button'] == "stop") {
+			$result = $makePdf->stopSystemStatus($viewArray[COLUMN_NAME_SYSTEM_STATUS]);
+		}
+
+		// メッセージ取得
+		$resultMessage	= $makePdf->getResultMessage($result);
+		$errorMessage	= $makePdf->getErrorMessage();
 	}
+
+	// 画面表示データ取得
+	$viewArray = $makePdf->getViewData();
+	$systemStatus = $makePdf->convertSystemStatus($viewArray[COLUMN_NAME_SYSTEM_STATUS]);
+	$startTime = $viewArray[COLUMN_NAME_PDF_TIME];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,36 +66,34 @@
 		<div  class="container">
 		<!-- Tabs -->
 			<section>
-				<h1>KVK 管理画面（商品データ）</h1>
+				<h1>KVK 管理画面（PDF設定）</h1>
 				<div>
 					<ul class="nav nav-tabs">
-						<li class="active"><a href="#">商品データ</a></li>
+						<li><a href="itemCsv.php">商品データ</a></li>
 						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
 						<li><a href="itemStatus.php">商品ステータス</a></li>
 						<li><a href="category.php">カテゴリデータ</a></li>
 						<li><a href="parts.php">部品データ</a></li>
+						<li class="active"><a href="#">PDF設定</a></li>
 					</ul>
 				</div>
 				<div>
 					<form class="form-horizontal well" action="#" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">商品CSVファイル</label>
-							<div class="col-sm-10">
-								<!-- input[type=file] を非表示にする -->
-								<input type="file" class="hidden" id="upload" name="file" value="<?php echo $viewFilePath ?>">
-								<!-- 代わりに input[type=text] と ボタンを表示 -->
-								<div class="input-group">
-									<input type="text" id="filepath" name="filepath" class="form-control" value="<?php echo $viewFilePath ?>">
-									<span class="input-group-btn">
-										<!-- ボタンを押したときに input[type=file] を押したことにする -->
-										<a class="btn btn-default" onclick="document.getElementById('upload').click()">ファイル選択</a>
-									</span>
-								</div>
+							<label class="col-sm-2 control-label">状態</label>
+							<div class="col-sm-10" Align="left">
+								<label class="col-sm-0 control-label"><?php echo $systemStatus ?></label>
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">pdf作成日</label>
+							<label class="col-sm-2 control-label">PDF作成開始時間</label>
+							<div class="col-sm-10">
+								<label class="col-sm-0 control-label"><?php echo $startTime ?></label>
+							</div>
+						</div>
+												<div class="form-group">
+							<label for="upload" class="col-sm-2 control-label">PDF作成日変更</label>
 							<div class="col-sm-10">
 								<div class="btn-group">
 									<div class="dropdown">
@@ -119,7 +116,7 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">pdf作成開始時間</label>
+							<label for="upload" class="col-sm-2 control-label">PDF作成開始時間変更</label>
 							<div class="col-sm-10">
 								<div class="input-group">
 									<input style="width:50px;" type="text" id="hour" name="hour" class="form-control"  maxlength="2" pattern="^[0-9]+$">
@@ -129,9 +126,10 @@
 							</div>
 						</div>
 						<div align="center">
-							<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="test_button" value="test">取込テスト</button>
-							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="run_button" value="run">CSV 取込</button>
-							<button type="submit" class="btn btn-warning"  onclick="document.form.submit();" name="download_button" value="download">CSV ダウンロード</button>
+						<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="unset_button" value="unset">設定解除</button>
+							<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="set_button" value="set">設定変更</button>
+							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="stop_button" value="stop">PDF作成中止</button>
+							<button type="button" class="btn btn-warning">商品データ更新</button>
 						</div>
 						<div>
 							実行結果：<?php echo $resultMessage ?>
@@ -162,12 +160,6 @@
 					form.dropdownDay.value = $(this).text();
 				});
 			}
-
-			/* $(function(){
-				$(".dropdown-menu li a").click(function(){
-					$(this).parents('.dropdown').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>');
-				});
-			}); */
 		</script>
     </body>
 </html>

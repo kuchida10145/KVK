@@ -3,7 +3,7 @@
  * ステータスリストDB管理クラス
 */
 include_once('/../../core/database/DbModel.php');
-class Status_listDbModel extends DbModel
+class Item_iconDbModel extends DbModel
 {
 	var $use_sequence = false;
 
@@ -15,9 +15,9 @@ class Status_listDbModel extends DbModel
 	public function getField()
 	{
 		$data = array(
-				'item_status',
-				'status_name',
-				'icon',
+				'icon_id',
+				'icon_name',
+				'icon_file',
 		);
 		return $data;
 	}

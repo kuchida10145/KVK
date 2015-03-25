@@ -24,6 +24,12 @@ abstract class AbstractImportCsv extends Page{
 		$dbCheck = "";				// db操作結果
 		$error = true;				// errorフラグ（true：エラーなし、false：エラーあり）
 
+		// システムステータスチェック
+		$error = $this->systemStatusCheck($this->systemStatus);
+		if(!$error) {
+			return false;
+		}
+
 		// 拡張子チェック
 		$error = $this->checkExtension($fileName);
 		if(!$error) {
@@ -120,7 +126,7 @@ abstract class AbstractImportCsv extends Page{
 		$csv  = array();
 		// csvから取り込んだデータをUTF-8に変換する
 		$data = file_get_contents($csvFile);
-		$data = mb_convert_encoding($data, 'UTF-8', 'sjis-win');
+		$data = mb_convert_encoding($data, SYSTEM_CODE, CSV_CODE);
 		$temp = tmpfile();
 
  		fwrite($temp, $data);

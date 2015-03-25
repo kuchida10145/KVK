@@ -2,7 +2,7 @@
 /**
  * pdf用部品リストDB管理クラス
 */
-class Pdf_parts_listDbModel extends DbModel
+class Onetime_pdf_partsDbModel extends DbModel
 {
 	var $use_sequence = false;
 
@@ -38,11 +38,13 @@ class Pdf_parts_listDbModel extends DbModel
 	 */
 	public function findByItemId($item_id)
 	{
+		$table = TABLE_NAME_PDF_PARTS_LIST;
+
 		$item_id = $this->escape_string($item_id);
 
 		$field = implode(',',$this->getField());
 
-		$sql = "SELECT * FROM pdf_parts_list WHERE item_id ='{$item_id}'";
+		$sql = "SELECT * FROM {$table} WHERE item_id ='{$item_id}'";
 
 		return $this->db->getAllData($sql);
 	}
@@ -53,11 +55,12 @@ class Pdf_parts_listDbModel extends DbModel
 	 * @return	$result	検索結果(true：データあり false：データなし)
 	 */
 	public function checkData($where) {
+		$table = TABLE_NAME_PDF_PARTS_LIST;
 		$result = true;
 		$sql = "";
 		$dataCount = array();
 
-		$sql = "SELECT * FROM pdf_parts_list WHERE ".$where;
+		$sql = "SELECT * FROM {$table} WHERE ".$where;
 
 		$dataCount = $this->db->getData($sql);
 
@@ -73,8 +76,8 @@ class Pdf_parts_listDbModel extends DbModel
 	 * @param	array	$targetArray	csvから取り込んだ親カテゴリ情報
 	 * @return	boolean	$insert_result	DB追加結果
 	 */
-	public function insertDB($targetArray) {
-		$table = 'pdf_parts_list';
+	public function insertParts($targetArray) {
+		$table = TABLE_NAME_PDF_PARTS_LIST;
 
 		$this->db->startTran();				// トランザクション開始
 

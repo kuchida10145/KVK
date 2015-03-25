@@ -3,7 +3,7 @@
  * Pdf用商品DB管理クラス
  */
 include_once('/../../core/database/DbModel.php');
-class Pdf_itemDbModel extends DbModel
+class Onetime_pdf_itemDbModel extends DbModel
 {
 	var $use_sequence = false;
 
@@ -61,7 +61,9 @@ class Pdf_itemDbModel extends DbModel
 
 		$field = implode(',',$this->getField());
 
-		$sql = "SELECT * FROM pdf_item WHERE item_id ='{$item_id}'";
+		$table = TABLE_NAME_PDF_ITEM;
+
+		$sql = "SELECT * FROM '{$table}' WHERE item_id ='{$item_id}'";
 
 		return $this->db->getAllData($sql);
 	}
@@ -75,8 +77,9 @@ class Pdf_itemDbModel extends DbModel
 		$result = true;
 		$sql = "";
 		$dataCount = array();
+		$table = TABLE_NAME_PDF_ITEM;
 
-		$sql = "SELECT * FROM pdf_item WHERE ".$where;
+		$sql = "SELECT * FROM '{$table}' WHERE {$where}";
 
 		$dataCount = $this->db->getData($sql);
 
@@ -93,7 +96,7 @@ class Pdf_itemDbModel extends DbModel
 	 * @return	boolean	$insert_result	DB追加結果
 	 */
 	public function insertDB($targetArray) {
-		$table = 'pdf_item';
+		$table = TABLE_NAME_PDF_ITEM;
 
 		$this->db->startTran();				// トランザクション開始
 

@@ -49,7 +49,7 @@ class AbstractExportCsv extends Page{
 		// csvファイル書き込み
 		$filePointer = fopen(CSV_FILE_NAME_ITEM, 'w');
 		$headerArray = $this->csvHeader;
-		mb_convert_variables('sjis', 'utf-8', $headerArray);
+		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
  		fputcsv($filePointer, $headerArray);
 
 		// データ取得
@@ -124,5 +124,6 @@ class AbstractExportCsv extends Page{
 		header('Content-Transfer-Encoding: binary');
 		header('Content-Length: ' . filesize(CSV_FILE_NAME_ITEM));
 		readfile(CSV_FILE_NAME_ITEM);
+		exit;
 	}
 }

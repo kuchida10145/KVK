@@ -59,12 +59,14 @@
 		$result = true;
 		$setVal = $checkData[NO_COLUMN_PARTS].','.$checkData[PARTS_ID_COLUMN_PARTS].','.$checkData[FILE_COLUMN_PARTS];
 
-		// キー項目が前にチェックしたデータにあったかチェックする
-		if ($this->{$setVal} != null) {
-			$this->{DUPLICATION_LINE} = $this->{$setVal};
-			$result = false;
-		} else {
-			$this->{$setVal} = $lineCount;
+		// キー項目が前にチェックしたデータにあったかチェックする(表示順空白はチェックしない)
+		if($checkData[NO_COLUMN_PARTS] != "") {
+			if ($this->{$setVal} != null) {
+				$this->{DUPLICATION_LINE} = $this->{$setVal};
+				$result = false;
+			} else {
+				$this->{$setVal} = $lineCount;
+			}
 		}
 		return $result;
 	}

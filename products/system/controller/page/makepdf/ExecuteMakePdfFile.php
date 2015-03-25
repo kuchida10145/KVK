@@ -1,6 +1,6 @@
 <?php
-	include_once('/../AbstractImportCsv.php');
-	class ImportCsvParts extends AbstractImportCsv {
+	include_once('/CommonMakePDF.php');
+	class ImportCsvParts extends CommonMakePDF {
 		function __construct() {
 			parent::__construct();
 		}
@@ -11,69 +11,73 @@
 		 * @return	$result			実行結果
 		 */
 		protected function executeMakePdf() {
+			$systemStatus = "";			// システムステータス
 			$result = true;				// 実行結果
 			$pdfItemArray = array();	// pdf作成対象データ（商品）
 			$pdfPartsArray = array();	// pdf作成対象データ（部品）
-			$keyArray = array();		// 検索キー配列
-			$keyPdfPartsList = "";		// テーブル検索用キー
+			$wherePdfPartsList = "";	// テーブル検索用where句（pdf作成用部品）
 			$errorMessage = array();	// エラーメッセージ格納用
-			$oldPath = "";				// 現在のファイルパス
-			$newPath = "";				// 移動先ファイルパス
-			$backupFileName = "";		// バックアップ用のファイル名
+			$viewError = "";			// エラーメッセージ表示用
 			$limit = "";
 			$order = "";
 
-			// pdf作成対象データ取得(商品)
+			// pdf作成対象データ取得(pdf作成用一次商品データ)
 			$pdfItemArray = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->getAll();
 			foreach ($pdfItemArray as $rowItem) {
+				// システムステータスチェック（4：PDF作成中止だった場合次のデータへ）
+				$systemStatus = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
+				if($systemStatus == SYSTEM_STATUS_PDF_STOP) {
+					break;
+				}
+
+				// pdf作成フラグチェック（pdfファイルが作成済みの場合次のデータへ）
+				if($rowItem[COLUMN_NAME_PDF_STATUS] == PDF_STATUS_ZUMI) {
+					break;
+				}
+
 				// 商品データからkey項目を取得して、pdf作成用部品リストを取得
-				$keyPdfPartsList = $rowItem[COLUMN_NAME_BUNKAI_DATA];
-				$keyPdfPartsList = COLUMN_NAME_FILE_NAME.' = "'.$keyPdfPartsList.'"';
-				$pdfPartsListDB = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->search($keyPdfPartsList, $limit, $order);
+				$wherePdfPartsList = COLUMN_NAME_ITEM_ID.' = "'.$rowItem[COLUMN_NAME_ITEM_ID].'" AND '.
+									COLUMN_NAME_FILE_NAME.' = "'.$rowItem[COLUMN_NAME_BUNKAI_DATA].'" ';
+				$pdfPartsListDB = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->search($wherePdfPartsList, $limit, $order);
 				if(count($rowPdfPartsList) == 0) {
-					$errorMessage[] = ERROR_MSG_NO_PARTS.$rowItem[COLUMN_NAME_ITEM_NAME]."<br>";
+					$errorMessage[] = ERROR_MSG_NO_PARTS.$rowItem[COLUMN_NAME_ITEM_ID]."<br>";
 					$result = false;
 				} else {
 					foreach ($pdfPartsListDB as $rowParts) {
 						$pdfPartsArray[] = $rowPdfPartsList;
 					}
+					// TODO：pdf作成処理（仮）	※テスト後削除
+					$result = makePdf($rowItem, $pdfPartsArray);
+
+					// pdf作成完了フラグを立てる。
+					if($result) {
+						$rowItem[COLUMN_NAME_PDF_STATUS] = PDF_STATUS_ZUMI;
+						$result = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->updateById($rowItem['id'], $rowItem);
+					}
+
+					// エラーチェック
+					if(!$result) {
+						$errorMessage[] = ERROR_MSG_MAKE_PDF."品番：".$rowItem[COLUMN_NAME_ITEM_ID]."<br>";
+					}
+				}
+
+				// TODO：pdf作成処理（仮）	※テスト後削除
+				$result = makePdf($pdfItemArray, $pdfPartsArray);
+
+				if(!$result) {
+					$errorMessage[] = ERROR_MSG_MAKE_PDF;
+				} else {
+					$result = $this->updateData();
 				}
 			}
-			
-			// pdfファイル退避
-			$oldPath = "/../../../".PDF_FILE_PATH.$rowItem[COLUMN_NAME_BUNKAI_DATA];
-			$backupFileName = basename($rowItem[COLUMN_NAME_BUNKAI_DATA], '.pdf').date("YmdHis").".pdf";
-			$newPath = "/../../../".PDF_BACKUP_PATH.$backupFileName;
-			rename($oldPath, $newPath);
 
-			// TODO：pdf作成処理（仮）	※テスト後削除
-			$result = makePdf();
-
-			if($result) {
-				// 商品データ
-				$keyArray = array(
-						COLUMN_NAME_ITEM_ID=>$pdfPartsArray[NO_COLUMN_PARTS],
-						COLUMN_NAME_CATEGORY_ID=>$pdfPartsArray[CATEGORY_ID_COLUMN_ITEM],
-				);
-				$table = TABLE_NAME_ITEM;
-				$result = $this->runDB($keyArray, $table, $rowItem);
-
-				// 初期化
-				$keyArray = array();
-				$table = "";
-
-				// 部品データ
-				$keyArray = array(
-						COLUMN_NAME_NO=>$pdfPartsArray[NO_COLUMN_PARTS],
-						COLUMN_NAME_FILE_NAME=>$pdfPartsArray[NO_COLUMN_PARTS],
-				);
-				$table = TABLE_NAME_PARTS_LIST;
-				foreach ($pdfPartsArray as $dataArray) {
-					$result = $this->runDB($keyArray, $table, $dataArray);
+			if(!$result) {
+				foreach ($errorMessage as $errorRow) {
+					$viewError = $viewError.$errorRow;
 				}
-			} else {
-				$errorMessage[] = ERROR_MSG_MAKE_PDF;
+				$this->{KEY_ERROR_MESSAGE} = $viewError;
 			}
+
 			return $result;
 		}
 

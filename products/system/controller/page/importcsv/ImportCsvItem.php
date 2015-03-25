@@ -33,6 +33,9 @@
 									);
 			// csvヘッダー項目数
 			$this->headerCount = HEADER_COUNT_ITEM;
+
+			// システム状態取得
+			$this->sytemStatus = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
 		}
 
 	/**
@@ -183,8 +186,12 @@
 				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->insertDB($dataArray);
 			}
 		}
+
+		// システムステータス更新
+		$dbCheck = $this->systemUpdate(SYSTEM_STATUS_PDF_WAIT, $this->pdfTime);
+
 		return $dbCheck;
- 	}
+	}
 }
 
 ?>

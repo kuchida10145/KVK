@@ -42,6 +42,9 @@ define('KEY_DB_CHECK_MESSAGE', 'dataDBCheckMessage');
 /** 取込結果メッセージ取得key */
 define('KEY_TORIKOMI_MESSAGE', 'torikomiMessage');
 
+/** PDF作成開始時間取得key */
+define('KEY_PDF_MAKE_TIME', 'pdfTime');
+
 /** csv拡張子 */
 define('CSV_EXTENTION', 'csv');
 
@@ -77,6 +80,18 @@ define('PDF_FILE_PATH', 'file/pdf/');
 
 /** pdfファイルバックアップ */
 define('PDF_BACKUP_PATH', 'file/backup/pdf/');
+
+/** 文字コード（sjis-win） */
+define('CSV_CODE', 'sjis-win');
+
+/** 文字コード（UTF-8） */
+define('SYSTEM_CODE', 'utf-8');
+
+/** pdf作成ステータス(0：未作成) */
+define('PDF_STATUS_MISAKUSEI', '0');
+
+/** pdf作成ステータス(1：作成済み) */
+define('PDF_STATUS_ZUMI', '1');
 
 /**
  * カテゴリ系
@@ -340,15 +355,18 @@ define('TABLE_NAME_ITEM', 'item');
  * 部品系（pdf）
  */
 
-/** pdf部品図テーブル */
-define('TABLE_NAME_PDF_PARTS_LIST', 'pdf_parts_list');
+/** pdf作成用部品図テーブル */
+define('TABLE_NAME_PDF_PARTS_LIST', 'onetime_pdf_parts');
 
-/** pdf商品テーブル */
-define('TABLE_NAME_PDF_ITEM', 'pdf_item');
+/** pdf作成用商品テーブル */
+define('TABLE_NAME_PDF_ITEM', 'onetime_pdf_item');
 
 /**
  * メッセージ
  */
+/** システムステータスエラーメッセージ */
+define('ERROR_MSG_STATUS_ERROR', 'PDF作成中のため実行できません。<br>');
+
 /** csvデータ数不足エラーメッセージ */
 define('ERROR_MSG_NODATA', 'CSVファイルにデータがありません。<br>');
 
@@ -384,6 +402,42 @@ define('RESULT_MSG_OK', '成功<br>');
 
 /** 実行結果メッセージ（失敗） */
 define('RESULT_MSG_NG', '失敗<br>');
+
+/** PDF作成時間設定エラーメッセージ */
+define('PDF_TIME_NG', 'PDF作成開始時間が不正です。<br>');
+
+/** PDF作成時間設定エラーメッセージ2 */
+define('PDF_TIME_NG_KAKO', 'PDF作成開始時間が過去の日付です。<br>');
+
+/** 未入力エラーメッセージ */
+define('MINYURYOKU_NG', '未入力項目があります。<br>');
+
+/** PDF作成完了エラーメッセージ */
+define('PDF_FINISH_NG', '作成済みのデータがあります。データ更新もしくはデータ破棄を行って下さい。<br>');
+
+/** PDF作成開始時間設定変更失敗 */
+define('ERROR_SET_PDF_TIME', '作成開始時間の変更に失敗しました。<br>');
+
+/** PDF作成開始時間設定変更成功 */
+define('MESSAGE_SET_PDF_TIME', '作成開始時間の変更に成功しました。<br>');
+
+/** PDF作成中止失敗 */
+define('ERROR_STOP_PDF', '作成開始時間の変更に失敗しました。<br>');
+
+/** PDF作成中止成功 */
+define('MESSAGE_STOP_PDF', '作成開始時間の変更に成功しました。<br>');
+
+/** PDF作成予約解除失敗 */
+define('ERROR_UNSET_PDF', 'PDF作成予定のキャンセルに失敗しました。<br>');
+
+/** PDF作成予約解除成功 */
+define('MESSAGE_UNSET_PDF', 'PDF作成予定をキャンセルしました。<br>');
+
+/** 部品データ更新失敗 */
+define('MESSAGE_FAIL_UPDATE_PARTS', '部品データの更新に失敗しました。品番：');
+
+/** 商品データ更新失敗 */
+define('MESSAGE_FAIL_UPDATE_ITEM', '商品データの更新に失敗しました。品番：');
 
 /**
  * 商品ステータス
@@ -503,7 +557,7 @@ define('SETSUYU_B_COLUMN_ITEM_STATUS', '35');
 define('SETSUYU_AB_COLUMN_ITEM_STATUS', '36');
 
 /**
- * 商品ステータスマスタ
+ * 商品アイコンマスタ
  */
 /** 商品ステータスマスタCSVカラム数 */
 define('HEADER_COUNT_STATUS_MASTER', '3');
@@ -517,17 +571,59 @@ define('STATUS_NAME_COLUMN_STATUS_MASTER', '1');
 /** ステータスアイコン */
 define('STATUS_ICON_COLUMN_STATUS_MASTER', '2');
 
-/** 商品ステータステーブル */
-define('TABLE_NAME_STATUS_LIST', 'status_list');
+/** 商品アイコンテーブル */
+define('TABLE_NAME_STATUS_LIST', 'item_icon');
 
-/** ステータスID */
-define('COLUMN_NAME_STATUS_ID', 'item_status');
+/** アイコンID */
+define('COLUMN_NAME_STATUS_ID', 'icon_id');
 
-/** ステータス名 */
-define('COLUMN_NAME_STATUS_NAME', 'status_name');
+/** アイコン名 */
+define('COLUMN_NAME_STATUS_NAME', 'icon_name');
 
-/** ステータスアイコン */
-define('COLUMN_NAME_ICON', 'icon');
+/** アイコンファイル名 */
+define('COLUMN_NAME_ICON', 'icon_file');
+
+/**
+ * システムステータス
+ */
+/** システムステータステーブル */
+define('TABLE_NAME_SYSTEM_STATUS', 'system_status');
+
+/** システムステータス */
+define('COLUMN_NAME_SYSTEM_STATUS', 'status');
+
+/** pdf作成開始時間 */
+define('COLUMN_NAME_PDF_TIME', 'pdf_time');
+
+/** システムステータス(0：通常) */
+define('SYSTEM_STATUS_NORMAL', '0');
+
+/** システムステータス(1：PDF作成待ち) */
+define('SYSTEM_STATUS_PDF_WAIT', '1');
+
+/** システムステータス(2：PDF作成中) */
+define('SYSTEM_STATUS_PDF_MAKE', '2');
+
+/** システムステータス(3：PDF作成完了) */
+define('SYSTEM_STATUS_PDF_FINISH', '3');
+
+/** システムステータス(4：PDF作成中止) */
+define('SYSTEM_STATUS_PDF_STOP', '4');
+
+/** システムステータス(0：通常) */
+define('SYSTEM_STATUS_NORMAL_VAL', 'なし');
+
+/** システムステータス(1：PDF作成待ち) */
+define('SYSTEM_STATUS_PDF_WAIT_VAL', 'PDF作成待ち');
+
+/** システムステータス(2：PDF作成中) */
+define('SYSTEM_STATUS_PDF_MAKE_VAL', 'PDF作成中');
+
+/** システムステータス(3：PDF作成完了) */
+define('SYSTEM_STATUS_PDF_FINISH_VAL', 'PDF作成完了');
+
+/** システムステータス(4：PDF作成中断) */
+define('SYSTEM_STATUS_PDF_STOP_VAL', 'PDF作成中断');
 
 /*----------------------------
  csv出力
@@ -538,6 +634,18 @@ define('CSV_FILE_NAME_ITEM', 'item_master.csv');
 /*----------------------------
   アップロードディレクトリ
 -----------------------------*/
+/** 客先ファイルアップロードフォルダ */
+define('UPLOAD_FOLDER', '/htdocs/products/upload/');
 
+/** pdfファイル保存ルートフォルダ */
+define('PDF_ROOT_FOLDER', '/htdocs/products/system/savepdf/');
 
+/** pdfファイルバックアップフォルダ */
+define('BUCKUP_PDF_FOLDER', 'backup_bunkai/');
+
+/** pdfファイル一次保存フォルダ */
+define('ONETIME_PDF_FOLDER', 'onetime_bunkai/');
+
+/** pdfファイル保存フォルダ */
+define('PDF_FOLDER', 'bunkai');
 ?>
