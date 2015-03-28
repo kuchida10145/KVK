@@ -1,5 +1,5 @@
 <?php
-	include_once('../../system/controller/page/importcsv/ImportCsvItemStatusMaster.php');
+	include_once('../../system/page/importcsv/ImportCsvItemStatusMaster.php');
 
 	// セッション
 	session_start();

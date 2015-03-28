@@ -3,7 +3,7 @@
  * ページコントローラー基本クラス
  *
  */
-require_once(dirname(__FILE__).'/controller/Management.php');
+require_once(dirname(__FILE__).'/system/Management.php');
 abstract class Page
 {
 	public $manager = NULL;
@@ -68,12 +68,21 @@ abstract class Page
 
 	/**
 	 * システムステータス更新（status = 0:通常 or 1:pdf作成待ち）
-	 * @param	$updateArray, $nowStatus
+	 * @param	$updateStatus
 	 * @return	$result
 	 */
-	public function systemUpdate($updateArray, $nowStatus) {
+	public function systemUpdate($updateStatus) {
 		$whereSystem = "";			// システムデータ更新用where句
 		$dbCheck = "";
+		$nowStatus = "";
+		$updateArray = array();
+
+		$nowStatus = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
+
+		$updateArray = array(
+				COLUMN_NAME_SYSTEM_STATUS=>$updateStatus,
+				COLUMN_NAME_PDF_TIME=>$this->pdfTime
+		);
 
 		$whereSystem = COLUMN_NAME_SYSTEM_STATUS." = '".$nowStatus."'";
 		$dbCheck = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->update($updateArray, $whereSystem);
@@ -117,7 +126,67 @@ abstract class Page
 			return false;
 		}
 
+		$this->pdfTime = $checkTime;
+
 		return true;
+	}
+
+	/**
+	 * サーバJOB登録
+	 * @param	$viewData
+	 * @param	$viewHour
+	 * @param	$viewMin
+	 * @return	bool $result
+	 */
+	public function registJob($viewData, $viewHour, $viewMin){
+		$year = "";
+		$month = "";
+		$day = "";
+		$hour = "";
+		$min = "";
+		$command = "";
+		$jobNum = "";
+		$dateArray = array();
+		$result = true;
+
+		// 日付設定
+		$dateArray = explode("/", $viewData);
+		$year = $dateArray[0];
+		$month = $dateArray[1];
+		$day = $dateArray[2];
+		$hour = $viewHour;
+		$min = $viewMin;
+
+		$command = JOB_COMMAND;
+
+		$desc = array(
+				0 => array("pipe", "r"),
+				1 => array("pipe", "w"),
+				2 => array("pipe", "w"),
+		);
+
+		/* at コマンド実行 (at hhmm MMDDYYYY) */
+		if(($proc = proc_open(sprintf("%s %02d%02d %02d%02d%04d",
+				"/usr/bin/at", $hour, $min, $month, $day, $year), $desc, $pipe))){
+
+			/* コマンド登録 */
+			fputs($pipe[0], $command);
+			fclose($pipe[0]);
+
+			/* job 番号を STDERR から取得 */
+			$buf = trim(fgets($pipe[2], 4096));
+			fclose($pipe[2]);
+
+			/* STDOUT close */
+			fclose($pipe[1]);
+
+			proc_close($proc);
+
+			/* job 番号をリターン */
+			$jobNum = preg_replace("/^job\s+(\d+).*$/", "$1", $buf);
+		}
+
+		return $result;
 	}
 
 	/**

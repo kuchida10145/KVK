@@ -36,12 +36,14 @@ class ValidationColumns extends Validation {
 					$message[$key] = $msg_rules[$rule];
 			}
 
-			$lineCount = $row_number . "行目";
-			if (is_numeric($key)) {
-				$column = $key + 1;
-				$columnCount = $column . "列目";
+			if($row_number != 0) {
+				$lineCount = $row_number . "行目";
+				if (is_numeric($key)) {
+					$column = $key + 1;
+					$columnCount = $column . "列目";
+				}
+				$messages[$key] = $message[$key] . $lineCount . ":" . $columnCount . "<br>";
 			}
-			$messages[$key] = $message[$key] . $lineCount . ":" . $columnCount . "<br>";
 		}
 		return $messages;
 	}

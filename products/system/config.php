@@ -93,6 +93,9 @@ define('PDF_STATUS_MISAKUSEI', '0');
 /** pdf作成ステータス(1：作成済み) */
 define('PDF_STATUS_ZUMI', '1');
 
+/** JOBコマンド */
+define('JOB_COMMAND', 'ls > /products/system/controller/page/makepdf/ExecuteMakePdfFile.php');
+
 /**
  * カテゴリ系
  */
@@ -624,6 +627,24 @@ define('SYSTEM_STATUS_PDF_FINISH_VAL', 'PDF作成完了');
 
 /** システムステータス(4：PDF作成中断) */
 define('SYSTEM_STATUS_PDF_STOP_VAL', 'PDF作成中断');
+
+/*----------------------------
+ ログインユーザ
+-----------------------------*/
+/** ユーザテーブル */
+define('TABLE_NAME_USER', 'user');
+
+/** カラム名：ユーザ名 */
+define('COLUMN_NAME_USER_NAME', 'user_name');
+
+/** カラム名：パスワード */
+define('COLUMN_NAME_PASS_WORD', 'pass_word');
+
+/** 配列番号：ユーザ名(0) */
+define('ARRAY_NO_USER_NAME', '0');
+
+/** 配列番号：パスワード(1) */
+define('ARRAY_NO_PASS_WORD', '1');
 
 /*----------------------------
  csv出力

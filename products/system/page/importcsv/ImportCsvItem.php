@@ -100,8 +100,10 @@
 		$limit = "";
 		$order = "";
 
-		// TODO：カテゴリリンク作成
-		$catalogLink = 'test';		// デバッグ用
+		// カタログファイル名作成
+		$catalogLink = $this->makeCatalogFileName(
+			$targetArray[CATALOG_YEAR_COLUMN_ITEM], $targetArray[CATALOG_PAGE_COLUMN_ITEM]);
+
 
 		// 商品DB登録データ生成
 		$dataArray = array(
@@ -191,6 +193,21 @@
 		$dbCheck = $this->systemUpdate(SYSTEM_STATUS_PDF_WAIT, $this->pdfTime);
 
 		return $dbCheck;
+	}
+
+	/**
+	 * カタログPDFファイル名作成
+	 * @param	$year		年
+	 * @param	$page		ページ
+	 * @return	$fileName	ファイル名
+	 */
+	protected function makeCatalogFileName($year, $page) {
+		$fileName = "";
+		$nextYear = $year + 1;
+
+		$fileName = $year."-".$nextYear."_".$page.".pdf";
+
+		return $fileName;
 	}
 }
 

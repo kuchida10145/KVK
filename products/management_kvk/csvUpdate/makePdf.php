@@ -1,5 +1,5 @@
 <?php
-	include_once('../../system/controller/page/makepdf/GetMakePDFData.php');
+	include_once('../../system/page/makepdf/GetMakePDFData.php');
 
 	// セッション
 	session_start();

@@ -1,5 +1,5 @@
 <?php
-	include_once('../../system/controller/page/importcsv/ImportCsvParts.php');
+	include_once('../../system/page/importcsv/ImportCsvParts.php');
 
 	// セッション
 	session_start();
