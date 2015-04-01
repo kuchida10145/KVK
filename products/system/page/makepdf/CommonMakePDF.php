@@ -1,5 +1,5 @@
 <?php
-include_once('/../../../Page.php');
+include(dirname(__FILE__) . '/../../../Page.php');
 class CommonMakePDF extends Page{
 
 	function __construct() {
@@ -185,9 +185,9 @@ class CommonMakePDF extends Page{
 			// 部品データ更新
 			foreach($partsArray as $partsRow) {
 				// where句生成
-				$whereParts = 	COLUMN_NAME_NO." = '".$partsRow[parts_no]."' AND "
-								.COLUMN_NAME_PARTS_ID." = '".$partsRow[parts_id]."' AND "
-								.COLUMN_NAME_FILE_NAME." = '".$partsRow[file_name]."'";
+				$whereParts = 	COLUMN_NAME_NO." = '".$partsRow[COLUMN_NAME_NO]."' AND "
+								.COLUMN_NAME_PARTS_ID." = '".$partsRow[COLUMN_NAME_PARTS_ID]."' AND "
+								.COLUMN_NAME_FILE_NAME." = '".$partsRow[COLUMN_NAME_FILE_NAME]."'";
 				// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
 				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($whereParts);
 				if($dbPartsCheck) {
@@ -203,7 +203,7 @@ class CommonMakePDF extends Page{
 
 				// エラーチェック
 				if(!$dbPartsCheck) {
-					$this->{KEY_ERROR_MESSAGE} = MESSAGE_FAIL_UPDATE_PARTS.$partsRow[parts_id]."<br>";
+					$this->{KEY_ERROR_MESSAGE} = MESSAGE_FAIL_UPDATE_PARTS.$partsRow[COLUMN_NAME_PARTS_ID]."<br>";
 					$result = false;
 				}
 			}
@@ -246,6 +246,84 @@ class CommonMakePDF extends Page{
 				$oldPath = PDF_ROOT_FOLDER.ONETIME_PDF_FOLDER.$rowFileName;
 				$newPath = UPLOAD_FOLDER.$rowFileName;
 				rename($oldPath, $newPath);
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * 部品データ更新（デバッグ用）
+	 * @param	-
+	 * @return	$result					データ更新結果
+	 */
+	public function partsUpdateDebug() {
+		$result = true;
+
+		// 更新データ取得
+		$partsArray = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->getAll();
+
+		// 部品データ更新
+		foreach($partsArray as $partsRow) {
+			// where句生成
+			$whereParts = 	COLUMN_NAME_NO." = '".$partsRow[COLUMN_NAME_PARTS_ID]."' AND "
+					.COLUMN_NAME_PARTS_ID." = '".$partsRow[COLUMN_NAME_PARTS_NAME]."' AND "
+							.COLUMN_NAME_FILE_NAME." = '".$partsRow[COLUMN_NAME_FILE_NAME]."'";
+			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
+			$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($whereParts);
+			if($dbPartsCheck) {
+				// DBUpdate処理
+				$partsRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
+				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->update($partsRow, $whereParts);
+			} else {
+				// DBinsert処理
+				$partsRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
+				$partsRow[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日
+				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->insertDB($partsRow);
+			}
+
+			// エラーチェック
+			if(!$dbPartsCheck) {
+				$this->{KEY_ERROR_MESSAGE} = MESSAGE_FAIL_UPDATE_PARTS.$partsRow[COLUMN_NAME_PARTS_ID]."<br>";
+				$result = false;
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * 商品データ更新（デバッグ用）
+	 * @param	-
+	 * @return	$result					データ更新結果
+	 */
+	public function itemUpdateDebug() {
+		$result = true;
+		$itemArray = array();
+
+		// 更新データ取得
+		$itemArray = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->getAll();
+
+		// 商品データ更新
+		foreach($itemArray as $itemRow) {
+			// where句生成
+			$whereItem = COLUMN_NAME_ITEM_ID." = '".$itemRow[COLUMN_NAME_ITEM_ID]."' AND ".COLUMN_NAME_CATEGORY_ID." = '".$itemRow[COLUMN_NAME_CATEGORY_ID]."'";
+			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
+			$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->checkData($whereItem);
+			if($dbPartsCheck) {
+				// DBUpdate処理
+				$itemRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
+				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->update($itemRow, $whereParts);
+			} else {
+				// DBinsert処理
+				$itemRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
+				$itemRow[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日
+				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->insertDB($itemRow);
+			}
+
+			// エラーチェック
+			if(!$dbPartsCheck) {
+				$this->{KEY_ERROR_MESSAGE} = MESSAGE_FAIL_UPDATE_PARTS.$itemRow[COLUMN_NAME_PARTS_ID]."<br>";
+				$result = false;
 			}
 		}
 

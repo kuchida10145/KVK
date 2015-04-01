@@ -1,5 +1,5 @@
 <?php
-	include_once('/CommonMakePDF.php');
+	include(dirname(__FILE__) . '/CommonMakePDF.php');
 	class ImportCsvParts extends CommonMakePDF {
 		function __construct() {
 			parent::__construct();
@@ -60,9 +60,6 @@
 						$errorMessage[] = ERROR_MSG_MAKE_PDF."品番：".$rowItem[COLUMN_NAME_ITEM_ID]."<br>";
 					}
 				}
-
-				// TODO：pdf作成処理（仮）	※テスト後削除
-				$result = makePdf($pdfItemArray, $pdfPartsArray);
 
 				if(!$result) {
 					$errorMessage[] = ERROR_MSG_MAKE_PDF;

@@ -2,7 +2,6 @@
 /**
  * 丸数字DB管理クラス
  */
-include_once('/../../core/database/DbModel.php');
 class Number_conversionDbModel extends DbModel
 {
 	var $use_sequence = false;

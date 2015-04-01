@@ -2,7 +2,6 @@
 /**
  * 親カテゴリーDB管理クラス
  */
-include_once('/../../core/database/DbModel.php');
 class Parent_categoryDbModel extends DbModel
 {
 	var $use_sequence = false;
@@ -60,5 +59,37 @@ class Parent_categoryDbModel extends DbModel
 			$result = false;
 		}
 		return $result;
+	}
+
+	/**
+	 * 対象の親カテゴリを取得する
+	 *
+	 * @param int $parent_id 親カテゴリID
+	 * @return Array
+	 */
+	public function findByParentId($parent_id)
+	{
+		$parent_id = $this->escape_string($parent_id);
+
+		$field = implode(',',$this->getField());
+
+		$sql = "SELECT * FROM parent_category WHERE `view_status` = ".VIEW_OK." AND `parent_id` ='{$parent_id}'";
+
+		return $this->db->getData($sql);
+	}
+
+	/**
+	 * 有効な親カテゴリを全件取得する
+	 *
+	 * @param int $parent_id 親カテゴリID
+	 * @return Array
+	 */
+	public function getAllEnabled()
+	{
+		$field = implode(',',$this->getField());
+
+		$sql = "SELECT {$field} FROM parent_category WHERE `view_status` = ".VIEW_OK." ORDER BY `parent_id` ASC";
+
+		return $this->db->getAllData($sql);
 	}
 }

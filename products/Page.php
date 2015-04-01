@@ -8,18 +8,45 @@ abstract class Page
 {
 	public $manager = NULL;
 
+	private $_data = array();
+
 	public function __construct()
 	{
 		$this->redierct301();
 		$this->manager = Management::getInstance();
 	}
 
-	public function redierct301()
+	public function redierct301($url=NULL)
 	{
 		return true;
 	}
 
-	private $_data = array();
+	public function error( $str ){
+		echo $str;
+		exit;
+	}
+
+	public function commonHeaderOutputs(){
+		header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
+		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // 過去の日付
+	}
+
+// --------------------------------------------------------------
+// ■ 共通関数
+// --------------------------------------------------------------
+
+	function getDirname( $filename ){
+		if( $filename != "" ){
+			$ar = explode( '_',$filename);
+			if( count($ar)==2){
+				return $ar[0];
+			}else{
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
 
 	/** GETTERメソッド
 	 * @param	$key				取得するデータのkey項目
@@ -91,6 +118,54 @@ abstract class Page
 	}
 
 	/**
+	 * 画面ステータス取得
+	 * @param	$dispName		対象画面
+	 * @return	$returnVal		画面ステータス
+	 */
+	public function getDispStatus($dispName) {
+		$returnVal = "";
+
+		$returnVal = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getDispStatus($dispName);
+
+		return $returnVal;
+	}
+
+
+	/**
+	 * 画面ステータス更新処理
+	 * @param	$dispName		対象画面
+	 * @param	$updateStatus	更新ステータス
+	 * @return	$result			画面ステータス更新結果
+	 */
+	public function viewInitial($dispName, $updateStatus) {
+		$whereSystem = "";			// システムデータ更新用where句
+		$dbCheck = "";
+		$nowStatus = "";
+		$nowDataArray = array();
+		$nowDataRow = array();
+
+		$nowDataArray = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getAll();
+		$nowDataRow = $nowDataArray[0];
+
+		// 対象画面の項目に値をセット
+		foreach ($nowDataRow as $key => $value) {
+			if ($key == $dispName) {
+				$nowDataRow[$key] = $updateStatus;
+			}
+		}
+
+		$nowStatus = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
+		$whereSystem = COLUMN_NAME_SYSTEM_STATUS." = '".$nowStatus."'";
+		$dbCheck = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->update($nowDataRow, $whereSystem);
+
+		if(!$dbCheck){
+			$this->{KEY_ERROR_MESSAGE} = MESSAGE_FAIL_PAGE_INITIAL;
+		}
+
+		return $dbCheck;
+	}
+
+	/**
 	 * システムステータス登録時間保持
 	 * @param	$day,$hour,$min
 	 * @return	boolean	$result(true：時間セット完了	false：時間セット失敗)
@@ -131,12 +206,14 @@ abstract class Page
 		return true;
 	}
 
+
+
 	/**
 	 * サーバJOB登録
 	 * @param	$viewData
 	 * @param	$viewHour
 	 * @param	$viewMin
-	 * @return	bool $result
+	 * @return	$jobNum
 	 */
 	public function registJob($viewData, $viewHour, $viewMin){
 		$year = "";
@@ -147,7 +224,6 @@ abstract class Page
 		$command = "";
 		$jobNum = "";
 		$dateArray = array();
-		$result = true;
 
 		// 日付設定
 		$dateArray = explode("/", $viewData);
@@ -157,7 +233,8 @@ abstract class Page
 		$hour = $viewHour;
 		$min = $viewMin;
 
-		$command = JOB_COMMAND;
+//		$command = JOB_COMMAND;
+		$command = "ls > /system/page/makepdf/ExecuteMakePdfFile.php";
 
 		$desc = array(
 				0 => array("pipe", "r"),
@@ -186,7 +263,9 @@ abstract class Page
 			$jobNum = preg_replace("/^job\s+(\d+).*$/", "$1", $buf);
 		}
 
-		return $result;
+		$jobNum = mb_convert_encoding($jobNum, SYSTEM_CODE, CSV_CODE);
+
+		return $jobNum;
 	}
 
 	/**

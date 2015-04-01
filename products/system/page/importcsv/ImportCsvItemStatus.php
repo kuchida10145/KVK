@@ -1,5 +1,5 @@
 <?php
-	include_once('/../AbstractImportCsv.php');
+	include(dirname(__FILE__) . '/../AbstractImportCsv.php');
 	class ImportCsvItemStatus extends AbstractImportCsv {
 		function __construct() {
 			parent::__construct();
@@ -102,6 +102,9 @@
 		$result = true;
 		$limit = "";
 		$order = "";
+
+		// 行番号追加
+		$line_count = $line_count + 1;
 
 		// 商品IDから商品データを取得
 		$getItemArray = COLUMN_NAME_ITEM_ID.' = "'.$checkData[ITEM_ID_COLUMN_ITEM_STATUS].'"';

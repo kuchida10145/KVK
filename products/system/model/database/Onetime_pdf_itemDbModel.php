@@ -2,7 +2,6 @@
 /**
  * Pdf用商品DB管理クラス
  */
-include_once('/../../core/database/DbModel.php');
 class Onetime_pdf_itemDbModel extends DbModel
 {
 	var $use_sequence = false;

@@ -2,7 +2,6 @@
 /**
  * ステータスリストDB管理クラス
 */
-include_once('/../../core/database/DbModel.php');
 class Item_iconDbModel extends DbModel
 {
 	var $use_sequence = false;
@@ -23,6 +22,14 @@ class Item_iconDbModel extends DbModel
 	}
 
 	/**
+	 * 全アイテム取得
+	 */
+	public function getAllItem(){
+		$sql = "SELECT * FROM `item_icon` ORDER BY `icon_id` ASC";
+		return $this->db->getAllData($sql);
+	}
+
+	/**
 	 * 対象の商品ステータスIDの部品一覧を取得する
 	 *
 	 * @param int $item_status 商品ステータスID
@@ -34,7 +41,7 @@ class Item_iconDbModel extends DbModel
 
 		$field = implode(',',$this->getField());
 
-		$sql = "SELECT * FROM status_list WHERE item_status ='{$item_status}'";
+		$sql = "SELECT * FROM item_icon WHERE icon_id ='{$item_status}'";
 
 		return $this->db->getAllData($sql);
 	}

@@ -1,35 +1,51 @@
 <?php
-	include_once('../../system/page/importcsv/ImportCsvParts.php');
+	include(dirname(__FILE__) . '/../../system/page/importcsv/ImportCsvParts.php');
+	include(dirname(__FILE__) . '/../../system/page/exportcsv/ExportCsvParts.php');
 
 	// セッション
 	session_start();
 
+	$today			= date("Y/m/d");
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
 	$viewFilePath	= "";	// 画面表示用csvファイルパス
 
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
-		// csv取込処理インスタンス化
-		$importCsv = new ImportCsvParts();
-		$filePath		= "";	// csvファイルパス
-		$fileName		= "";	// csvファイル名
-		$testFlg = false;		// 取込処理フラグ
-		// 取込テスト判定（true：取込テスト、false：csv取込）
-		if(isset($_POST['test_button']) && $_POST['test_button'] == "test") {
-			$testFlg = true;
+		if(isset($_POST['download_button']) && $_POST['download_button'] == "download") {
+			// csv出力処理インスタンス化
+			$exportCsv = new ExportCsvParts();
+			if($exportCsv->executeExport() && !$importCsv->viewInitial(COLUMN_NAME_ITEM_DISP_STATUS, CSV_DOWNLOAD)) {
+				$errorMessage	= $importCsv->getErrorMessage();
+			}
+		} else {
+			// csv取込処理インスタンス化
+			$importCsv = new ImportCsvParts();
+			$filePath		= "";	// csvファイルパス
+			$fileName		= "";	// csvファイル名
+			$testFlg = false;		// 取込処理フラグ
+			$result = true;
+			// 取込テスト判定（true：取込テスト、false：csv取込）
+			if(isset($_POST['test_button']) && $_POST['test_button'] == "test") {
+				$testFlg = true;
+			} else {
+				$result = $importCsv->setPdfTime($_POST['dropdownDay'], $_POST['hour'], $_POST['min']);
+			}
+
+			$filePath = $_FILES["file"]["tmp_name"];
+			$fileName = $_FILES["file"]["name"];
+
+			if($result) {
+				// csv取込処理実行
+				$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
+			}
+
+			// メッセージ取得
+			$resultMessage	= $importCsv->getResultMessage($result);
+			$errorMessage	= $importCsv->getErrorMessage();
+			// 画面表示用csvファイルパス設定
+//			$viewFilePath = $_POST['filepath'];
 		}
-
-		$filePath = $_FILES["file"]["tmp_name"];
-		$fileName = $_FILES["file"]["name"];
-
-		// csv取込処理実行
-		$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
-		// メッセージ取得
-		$resultMessage	= $importCsv->getResultMessage($result);
-		$errorMessage	= $importCsv->getErrorMessage();
-		// 画面表示用csvファイルパス設定
-		$viewFilePath = $_POST['filepath'];
 	}
 ?>
 <!DOCTYPE html>
@@ -58,10 +74,11 @@
 				<div>
 					<ul class="nav nav-tabs">
 						<li><a href="itemCsv.php">商品データ</a></li>
-						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
 						<li><a href="itemStatus.php">商品ステータス</a></li>
-						<li><a href="category.php">カテゴリデータ</a></li>
 						<li class="active"><a href="#">部品データ</a></li>
+						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
+						<li><a href="category.php">カテゴリマスタ</a></li>
+						<li><a href="makePdf.php">PDF設定</a></li>
 					</ul>
 				</div>
 				<div>
@@ -82,10 +99,43 @@
 								</div>
 							</div>
 						</div>
+						<div class="form-group">
+							<label for="upload" class="col-sm-2 control-label">pdf作成日</label>
+							<div class="col-sm-10">
+								<div class="btn-group">
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" onClick="changeDay(this.form)">
+											日付
+											<span class="caret"></span>
+										</button>
+										<ul class="dropdown-menu">
+											<li><a href="#" data-val="0"><?php echo $today ?></a></li>
+											<li><a href="#" data-val="1"><?php echo date("Y/m/d",strtotime("+1 day")) ?></a></li>
+											<li><a href="#" data-val="2"><?php echo date("Y/m/d",strtotime("+2 day")) ?></a></li>
+											<li><a href="#" data-val="3"><?php echo date("Y/m/d",strtotime("+3 day")) ?></a></li>
+											<li><a href="#" data-val="4"><?php echo date("Y/m/d",strtotime("+4 day")) ?></a></li>
+											<li><a href="#" data-val="5"><?php echo date("Y/m/d",strtotime("+5 day")) ?></a></li>
+											<li><a href="#" data-val="6"><?php echo date("Y/m/d",strtotime("+6 day")) ?></a></li>
+										</ul>
+										<input type="hidden" id="dropdownDay" name="dropdownDay" value="">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="upload" class="col-sm-2 control-label">pdf作成開始時間</label>
+							<div class="col-sm-10">
+								<div class="input-group">
+									<input style="width:50px;" type="text" id="hour" name="hour" class="form-control"  maxlength="2" pattern="^[0-9]+$">
+									<label for="upload" class="col-sm-2 control-label">:</label>
+									<input style="width:50px;" type="text" id="min" name="min" class="form-control"  maxlength="2">
+								</div>
+							</div>
+						</div>
 						<div align="center">
 							<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="test_button" value="test">取込テスト</button>
 							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="run_button" value="run">CSV 取込</button>
-							<!-- <button type="button" class="btn btn-warning">CSV ダウンロード</button> -->
+							<button type="submit" class="btn btn-warning"  onclick="document.form.submit();" name="download_button" value="download">CSV ダウンロード</button>
 						</div>
 						<div>
 							実行結果：<?php echo $resultMessage ?>
@@ -109,6 +159,13 @@
 			$('input[id=upload]').on('change', function() {
 			$('#filepath').val($(this).val());
 			});
+
+			function changeDay(form) {
+				$(".dropdown-menu li a").click(function(){
+					$(this).parents('.dropdown').find('.dropdown-toggle').html($(this).text() + ' <span class="caret"></span>');
+					form.dropdownDay.value = $(this).text();
+				});
+			}
 		</script>
     </body>
 </html>

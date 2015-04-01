@@ -2,7 +2,6 @@
 /**
  * 子カテゴリDB管理クラス
  */
-include_once('/../../core/database/DbModel.php');
 class Child_categoryDbModel extends DbModel
 {
 	var $use_sequence = false;
@@ -25,6 +24,23 @@ class Child_categoryDbModel extends DbModel
 	}
 
 	/**
+	 * 対象の子カテゴリを取得する
+	 *
+	 * @param int $parent_id 子カテゴリID
+	 * @return Array
+	 */
+	public function findByCategoryId($category_id)
+	{
+		$category_id = $this->escape_string($category_id);
+
+		$field = implode(',',$this->getField());
+
+		$sql = "SELECT * FROM child_category WHERE category_id ='{$category_id}' AND `view_status` = ".VIEW_OK;
+
+		return $this->db->getData($sql);
+	}
+
+	/**
 	 * 対象の親カテゴリIDの子カテゴリ一覧を取得する
 	 *
 	 * @param int $parent_id 親カテゴリID
@@ -36,7 +52,22 @@ class Child_categoryDbModel extends DbModel
 
 		$field = implode(',',$this->getField());
 
-		$sql = "SELECT * FROM child_category WHERE parent_id ='{$parent_id}'";
+		$sql = "SELECT * FROM child_category WHERE parent_id ='{$parent_id}' AND `view_status` = ".VIEW_OK." ORDER BY `category_id` ASC";
+
+		return $this->db->getAllData($sql);
+	}
+
+	/**
+	 * 有効な子カテゴリを全件取得する
+	 *
+	 * @param int $category_id 子カテゴリID
+	 * @return Array
+	 */
+	public function getAllEnabled()
+	{
+		$field = implode(',',$this->getField());
+
+		$sql = "SELECT {$field} FROM child_category WHERE `view_status` = ".VIEW_OK." ORDER BY `category_id` ASC";
 
 		return $this->db->getAllData($sql);
 	}

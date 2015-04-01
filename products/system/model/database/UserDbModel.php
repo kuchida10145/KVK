@@ -2,7 +2,6 @@
 /**
  * ユーザDB管理クラス
  */
-include_once('/../../core/database/DbModel.php');
 class UserDbModel extends DbModel
 {
 	var $use_sequence = false;

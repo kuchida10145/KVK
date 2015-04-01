@@ -1,5 +1,5 @@
 <?php
-	include_once('/../AbstractImportCsv.php');
+	include(dirname(__FILE__) . '/../AbstractImportCsv.php');
 	class ImportCsvItemStatusMaster extends AbstractImportCsv {
 		function __construct() {
 			parent::__construct();

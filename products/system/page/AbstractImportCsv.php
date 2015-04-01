@@ -1,5 +1,5 @@
 <?php
-include_once('/../../Page.php');
+include(dirname(__FILE__) . '/../../Page.php');
 abstract class AbstractImportCsv extends Page{
 
 	function __construct() {

@@ -1,5 +1,5 @@
 <?php
-	include_once('/../../../Page.php');
+	include(dirname(__FILE__) . '/../../../Page.php');
 	class PageLogin extends Page{
 		function __construct() {
 			parent::__construct();

@@ -10,19 +10,51 @@
 | データベース設定
 |--------------------------------------------------------------------------
  */
-
-define('DB_NAME','kvk');
-define('DB_USER','root');
-define('DB_PASS','yuki10145');
-define('DB_HOST','localhost');
-//define('DB_HOST','203.138.100.12');
-define('DB_CHARSET','utf8');
+if( $_SERVER['HTTP_HOST'] == 'test.kvk01.dpg.mmrs.jp' ){
+	define('DB_NAME','dpg_kvk1_test');
+	define('DB_USER','dpg_kvk1');
+	define('DB_PASS','tEVYgtu.');
+	define('DB_HOST','db1.dpg.mmrs.jp');
+	define('DB_CHARSET','utf8');
+} else {
+	define('DB_NAME','kvk');
+	define('DB_USER','root');
+	define('DB_PASS','yuki10145');
+	define('DB_HOST','localhost');
+	//define('DB_HOST','203.138.100.12');
+	define('DB_CHARSET','utf8');
+}
 
 /*
 |--------------------------------------------------------------------------
 | 定数宣言
 |--------------------------------------------------------------------------
  */
+
+// 表示or非表示
+define( 'VIEW_OK' , 0 );
+define( 'VIEW_NG' , 1 );
+
+// 画面ステータス
+define( 'INISIAL_DISP' , 0 );
+define( 'CSV_DOWNLOAD' , 1 );
+
+// ソートモード
+define( 'SORT_MODE_NEW' , 1 );
+define( 'SORT_MODE_ID' , 2 );
+define( 'SORT_MODE_SEARCH' , 3 );
+
+// 子カテゴリにおける商品の表示件数
+define( 'MAX_LIST_CNT' , 10);
+
+// ディレクトリ名（PATHではない）
+define('DIR_UPLOAD', '/products/upload/');
+define('DIR_MAP', '/products/upload/');
+define('DIR_TORISETSU', '/products/upload/');
+define('DIR_KOUSETSU', '/products/upload/');
+define('DIR_BUNKAI', '/products/upload/');
+define('DIR_SHOWER', '/products/upload/');
+define('DIR_CATALOG', '/products/upload/catalog/');
 
 /**
  * 共通
@@ -156,20 +188,20 @@ define('PARTS_ID_COLUMN_PARTS', '1');
 /** カラム番号：品名 */
 define('PARTS_NAME_COLUMN_PARTS', '2');
 
-/** カラム番号：\マーク */
-define('EN_MARK_COLUMN_PARTS', '3');
-
 /** カラム番号：希望小売価格（税抜き） */
-define('PRICE_COLUMN_PARTS', '4');
+define('PRICE_COLUMN_PARTS', '3');
 
 /** カラム番号：希望小売価格（税込み） */
-define('PRICE_ZEI_COLUMN_PARTS', '5');
+define('PRICE_ZEI_COLUMN_PARTS', '4');
 
-/** カラム番号：備考 */
-define('NOTE_COLUMN_PARTS', '6');
+/** カラム番号：品番（紐付く商品） */
+define('ITEM_COLUMN_PARTS', '5');
 
 /** カラム番号：ファイル名 */
-define('FILE_COLUMN_PARTS', '7');
+define('FILE_COLUMN_PARTS', '6');
+
+/** カラム番号：備考 */
+define('NOTE_COLUMN_PARTS', '7');
 
 /** カラム番号：削除フラグ */
 define('DELETE_COLUMN_PARTS', '8');
@@ -196,94 +228,91 @@ define('COLUMN_NAME_FILE_NAME', 'file_name');
  * 商品系
  */
 /** カテゴリーデータCSVのカラム数 */
-define('HEADER_COUNT_ITEM', '29');
-
-/** カラム番号：No */
-define('NO_COLUMN_ITEM', '0');
+define('HEADER_COUNT_ITEM', '28');
 
 /** カラム番号：品番 */
-define('ITEM_ID_COLUMN_ITEM', '1');
+define('ITEM_ID_COLUMN_ITEM', '0');
 
 /** カラム番号：品名 */
-define('ITEM_NAME_COLUMN_ITEM', '2');
+define('ITEM_NAME_COLUMN_ITEM', '1');
 
 /** カラム番号：写真 */
-define('ITEM_PHOTO_COLUMN_ITEM', '3');
+define('ITEM_PHOTO_COLUMN_ITEM', '2');
 
 /** カラム番号：図面 */
-define('MAP_COLUMN_ITEM', '4');
+define('MAP_COLUMN_ITEM', '3');
 
 /** カラム番号：取説 */
-define('TORISETSU_COLUMN_ITEM', '5');
+define('TORISETSU_COLUMN_ITEM', '4');
 
 /** カラム番号：施工 */
-define('SEKOU_COLUMN_ITEM', '6');
+define('SEKOU_COLUMN_ITEM', '5');
 
 /** カラム番号：分解図 */
-define('BUNKAI_COLUMN_ITEM', '7');
+define('BUNKAI_COLUMN_ITEM', '6');
 
 /** カラム番号：シャワー */
-define('SHOWER_COLUMN_ITEM', '8');
+define('SHOWER_COLUMN_ITEM', '7');
 
 /** カラム番号：購入リンク */
-define('BUY_STATUS_COLUMN_ITEM', '9');
+define('BUY_STATUS_COLUMN_ITEM', '8');
 
 /** カラム番号：価格 */
-define('PRICE_COLUMN_ITEM', '10');
+define('PRICE_COLUMN_ITEM', '9');
 
 /** カラム番号：価格（税込） */
-define('PRICE_ZEI_COLUMN_ITEM', '11');
+define('PRICE_ZEI_COLUMN_ITEM', '10');
 
 /** カラム番号：備考 */
-define('NOTE_COLUMN_ITEM', '12');
+define('NOTE_COLUMN_ITEM', '11');
 
 /** カラム番号：商品画像 */
-define('ITEM_IMAGE_COLUMN_ITEM', '13');
+define('ITEM_IMAGE_COLUMN_ITEM', '12');
 
 /** カラム番号：バリエーション名 */
-define('VARIATION_NAME_COLUMN_ITEM', '14');
+define('VARIATION_NAME_COLUMN_ITEM', '13');
 
 /** カラム番号：バリエーション表示順 */
-define('VARIATION_NO_COLUMN_ITEM', '15');
+define('VARIATION_NO_COLUMN_ITEM', '14');
 
 /** カラム番号：カタログ年度 */
-define('CATALOG_YEAR_COLUMN_ITEM', '16');
+define('CATALOG_YEAR_COLUMN_ITEM', '15');
 
 /** カラム番号：カタログページ */
-define('CATALOG_PAGE_COLUMN_ITEM', '17');
+define('CATALOG_PAGE_COLUMN_ITEM', '16');
 
 /** カラム番号：検索ワード */
-define('SEARCH_WORD_COLUMN_ITEM', '18');
+define('SEARCH_WORD_COLUMN_ITEM', '17');
 
 /** カラム番号：分岐金具_1 */
-define('BUNKI_KANAGU_1_COLUMN_ITEM', '19');
+define('BUNKI_KANAGU_1_COLUMN_ITEM', '18');
 
 /** カラム番号：分岐金具_2 */
-define('BUNKI_KANAGU_2_COLUMN_ITEM', '20');
+define('BUNKI_KANAGU_2_COLUMN_ITEM', '19');
 
 /** カラム番号：分岐金具_3 */
-define('BUNKI_KANAGU_3_COLUMN_ITEM', '21');
+define('BUNKI_KANAGU_3_COLUMN_ITEM', '20');
 
 /** カラム番号：販売時期 */
-define('SELL_KIKAN_COLUMN_ITEM', '22');
+define('SELL_KIKAN_COLUMN_ITEM', '21');
 
 /** カラム番号：代替品 */
-define('DAIGAE_COLUMN_ITEM', '23');
+define('DAIGAE_COLUMN_ITEM', '22');
 
 /** カラム番号：取付寸法 */
-define('SUNPOU_COLUMN_ITEM', '24');
+define('SUNPOU_COLUMN_ITEM', '23');
 
 /** カラム番号：ピッチ */
-define('PITCH_COLUMN_ITEM', '25');
+define('PITCH_COLUMN_ITEM', '24');
 
 /** カラム番号：シャワー取付寸法 */
-define('SHOWER_SUNPOU_COLUMN_ITEM', '26');
+define('SHOWER_SUNPOU_COLUMN_ITEM', '25');
 
 /** カラム番号：削除 */
-define('DELETE_COLUMN_ITEM', '27');
+define('DELETE_COLUMN_ITEM', '26');
 
 /** カラム番号：カテゴリID */
-define('CATEGORY_ID_COLUMN_ITEM', '28');
+define('CATEGORY_ID_COLUMN_ITEM', '27');
 
 /** 品名 */
 define('COLUMN_NAME_ITEM_NAME', 'item_name');
@@ -442,6 +471,9 @@ define('MESSAGE_FAIL_UPDATE_PARTS', '部品データの更新に失敗しまし�
 /** 商品データ更新失敗 */
 define('MESSAGE_FAIL_UPDATE_ITEM', '商品データの更新に失敗しました。品番：');
 
+/** 画面初期表示失敗 */
+define('MESSAGE_FAIL_PAGE_INITIAL', '画面の初期表示に失敗しました。<br>');
+
 /**
  * 商品ステータス
  */
@@ -482,7 +514,7 @@ define('E_SHOWER_COLUMN_ITEM_STATUS', '9');
 define('YASASHISA_COLUMN_ITEM_STATUS', '10');
 
 /** 定量止水 */
-define('TEIRYO_SHISUI_COLUMN_ITEM_STATUS', '11');
+define('OYUPITA_COLUMN_ITEM_STATUS', '11');
 
 /** サーモスタット式水栓 */
 define('SARMO_STAT_COLUMN_ITEM_STATUS', '12');
@@ -598,6 +630,21 @@ define('COLUMN_NAME_SYSTEM_STATUS', 'status');
 /** pdf作成開始時間 */
 define('COLUMN_NAME_PDF_TIME', 'pdf_time');
 
+/** 商品データ取込画面ステータス */
+define('COLUMN_NAME_ITEM_DISP_STATUS', 'item_disp_status');
+
+/** 商品ステータスマスターデータ取込画面ステータス */
+define('COLUMN_NAME_STATUS_MASTER_DISP_STATUS', 'status_master_disp_status');
+
+/** 商品ステータスデータ取込画面ステータス */
+define('COLUMN_NAME_STATUS_DISP_STATUS', 'status_disp_status');
+
+/** カテゴリー取込画面ステータス */
+define('COLUMN_NAME_CATEGORY_DISP_STATUS', 'category_disp_status');
+
+/** 部品データ取込画面ステータス */
+define('COLUMN_NAME_PARTS_DISP_STATUS', 'parts_disp_status');
+
 /** システムステータス(0：通常) */
 define('SYSTEM_STATUS_NORMAL', '0');
 
@@ -651,6 +698,18 @@ define('ARRAY_NO_PASS_WORD', '1');
 -----------------------------*/
 /** csvファイル名（商品） */
 define('CSV_FILE_NAME_ITEM', 'item_master.csv');
+
+/** csvファイル名（部品） */
+define('CSV_FILE_NAME_PARTS', 'parts_master.csv');
+
+/** csvファイル名（商品ステータス） */
+define('CSV_FILE_NAME_ITEM_STATUS', 'item_status.csv');
+
+/** csvファイル名（商品ステータスマスタ） */
+define('CSV_FILE_NAME_ITEM_STATUS_MASTER', 'item_status_master.csv');
+
+/** csvファイル名（カテゴリマスタ） */
+define('CSV_FILE_NAME_CATEGORY_MASTER', 'category_master.csv');
 
 /*----------------------------
   アップロードディレクトリ

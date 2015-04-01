@@ -1,5 +1,5 @@
 <?php
-	include_once('../../system/page/makepdf/GetMakePDFData.php');
+	include(dirname(__FILE__) . '/../../system/page/makepdf/ExecuteMakePdfFile.php');
 
 	// セッション
 	session_start();
@@ -16,12 +16,12 @@
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
 		$result = false;
 
-		// pdf作成時間解除（true：時間設定解除）
+		// pdf作成時間解除
 		if(isset($_POST['unset_button']) && $_POST['unset_button'] == "unset") {
 			$result = $makePdf->unsetSystemStatus($viewArray[COLUMN_NAME_SYSTEM_STATUS]);
 		}
 
-		// pdf作成時間設定（true：時間設定）
+		// pdf作成時間設定
 		if(isset($_POST['set_button']) && $_POST['set_button'] == "set") {
 			$result = $makePdf->setPdfTime($_POST['dropdownDay'], $_POST['hour'], $_POST['min']);
 			if($result) {
@@ -29,9 +29,17 @@
 			}
 		}
 
-		// pdf作成中止（true：pdf作成中止）
+		// pdf作成中止
 		if(isset($_POST['stop_button']) && $_POST['stop_button'] == "stop") {
 			$result = $makePdf->stopSystemStatus($viewArray[COLUMN_NAME_SYSTEM_STATUS]);
+		}
+
+		// データ更新
+		if(isset($_POST['update_button']) && $_POST['update_button'] == "update") {
+// TODO:デバッグ用
+//			$result = $makePdf->updateData();
+			$result = $makePdf->partsUpdateDebug();
+			$result = $makePdf->itemUpdateDebug();
 		}
 
 		// メッセージ取得
@@ -70,10 +78,10 @@
 				<div>
 					<ul class="nav nav-tabs">
 						<li><a href="itemCsv.php">商品データ</a></li>
-						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
 						<li><a href="itemStatus.php">商品ステータス</a></li>
-						<li><a href="category.php">カテゴリデータ</a></li>
 						<li><a href="parts.php">部品データ</a></li>
+						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
+						<li><a href="category.php">カテゴリマスタ</a></li>
 						<li class="active"><a href="#">PDF設定</a></li>
 					</ul>
 				</div>
@@ -129,7 +137,7 @@
 						<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="unset_button" value="unset">設定解除</button>
 							<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="set_button" value="set">設定変更</button>
 							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="stop_button" value="stop">PDF作成中止</button>
-							<button type="button" class="btn btn-warning">商品データ更新</button>
+							<button type="submit" class="btn btn-warning" onclick="document.form.submit();" name="update_button" value="update">商品データ更新</button>
 						</div>
 						<div>
 							実行結果：<?php echo $resultMessage ?>
