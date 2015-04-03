@@ -267,8 +267,7 @@ class CommonMakePDF extends Page{
 		foreach($partsArray as $partsRow) {
 			// where句生成
 			$whereParts = 	COLUMN_NAME_NO." = '".$partsRow[COLUMN_NAME_PARTS_ID]."' AND "
-					.COLUMN_NAME_PARTS_ID." = '".$partsRow[COLUMN_NAME_PARTS_NAME]."' AND "
-							.COLUMN_NAME_FILE_NAME." = '".$partsRow[COLUMN_NAME_FILE_NAME]."'";
+							.COLUMN_NAME_ITEM_ID." = '".$partsRow[COLUMN_NAME_ITEM_ID]."'";
 			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
 			$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($whereParts);
 			if($dbPartsCheck) {
@@ -284,7 +283,7 @@ class CommonMakePDF extends Page{
 
 			// エラーチェック
 			if(!$dbPartsCheck) {
-				$this->{KEY_ERROR_MESSAGE} = MESSAGE_FAIL_UPDATE_PARTS.$partsRow[COLUMN_NAME_PARTS_ID]."<br>";
+				$this->{KEY_ERROR_MESSAGE} = $this->{KEY_ERROR_MESSAGE}.MESSAGE_FAIL_UPDATE_PARTS.$partsRow[COLUMN_NAME_PARTS_ID]."<br>";
 				$result = false;
 			}
 		}
@@ -306,23 +305,24 @@ class CommonMakePDF extends Page{
 		// 商品データ更新
 		foreach($itemArray as $itemRow) {
 			// where句生成
-			$whereItem = COLUMN_NAME_ITEM_ID." = '".$itemRow[COLUMN_NAME_ITEM_ID]."' AND ".COLUMN_NAME_CATEGORY_ID." = '".$itemRow[COLUMN_NAME_CATEGORY_ID]."'";
+			$whereItem = COLUMN_NAME_ITEM_ID." = '".$itemRow[COLUMN_NAME_ITEM_ID]."' AND "
+						.COLUMN_NAME_CATEGORY_ID." = '".$itemRow[COLUMN_NAME_CATEGORY_ID]."'";
 			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
-			$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->checkData($whereItem);
+			$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->checkData($whereItem);
 			if($dbPartsCheck) {
 				// DBUpdate処理
 				$itemRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
-				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->update($itemRow, $whereParts);
+				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->update($itemRow, $whereItem);
 			} else {
 				// DBinsert処理
 				$itemRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
 				$itemRow[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日
-				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->insertDB($itemRow);
+				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->insertDB($itemRow);
 			}
 
 			// エラーチェック
 			if(!$dbPartsCheck) {
-				$this->{KEY_ERROR_MESSAGE} = MESSAGE_FAIL_UPDATE_PARTS.$itemRow[COLUMN_NAME_PARTS_ID]."<br>";
+				$this->{KEY_ERROR_MESSAGE} = $this->{KEY_ERROR_MESSAGE}.MESSAGE_FAIL_UPDATE_ITEM.$itemRow[COLUMN_NAME_ITEM_ID]."<br>";
 				$result = false;
 			}
 		}

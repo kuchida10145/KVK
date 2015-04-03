@@ -22,6 +22,9 @@
 
 			// csvヘッダー項目数
 			$this->headerCount = HEADER_COUNT_PARTS;
+
+			// csvアップロード情報
+			$this->uploadInfo = CSV_FOLDER.CSV_FILE_NAME_ONETIME_PARTS;
 		}
 
 	/**
@@ -81,72 +84,29 @@
 	 * @return	$result			チェック結果
 	 */
 	protected function runDB($targetArray) {
-		$dataArray = array();		// 更新データ格納用の配列
-		$partsNameArray = array();	// パーツ名格納用の配列
-		$itemIDArray = array();		// 商品ID格納用配列
-		$dbCheck = "";				// DB動作結果
-		$where = "";				// SQL実行用のwhere句
-		$keyViewNo = $targetArray[NO_COLUMN_PARTS];			// 検索key(表示順)
-		$keyItemID = $targetArray[PARTS_ID_COLUMN_PARTS];	// 検索key(品番：部品)
-		$limit = "";
-		$order = "";
+		// 処理なし
+		return true;
+ 	}
 
-		// 商品IDを分解
-		$partsNameArray = explode('・', $targetArray[ITEM_COLUMN_PARTS]);
+ 	/**
+ 	 * CSVアップロード実行
+ 	 * @param	$filePath	保存対象ファイルパス
+	 * @return	$result		アップロード実行結果
+ 	 */
+ 	protected function csvUpload($filePath) {
+		$result = true;
 
-		foreach ($partsNameArray as $key => $val) {
-			// 部品リストDB登録データ生成
-			$dataArray = array(
-					// 番号（部品表示順）
-					COLUMN_NAME_NO=>$targetArray[NO_COLUMN_PARTS],
-					// 品番（パーツ）
-					COLUMN_NAME_PARTS_ID=>$targetArray[PARTS_ID_COLUMN_PARTS],
-					// 品名（パーツ）
-					COLUMN_NAME_PARTS_NAME=>$targetArray[PARTS_NAME_COLUMN_PARTS],
-					// 希望小売価格
-					COLUMN_NAME_PRICE=>$targetArray[PRICE_COLUMN_PARTS],
-					// 希望小売価格（税込み）
-					COLUMN_NAME_PRICE_ZEI=>$targetArray[PRICE_ZEI_COLUMN_PARTS],
-					// 品番（商品）
-					COLUMN_NAME_ITEM_ID=>$val,
-					// ファイル名
-					COLUMN_NAME_FILE_NAME=>$targetArray[FILE_COLUMN_PARTS],
-					// 表示ステータス
-					COLUMN_NAME_VIEW_STATUS=>$targetArray[DELETE_COLUMN_PARTS],
-					// 備考
-					COLUMN_NAME_NOTE=>$targetArray[NOTE_COLUMN_PARTS],
-					// 更新日
-					COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
-			);
+		// ファイルアップロード
+		$result = move_uploaded_file($filePath, $this->uploadInfo);
 
-			$where = COLUMN_NAME_NO." = '".$keyViewNo."' AND "
-					.COLUMN_NAME_PARTS_ID." = '".$keyItemID."' AND "
-					.COLUMN_NAME_ITEM_ID." = '".$val."'";
-
-			// 削除フラグ取得
-			$deleteFlg = $this->convertDeleteFlg($targetArray[DELETE_COLUMN_PARTS]);
-			//削除フラグチェック
-			if($deleteFlg){
-				// DB削除処理(表示フラグ更新)
-				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->update($dataArray, $where);
-			} else {
-				// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
-				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->checkData($where);
-				if($dbCheck) {
-					// DBUpdate処理
-					$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->update($dataArray, $where);
-				} else {
-					// DBinsert処理
-					$dataArray[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日追加
-					$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->insertParts($dataArray);
-				}
-			}
+		if($result) {
+			// システムステータス更新
+			$result = $this->systemUpdate(SYSTEM_STATUS_PDF_WAIT, $this->pdfTime);
+		} else {
+			$this->{KEY_DB_CHECK_MESSAGE} = "部品CSVファイルのアップロードに失敗しました。<br>";
 		}
 
-		// システムステータス更新
-		$dbCheck = $this->systemUpdate(SYSTEM_STATUS_PDF_WAIT, $this->pdfTime);
-
-		return $dbCheck;
+		return $result;
  	}
 }
 

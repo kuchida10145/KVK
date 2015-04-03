@@ -69,9 +69,9 @@
 		);
 		$table = TABLE_NAME_STATUS_LIST;
 		// key項目設定
-		$key = $dataArray[COLUMN_NAME_STATUS_NAME];
+		$key = $dataArray[COLUMN_NAME_STATUS_ID];
 		// where句生成
-		$where = COLUMN_NAME_STATUS_NAME." = '".$key."'";
+		$where = COLUMN_NAME_STATUS_ID." = '".$key."'";
 
 		// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
 		$dbCheck = $this->manager->db_manager->get($table)->checkData($where);

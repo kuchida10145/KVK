@@ -60,7 +60,7 @@ class Item_iconDbModel extends DbModel
 		$sql = "SELECT * FROM {$table} WHERE ".$where;
 		$dataCount = $this->db->getCount($sql);
 
-		if(count($dataCount) == 0) {
+		if($dataCount == 0) {
 			$result = false;
 		}
 		return $result;

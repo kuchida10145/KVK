@@ -73,16 +73,16 @@ class Onetime_pdf_itemDbModel extends DbModel
 	 * @return	$result	検索結果(true：データあり false：データなし)
 	 */
 	public function checkData($where) {
+		$table = TABLE_NAME_PDF_ITEM;
 		$result = true;
 		$sql = "";
 		$dataCount = array();
-		$table = TABLE_NAME_PDF_ITEM;
 
-		$sql = "SELECT * FROM '{$table}' WHERE {$where}";
+		$sql = "SELECT id FROM {$table} WHERE ".$where." limit 0, 1";
 
 		$dataCount = $this->db->getData($sql);
 
-		if(count($dataCount) == 0) {
+		if(!$dataCount == 0) {
 			$result = false;
 		}
 		return $result;

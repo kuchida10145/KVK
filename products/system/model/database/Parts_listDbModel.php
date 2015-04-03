@@ -53,15 +53,16 @@ class Parts_listDbModel extends DbModel
 	 * @return	$result	検索結果(true：データあり false：データなし)
 	 */
 	public function checkData($where) {
+		$table = TABLE_NAME_PARTS_LIST;
 		$result = true;
 		$sql = "";
 		$dataCount = array();
 
-		$sql = "SELECT * FROM parts_list WHERE ".$where;
+		$sql = "SELECT id FROM {$table} WHERE ".$where." limit 0, 1";
 
 		$dataCount = $this->db->getData($sql);
 
-		if(count($dataCount) == 0) {
+		if(!$dataCount == 0) {
 			$result = false;
 		}
 		return $result;
@@ -84,6 +85,53 @@ class Parts_listDbModel extends DbModel
 
 		return $insert_result;
 	}
+
+	/**
+	 * 対象データをチェックして変更箇所を特定する。
+	 *
+	 * @param	array	$targetData	チェック対象データ
+	 * @param	string	$where		DB検索用where句
+	 * @return	array	$updateClm	更新対象データ
+	 */
+	public function updateCheck($targetData, $where) {
+		$dbRow = array();
+		$updateClm = array();
+		$table = 'parts_list';
+		$sql = "SELECT * FROM {$table} WHERE $where";
+
+		$dbRow = $this->db->getData($sql);
+
+		$updateClm = compareData($dbRow, $targetData);
+
+		return $updateClm;
+	}
+
+	/**
+	 * データの差異をチェックする。
+	 *
+	 * @param  array	$dbData		DBから取得したデータ
+	 * @param  array	$targetData	チェック対象データ
+	 * @return array	$updateClm	更新対象データ
+	 */
+	protected function compareData($dbData, $targetData) {
+		$updateClm = array();
+
+		foreach ($dbData as $key => $value) {
+			// 取込データにidは無い
+			if($key == 'id'){
+				$updateClm[$key] = $value;
+				continue;
+			}
+
+			// 値が違えば更新対象データ
+			if($value != $targetData[$key]){
+				$updateClm[$key] = $targetData[$key];
+			}
+		}
+
+		return $updateClm;
+	}
+
 
 	/**
 	 * シーケンスID取得。

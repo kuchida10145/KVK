@@ -35,7 +35,11 @@ class Child_categoryDbModel extends DbModel
 
 		$field = implode(',',$this->getField());
 
-		$sql = "SELECT * FROM child_category WHERE category_id ='{$category_id}' AND `view_status` = ".VIEW_OK;
+		if(mb_strlen($category_id)  == 4){
+			$sql = "SELECT * FROM child_category WHERE category_id + parent_id * 1000 = '{$category_id}' AND `view_status` = ".VIEW_OK;
+		} else {
+			$sql = "SELECT * FROM child_category WHERE category_id ='{$category_id}' AND `view_status` = ".VIEW_OK;
+		}
 
 		return $this->db->getData($sql);
 	}

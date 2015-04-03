@@ -3,7 +3,7 @@
  * 検証クラス（CSVカラム用）
  *
  */
-include_once('/Validation.php');
+include_once(dirname(__FILE__) .'/Validation.php');
 class ValidationColumns extends Validation {
 
 	/**

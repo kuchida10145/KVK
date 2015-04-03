@@ -37,7 +37,7 @@
 
 			if($result) {
 				// csv取込処理実行
-				$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
+				$result = $importCsv->executeImport($filePath, $fileName, $testFlg, $dbFlg = CSV_UPDATE);
 			}
 
 			// メッセージ取得

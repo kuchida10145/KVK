@@ -241,4 +241,43 @@ class ItemDbModel extends DbModel
 		return $return_ar;
 	}
 
+	/**
+	 * データチェック
+	 * @param	$where	データ検索用where句
+	 * @return	$result	検索結果(true：データあり false：データなし)
+	 */
+	public function checkData($where) {
+		$table = TABLE_NAME_ITEM;
+		$result = true;
+		$sql = "";
+		$dataCount = array();
+
+		$sql = "SELECT id FROM {$table} WHERE ".$where." limit 0, 1";
+
+		$dataCount = $this->db->getData($sql);
+
+		if(!$dataCount) {
+			$result = false;
+		}
+		return $result;
+	}
+
+	/**
+	 * 取込データをDBに登録する。
+	 *
+	 * @param	array	$targetArray	csvから取り込んだ親カテゴリ情報
+	 * @return	boolean	$insert_result	DB追加結果
+	 */
+	public function insertDB($targetArray) {
+		$table = TABLE_NAME_PDF_ITEM;
+
+		$this->db->startTran();				// トランザクション開始
+
+		$insert_result = $this->db->insert($table, $targetArray);
+
+		$this->db->endTran($insert_result);	// トランザクション終了
+
+		return $insert_result;
+	}
+
 }

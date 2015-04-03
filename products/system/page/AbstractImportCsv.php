@@ -6,35 +6,37 @@ abstract class AbstractImportCsv extends Page{
 		parent::__construct();
 	}
 
-	protected abstract function dataDBCheck($checkData, $line_count);		// cavデータDBチェック
-	protected abstract function dataPrimaryCheck($checkData, $lineCount); 	// cavデータ重複データチェック
+	protected abstract function dataDBCheck($checkData, $line_count);		// CSVデータDBチェック
+	protected abstract function dataPrimaryCheck($checkData, $lineCount); 	// CSVデータ重複データチェック
 	protected abstract function runDB($targetData);							// DB関連の処理実行
+	protected abstract function csvUpload($targetFile);						// ファイルアップロード処理実行
 
 	/**
 	 * csvファイル取込メイン処理
 	 * @param 	$filePath	取込csvファイルパス
 	 * @param 	$fileName	取込csvファイル名
 	 * @param	$testFlg	取込テスト判定
+	 * @param	bool		$uploadFlg	アップロードフラグ（true：csvアップロード	false：DB更新）
 	 * @return	$result		取込結果（true：csv取込成功	false：csv取込失敗）
 	 */
-	public function executeImport($filePath, $fileName, $testFlg) {
+	public function executeImport($filePath, $fileName, $testFlg, $uploadFlg) {
 		$line_count = 0;			// csvファイル行数カウント用
 		$where = "";				// sql実行用のwhere句
 		$parentID = "";				// 親カテゴリID格納用
-		$dbCheck = "";				// db操作結果
+		$result = "";				// チェック結果
 		$error = true;				// errorフラグ（true：エラーなし、false：エラーあり）
 
 		// システムステータスチェック
-		$error = $this->systemStatusCheck($this->systemStatus);
-		if(!$error) {
-			return false;
+		$result = $this->systemStatusCheck($this->systemStatus);
+		if(!$result) {
+			return $result;
 		}
 
 		// 拡張子チェック
-		$error = $this->checkExtension($fileName);
-		if(!$error) {
+		$result = $this->checkExtension($fileName);
+		if(!$result) {
 			$this->{KEY_ERROR_MESSAGE} =  ERROR_MSG_FILE_ERROR;
-			return false;
+			return $result;
 		}
 		// CSVデータ取得
 		$csvData = $this->getCsvData($filePath);
@@ -44,37 +46,34 @@ abstract class AbstractImportCsv extends Page{
 			return false;
 		}
 		// CSVカラム数チェック
-		$error = $this->csvColumnCheck(count($csvData[CSV_HEADER_LINE]));
-		if(!$error) {
+		$result = $this->csvColumnCheck(count($csvData[CSV_HEADER_LINE]));
+		if(!$result) {
 			$this->{KEY_ERROR_MESSAGE} = ERROR_MSG_COLUMN_ERROR;
-			return false;
+			return $result;
 		}
 		// CSVデータチェック取得
-		$error = $this->csvDataCheck($csvData);
-		if(!$error) {
-			return false;
+		$result = $this->csvDataCheck($csvData);
+		if(!$result) {
+			return $result;
 		}
-		// シュミレーションモードでなければDB更新。
-		// true：シュミレーション（DB更新しない）	false：csv取込（DB更新を行う）
+		// 登録処理
 		if($testFlg) {
 			$this->{KEY_ERROR_MESSAGE} = MSG_CHECK_OK;
-			return true;
+		} elseif($uploadFlg) {
+			$result = move_uploaded_file($filePath, CSV_FOLDER.CSV_FILE_NAME_ONETIME_PARTS);
 		} else {
-			// csvファイル全データに対してDB処理を行う。
 			foreach ($csvData as $row) {
 				if($line_count != 0){
-					// DB処理
-					$dbCheck = $this->runDB($row);
+					$result = $this->runDB($row);
 				}
 				$line_count++;
 			}
 
-			if(!$dbCheck) {
+			if(!$result) {
 				$this->{KEY_ERROR_MESSAGE} = ERROR_MSG_DB;
-				return false;
 			}
 		}
-		return true;
+		return $result;
 	}
 
 	/**

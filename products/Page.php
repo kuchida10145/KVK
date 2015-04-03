@@ -114,6 +114,10 @@ abstract class Page
 		$whereSystem = COLUMN_NAME_SYSTEM_STATUS." = '".$nowStatus."'";
 		$dbCheck = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->update($updateArray, $whereSystem);
 
+		if(!$dbCheck) {
+			$this->{KEY_DB_CHECK_MESSAGE} = "システムステータスの更新に失敗しました。<br>";
+		}
+
 		return $dbCheck;
 	}
 

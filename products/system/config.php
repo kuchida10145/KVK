@@ -39,6 +39,10 @@ define( 'VIEW_NG' , 1 );
 define( 'INISIAL_DISP' , 0 );
 define( 'CSV_DOWNLOAD' , 1 );
 
+// DB取込ステータス
+define( 'DB_UPDATE' , 0 );
+define( 'CSV_UPDATE' , 1 );
+
 // ソートモード
 define( 'SORT_MODE_NEW' , 1 );
 define( 'SORT_MODE_ID' , 2 );
@@ -711,6 +715,9 @@ define('CSV_FILE_NAME_ITEM_STATUS_MASTER', 'item_status_master.csv');
 /** csvファイル名（カテゴリマスタ） */
 define('CSV_FILE_NAME_CATEGORY_MASTER', 'category_master.csv');
 
+/** csvファイル名（PDF作成用部品csvファイル） */
+define('CSV_FILE_NAME_ONETIME_PARTS', 'onetime_parst.csv');
+
 /*----------------------------
   アップロードディレクトリ
 -----------------------------*/
@@ -728,4 +735,8 @@ define('ONETIME_PDF_FOLDER', 'onetime_bunkai/');
 
 /** pdfファイル保存フォルダ */
 define('PDF_FOLDER', 'bunkai');
+
+/** csvアップロードフォルダ */
+define('CSV_FOLDER', '../../save_csv/');
+
 ?>
