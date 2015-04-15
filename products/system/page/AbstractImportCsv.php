@@ -60,7 +60,7 @@ abstract class AbstractImportCsv extends Page{
 		if($testFlg) {
 			$this->{KEY_ERROR_MESSAGE} = MSG_CHECK_OK;
 		} elseif($uploadFlg) {
-			$result = move_uploaded_file($filePath, CSV_FOLDER.CSV_FILE_NAME_ONETIME_PARTS);
+			$result = $this->csvUpload($filePath);
 		} else {
 			foreach ($csvData as $row) {
 				if($line_count != 0){

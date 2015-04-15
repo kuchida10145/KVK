@@ -36,6 +36,9 @@
 
 			// システム状態取得
 			$this->sytemStatus = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
+
+			// csvアップロード情報
+			$this->uploadInfo = CSV_FOLDER.CSV_FILE_NAME_ONETIME_ITEM;
 		}
 
 	/**
@@ -104,6 +107,9 @@
 		$catalogLink = $this->makeCatalogFileName(
 			$targetArray[CATALOG_YEAR_COLUMN_ITEM], $targetArray[CATALOG_PAGE_COLUMN_ITEM]);
 
+		// カテゴリID分解
+		$parentIDVal = mb_substr($targetArray[CATEGORY_ID_COLUMN_ITEM], -4, NULL);
+		$categoryIDVal = substr($targetArray[CATEGORY_ID_COLUMN_ITEM], -3);
 
 		// 商品DB登録データ生成
 		$dataArray = array(
@@ -141,8 +147,10 @@
 			COLUMN_NAME_NOTE=>$targetArray[NOTE_COLUMN_ITEM],
 			// 商品イメージ画像
 			COLUMN_NAME_ITEM_IMAGE=>"",
-			// カテゴリID
-			COLUMN_NAME_CATEGORY_ID=>$targetArray[CATEGORY_ID_COLUMN_ITEM],
+			// 親カテゴリID
+			COLUMN_NAME_PARENT_ID=>$parentIDVal,
+			// 子カテゴリID
+			COLUMN_NAME_CATEGORY_ID=>$categoryIDVal,
 			// pdf作成ステータス
 			COLUMN_NAME_PDF_STATUS=>"",
 			// 検索ワード
@@ -208,6 +216,27 @@
 		$fileName = $year."-".$nextYear."_".$page.".pdf";
 
 		return $fileName;
+	}
+
+	/**
+	 * CSVアップロード実行
+	 * @param	$filePath	保存対象ファイルパス
+	 * @return	$result		アップロード実行結果
+	 */
+	protected function csvUpload($filePath) {
+		$result = true;
+
+		// ファイルアップロード
+		$result = move_uploaded_file($filePath, $this->uploadInfo);
+
+		if($result) {
+			// システムステータス更新
+			$result = $this->systemUpdate(SYSTEM_STATUS_PDF_WAIT, $this->pdfTime);
+		} else {
+			$this->{KEY_DB_CHECK_MESSAGE} = "商品CSVファイルのアップロードに失敗しました。<br>";
+		}
+
+		return $result;
 	}
 }
 

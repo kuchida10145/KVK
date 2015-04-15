@@ -62,7 +62,7 @@ class Parts_listDbModel extends DbModel
 
 		$dataCount = $this->db->getData($sql);
 
-		if(!$dataCount == 0) {
+		if(!$dataCount) {
 			$result = false;
 		}
 		return $result;

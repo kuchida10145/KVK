@@ -5,7 +5,15 @@
 	// セッション
 	session_start();
 
-	$today			= date("Y/m/d");
+	// csv取込処理インスタンス化
+	$importCsv = new ImportCsvParts();
+	// PDF作成日時取得
+	$importCsv->getMakePdfTime();
+	$pdfDay = $importCsv->dayVal;
+	$pdfHour = $importCsv->dayHour;
+	$pdfMin = $importCsv->dayMin;
+	$systemStatus = $importCsv->pdfStatus;
+	$today			= date("Y-m-d");
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
 	$viewFilePath	= "";	// 画面表示用csvファイルパス
@@ -19,8 +27,6 @@
 				$errorMessage	= $importCsv->getErrorMessage();
 			}
 		} else {
-			// csv取込処理インスタンス化
-			$importCsv = new ImportCsvParts();
 			$filePath		= "";	// csvファイルパス
 			$fileName		= "";	// csvファイル名
 			$testFlg = false;		// 取込処理フラグ
@@ -29,7 +35,7 @@
 			if(isset($_POST['test_button']) && $_POST['test_button'] == "test") {
 				$testFlg = true;
 			} else {
-				$result = $importCsv->setPdfTime($_POST['dropdownDay'], $_POST['hour'], $_POST['min']);
+				$result = $importCsv->setPdfTime($_POST['dropdownDay'], $_POST['hour'], $_POST['min'], $pdfDay);
 			}
 
 			$filePath = $_FILES["file"]["tmp_name"];
@@ -37,7 +43,7 @@
 
 			if($result) {
 				// csv取込処理実行
-				$result = $importCsv->executeImport($filePath, $fileName, $testFlg, $dbFlg = CSV_UPDATE);
+				$result = $importCsv->executeImport($filePath, $fileName, $testFlg, $updateFlg = CSV_UPDATE);
 			}
 
 			// メッセージ取得
@@ -47,18 +53,23 @@
 //			$viewFilePath = $_POST['filepath'];
 		}
 	}
+
+	// PDF作成日時取得
+	$importCsv->getMakePdfTime();
+	$pdfDay = $importCsv->dayVal;
+	$pdfHour = $importCsv->dayHour;
+	$pdfMin = $importCsv->dayMin;
+	$systemStatus = $importCsv->pdfStatus;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Navs</title>
-
+		<title>管理画面｜部品情報更新</title>
 		<!-- Bootstrap -->
-		<link href="../../system/style_code/css/bootstrap.min.css" rel="stylesheet">
-
+			<link href="../../system/style_code/css/bootstrap.min.css" rel="stylesheet" media="screen">
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 		<!--[if lt IE 9]>
@@ -68,20 +79,25 @@
 	</head>
 	<body>
 		<div  class="container">
-		<!-- Tabs -->
-			<section>
-				<h1>KVK 管理画面（部品データ）</h1>
-				<div>
-					<ul class="nav nav-tabs">
-						<li><a href="itemCsv.php">商品データ</a></li>
-						<li><a href="itemStatus.php">商品ステータス</a></li>
-						<li class="active"><a href="#">部品データ</a></li>
-						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
-						<li><a href="category.php">カテゴリマスタ</a></li>
-						<li><a href="makePdf.php">PDF設定</a></li>
+			<div class="page-header">
+				<h1>WEBサイト管理
+					<small>商品データ更新</small>
+				</h1>
+			</div>
+			<div class="row">
+				<div class="col-md-2">
+					<ul class="nav nav-pills nav-stacked">
+						<li class="active"><a href="#">商品情報更新</a></li>
+						<li><a href="itemStatusMaster.php">マスタデータ更新</a></li>
+						<li><a href="makePdf.php">PDF作成</a></li>
 					</ul>
 				</div>
-				<div>
+				<div class="col-md-10">
+					<ul class="nav nav-tabs">
+						<li><a href="itemCsv.php">商品情報更新</a></li>
+						<li class="active"><a href="#">部品情報更新</a></li>
+						<li><a href="itemStatus.php">商品機能アイコン変更</a></li>
+					</ul>
 					<form class="form-horizontal well" action="#" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
 						<div class="form-group">
@@ -100,22 +116,28 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">pdf作成日</label>
+							<label class="col-sm-2 control-label">状態</label>
+							<div class="col-sm-10" Align="left">
+								<label class="col-sm-0 control-label"><?php echo $systemStatus ?></label>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="upload" class="col-sm-2 control-label">PDF作成日</label>
 							<div class="col-sm-10">
 								<div class="btn-group">
 									<div class="dropdown">
-										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" onClick="changeDay(this.form)">
-											日付
+										<button class="btn btn-default dropdown-toggle" type="button" id="pdfDay" name="pdfDay" data-toggle="dropdown" onClick="changeDay(this.form)" value="<?php echo $pdfDay ?>">
+											<?php echo $pdfDay ?>
 											<span class="caret"></span>
 										</button>
 										<ul class="dropdown-menu">
 											<li><a href="#" data-val="0"><?php echo $today ?></a></li>
-											<li><a href="#" data-val="1"><?php echo date("Y/m/d",strtotime("+1 day")) ?></a></li>
-											<li><a href="#" data-val="2"><?php echo date("Y/m/d",strtotime("+2 day")) ?></a></li>
-											<li><a href="#" data-val="3"><?php echo date("Y/m/d",strtotime("+3 day")) ?></a></li>
-											<li><a href="#" data-val="4"><?php echo date("Y/m/d",strtotime("+4 day")) ?></a></li>
-											<li><a href="#" data-val="5"><?php echo date("Y/m/d",strtotime("+5 day")) ?></a></li>
-											<li><a href="#" data-val="6"><?php echo date("Y/m/d",strtotime("+6 day")) ?></a></li>
+											<li><a href="#" data-val="1"><?php echo date("Y-m-d",strtotime("+1 day")) ?></a></li>
+											<li><a href="#" data-val="2"><?php echo date("Y-m-d",strtotime("+2 day")) ?></a></li>
+											<li><a href="#" data-val="3"><?php echo date("Y-m-d",strtotime("+3 day")) ?></a></li>
+											<li><a href="#" data-val="4"><?php echo date("Y-m-d",strtotime("+4 day")) ?></a></li>
+											<li><a href="#" data-val="5"><?php echo date("Y-m-d",strtotime("+5 day")) ?></a></li>
+											<li><a href="#" data-val="6"><?php echo date("Y-m-d",strtotime("+6 day")) ?></a></li>
 										</ul>
 										<input type="hidden" id="dropdownDay" name="dropdownDay" value="">
 									</div>
@@ -123,12 +145,12 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">pdf作成開始時間</label>
+							<label for="upload" class="col-sm-2 control-label">PDF作成開始時間</label>
 							<div class="col-sm-10">
 								<div class="input-group">
-									<input style="width:50px;" type="text" id="hour" name="hour" class="form-control"  maxlength="2" pattern="^[0-9]+$">
+									<input style="width:50px;" type="text" id="hour" name="hour" class="form-control"  maxlength="2" pattern="^[0-9]+$" value="<?php echo $pdfHour ?>">
 									<label for="upload" class="col-sm-2 control-label">:</label>
-									<input style="width:50px;" type="text" id="min" name="min" class="form-control"  maxlength="2">
+									<input style="width:50px;" type="text" id="min" name="min" class="form-control"  maxlength="2" value="<?php echo $pdfMin ?>">
 								</div>
 							</div>
 						</div>
@@ -146,7 +168,7 @@
 						</div>
 					</form>
 				</div>
-			</section>
+			</div>
 		</div>
 		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>

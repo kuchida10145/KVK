@@ -269,7 +269,7 @@ class ItemDbModel extends DbModel
 	 * @return	boolean	$insert_result	DB追加結果
 	 */
 	public function insertDB($targetArray) {
-		$table = TABLE_NAME_PDF_ITEM;
+		$table = TABLE_NAME_ITEM;
 
 		$this->db->startTran();				// トランザクション開始
 
@@ -278,6 +278,26 @@ class ItemDbModel extends DbModel
 		$this->db->endTran($insert_result);	// トランザクション終了
 
 		return $insert_result;
+	}
+
+	/**
+	 * 対象データをチェックして変更箇所を特定する。
+	 *
+	 * @param	array	$targetData	チェック対象データ
+	 * @param	string	$where		DB検索用where句
+	 * @return	array	$updateClm	更新対象データ
+	 */
+	public function updateCheck($targetData, $where) {
+		$dbRow = array();
+		$updateClm = array();
+		$table = TABLE_NAME_ITEM;
+		$sql = "SELECT * FROM {$table} WHERE $where";
+
+		$dbRow = $this->db->getData($sql);
+
+		$updateClm = compareData($dbRow, $targetData);
+
+		return $updateClm;
 	}
 
 }

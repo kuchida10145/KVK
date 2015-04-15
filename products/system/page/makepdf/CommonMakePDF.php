@@ -7,6 +7,28 @@ class CommonMakePDF extends Page{
 
 		// システム状態取得
 		$this->sytemStatus = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
+
+		// アップロードしたcsvファイル
+		$this->uploadInfo = CSV_FOLDER.CSV_FILE_NAME_ONETIME_PARTS;
+
+		// pdf作成中csvファイル
+		$this->makingPdfCsvInfo = CSV_FOLDER.MAKING_PDF_CSV;
+
+		// 前回更新時に作成したcsvファイル
+		$this->oldPartsDbCsv = CSV_FOLDER.OLD_PARTS_DB_CSV;
+
+		// 出力csvファイルのヘッダー行
+		$this->csvHeader = array(
+				'番号',
+				'品番',
+				'品名',
+				'希望小売価格',
+				'税込',
+				'品番',
+				'分解図',
+				'備考',
+				'削除',
+		);
 	}
 
 	/**
@@ -257,36 +279,114 @@ class CommonMakePDF extends Page{
 	 * @param	-
 	 * @return	$result					データ更新結果
 	 */
-	public function partsUpdateDebug() {
+	public function partsUpdateDebug($executePath) {
 		$result = true;
+		$nowArray = array();	// アップデートしたcsvファイル
+		$oldArray = array();	// 前回までの更新した値
+		$targetArray = array();	// 差異
+		$checkArray = array();
+		$updateArray = array();	// 更新対象配列
+		$pdfArrat = array();
+		$makeCount = 0;
 
-		// 更新データ取得
-		$partsArray = $this->manager->db_manager->get(TABLE_NAME_PDF_PARTS_LIST)->getAll();
+		// ファイル存在チェック
+		if(file_exists($this->makingPdfCsvInfo)) {
+			// pdf作成、DB更新処理実行
+			$pdfArrat = $this->getCsvData($this->makingPdfCsvInfo);
+			// 部品データ更新
+			foreach($pdfArrat as $key=>$partsRow) {
+				if($makeCount == 0){
+					$makeCount = $makeCount + 1;
+					continue;
+				}
 
-		// 部品データ更新
-		foreach($partsArray as $partsRow) {
-			// where句生成
-			$whereParts = 	COLUMN_NAME_NO." = '".$partsRow[COLUMN_NAME_PARTS_ID]."' AND "
-							.COLUMN_NAME_ITEM_ID." = '".$partsRow[COLUMN_NAME_ITEM_ID]."'";
-			// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
-			$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($whereParts);
-			if($dbPartsCheck) {
-				// DBUpdate処理
-				$partsRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
-				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->update($partsRow, $whereParts);
-			} else {
-				// DBinsert処理
-				$partsRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
-				$partsRow[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日
-				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->insertDB($partsRow);
+				if($makeCount < 2) {
+					//DB登録データ作成
+					// 商品DB登録データ生成
+					$dataArray = array(
+							// 番号（部品表示順）
+							COLUMN_NAME_NO=>$partsRow[NO_COLUMN_PARTS],
+							// 品番（パーツ）
+							COLUMN_NAME_PARTS_ID=>$partsRow[PARTS_ID_COLUMN_PARTS],
+							// 品名（パーツ）
+							COLUMN_NAME_PARTS_NAME=>$partsRow[PARTS_NAME_COLUMN_PARTS],
+							// 希望小売価格
+							COLUMN_NAME_PRICE=>$partsRow[PRICE_COLUMN_PARTS],
+							// 希望小売価格（税込み）
+							COLUMN_NAME_PRICE_ZEI=>$partsRow[PRICE_ZEI_COLUMN_PARTS],
+							// 品番（商品）
+							COLUMN_NAME_ITEM_ID=>$partsRow[ITEM_COLUMN_PARTS],
+							// ファイル名
+							COLUMN_NAME_FILE_NAME=>$partsRow[FILE_COLUMN_PARTS],
+							// 表示フラグ
+							COLUMN_NAME_VIEW_STATUS=>$partsRow[DELETE_COLUMN_PARTS],
+							// 備考
+							COLUMN_NAME_NOTE=>$partsRow[NOTE_COLUMN_PARTS],
+					);
+
+					// where句生成
+					$whereParts = 	COLUMN_NAME_NO." = '".$dataArray[COLUMN_NAME_PARTS_ID]."' AND "
+									.COLUMN_NAME_ITEM_ID." = '".$dataArray[COLUMN_NAME_ITEM_ID]."'";
+					// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
+					$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($whereParts);
+					if($dbPartsCheck) {
+						// DBUpdate処理
+						$dataArray[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
+						$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->update($dataArray, $whereParts);
+					} else {
+						// DBinsert処理
+						$dataArray[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
+						$dataArray[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日
+						$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->insertDB($dataArray);
+					}
+
+					// エラーチェック
+					if(!$dbPartsCheck) {
+						$this->{KEY_ERROR_MESSAGE} = $this->{KEY_ERROR_MESSAGE}.MESSAGE_FAIL_UPDATE_PARTS.$dataArray[COLUMN_NAME_PARTS_ID]."<br>";
+						$result = false;
+					}
+				} else {
+					$updateArray[] = $partsRow;
+				}
+				$makeCount = $makeCount + 1;
 			}
+		} else {
+			// データの差異を取得
+			$oldArray = $this->getCsvData($this->oldPartsDbCsv);
+ 			$nowArray = $this->getCsvData($this->uploadInfo);
+ 			$oldArrayCount =  count($oldArray);						// DB登録データの最大数
 
-			// エラーチェック
-			if(!$dbPartsCheck) {
-				$this->{KEY_ERROR_MESSAGE} = $this->{KEY_ERROR_MESSAGE}.MESSAGE_FAIL_UPDATE_PARTS.$partsRow[COLUMN_NAME_PARTS_ID]."<br>";
-				$result = false;
+ 			// 部品データ更新
+			foreach($nowArray as $key=>$value) {
+				if($key == "0") {
+					continue;
+				}
+				// where句生成
+				$whereParts = 	COLUMN_NAME_NO." = '".$value[PARTS_ID_COLUMN_PARTS]."' AND "
+								.COLUMN_NAME_ITEM_ID." = '".$value[ITEM_COLUMN_PARTS]."'";
+				// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
+				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($whereParts);
+				if($dbPartsCheck) {
+					$targetArray = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->updateCheck($value, $whereParts);
+					$checkArray = array_diff($value, $targetArray);
+					if(!empty($checkArray)){
+						$updateArray[] = $value;
+					}
+				} else {
+					$updateArray[] = $value;
+				}
 			}
 		}
+
+		if($makeCount == 1) {
+			// csvファイル削除
+			$result = unlink($this->makingPdfCsvInfo);
+		} else {
+			// csvファイル作成
+			$result = $this->setExport($updateArray, $executePath);
+		}
+
+
 		return $result;
 	}
 
@@ -326,6 +426,75 @@ class CommonMakePDF extends Page{
 				$result = false;
 			}
 		}
+
+		return $result;
+	}
+
+	/**
+	 * CSVデータ取得
+	 * @param  $csvFile	csvファイルパス
+	 * @return $csv		UTF-8変換後のcsvデータ
+	 */
+	protected function getCsvData($csvFile) {
+		$csv  = array();
+		// csvから取り込んだデータをUTF-8に変換する
+		$data = file_get_contents($csvFile);
+		$data = mb_convert_encoding($data, SYSTEM_CODE, CSV_CODE);
+		$temp = tmpfile();
+
+		fwrite($temp, $data);
+		rewind($temp);
+
+		while (($data = fgetcsv($temp, 0, ",")) !== FALSE) {
+			$csv[] = $data;
+		}
+		fclose($temp);
+
+		return $csv;
+	}
+
+	/**
+	 * csvファイル出力メイン処理
+	 * @param	array()		csv保存対象データ
+	 * @return	$result		出力結果（true：csv取込成功	false：csv取込失敗）
+	 */
+	protected function setExport($updateArray, $executePath) {
+		$filePointer = "";			// ファイルポインタ
+		$headerArray = array();		// csvヘッダー行
+		$result = true;
+		$makeFilePath = $this->makingPdfCsvInfo;
+
+		// csvファイル書き込み
+		$filePointer = fopen($makeFilePath, 'w');
+		$headerArray = $this->csvHeader;
+		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
+		fputcsv($filePointer, $headerArray);
+
+		foreach ($updateArray as $itemDataRow){
+			$csvDataArray = array(
+					// 番号
+					$itemDataRow[NO_COLUMN_PARTS],
+					// 品番
+					$itemDataRow[PARTS_ID_COLUMN_PARTS],
+					// 品名
+					$itemDataRow[PARTS_NAME_COLUMN_PARTS],
+					// 希望小売価格
+					$itemDataRow[PRICE_COLUMN_PARTS],
+					// 税込
+					$itemDataRow[PRICE_ZEI_COLUMN_PARTS],
+					// 品番
+					$itemDataRow[ITEM_COLUMN_PARTS],
+					// 分解図
+					$itemDataRow[FILE_COLUMN_PARTS],
+					// 備考
+					$itemDataRow[NOTE_COLUMN_PARTS],
+					// 削除
+					$itemDataRow[DELETE_COLUMN_PARTS],
+			);
+			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
+			fputcsv($filePointer, $csvDataArray);
+		}
+		fclose($filePointer);
 
 		return $result;
 	}

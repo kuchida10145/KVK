@@ -40,8 +40,8 @@ define( 'INISIAL_DISP' , 0 );
 define( 'CSV_DOWNLOAD' , 1 );
 
 // DB取込ステータス
-define( 'DB_UPDATE' , 0 );
-define( 'CSV_UPDATE' , 1 );
+define( 'CSV_UPDATE' , true );
+define( 'DB_UPDATE' , false );
 
 // ソートモード
 define( 'SORT_MODE_NEW' , 1 );
@@ -153,9 +153,6 @@ define('IMAGE_COLUMN_CATEGORY', '3');
 /** カラム番号：削除フラグ */
 define('DELETE_COLUMN_CATEGORY', '4');
 
-/** 親カテゴリテーブル */
-define('TABLE_NAME_PARENT_CATEGORY', 'parent_category');
-
 /** 親カテゴリID */
 define('COLUMN_NAME_PARENT_ID', 'parent_id');
 
@@ -164,9 +161,6 @@ define('COLUMN_NAME_PARENT_NAME', 'parent_name');
 
 /** 親カテゴリ画像 */
 define('COLUMN_NAME_PARENT_IMAGE', 'parent_image');
-
-/** 子カテゴリテーブル */
-define('TABLE_NAME_CHILD_CATEGORY', 'child_category');
 
 /** 子カテゴリID */
 define('COLUMN_NAME_CATEGORY_ID', 'category_id');
@@ -210,8 +204,7 @@ define('NOTE_COLUMN_PARTS', '7');
 /** カラム番号：削除フラグ */
 define('DELETE_COLUMN_PARTS', '8');
 
-/** 部品図テーブル */
-define('TABLE_NAME_PARTS_LIST', 'parts_list');
+
 
 /** ID */
 define('COLUMN_NAME_ID', 'id');
@@ -384,22 +377,12 @@ define('COLUMN_NAME_PITCH', 'pitch');
 /** シャワー取付穴 */
 define('COLUMN_NAME_SHOWER_SUNPOU', 'shower_sunpou');
 
-/** 商品テーブル */
-define('TABLE_NAME_ITEM', 'item');
 
-/**
- * 部品系（pdf）
- */
-
-/** pdf作成用部品図テーブル */
-define('TABLE_NAME_PDF_PARTS_LIST', 'onetime_pdf_parts');
-
-/** pdf作成用商品テーブル */
-define('TABLE_NAME_PDF_ITEM', 'onetime_pdf_item');
-
-/**
- * メッセージ
- */
+/*
+|------------------------------
+| システムメッセージ
+|------------------------------
+*/
 /** システムステータスエラーメッセージ */
 define('ERROR_MSG_STATUS_ERROR', 'PDF作成中のため実行できません。<br>');
 
@@ -610,9 +593,6 @@ define('STATUS_NAME_COLUMN_STATUS_MASTER', '1');
 /** ステータスアイコン */
 define('STATUS_ICON_COLUMN_STATUS_MASTER', '2');
 
-/** 商品アイコンテーブル */
-define('TABLE_NAME_STATUS_LIST', 'item_icon');
-
 /** アイコンID */
 define('COLUMN_NAME_STATUS_ID', 'icon_id');
 
@@ -625,8 +605,6 @@ define('COLUMN_NAME_ICON', 'icon_file');
 /**
  * システムステータス
  */
-/** システムステータステーブル */
-define('TABLE_NAME_SYSTEM_STATUS', 'system_status');
 
 /** システムステータス */
 define('COLUMN_NAME_SYSTEM_STATUS', 'status');
@@ -679,22 +657,51 @@ define('SYSTEM_STATUS_PDF_FINISH_VAL', 'PDF作成完了');
 /** システムステータス(4：PDF作成中断) */
 define('SYSTEM_STATUS_PDF_STOP_VAL', 'PDF作成中断');
 
-/*----------------------------
- ログインユーザ
------------------------------*/
+/*
+|------------------------------
+| テーブル名
+|------------------------------
+*/
+/** 親カテゴリテーブル */
+define('TABLE_NAME_PARENT_CATEGORY', 'parent_category');
+
+/** 子カテゴリテーブル */
+define('TABLE_NAME_CHILD_CATEGORY', 'child_category');
+
+/** 部品図テーブル */
+define('TABLE_NAME_PARTS_LIST', 'parts_list');
+
+/** 商品テーブル */
+define('TABLE_NAME_ITEM', 'item');
+
+/** pdf作成用部品図テーブル */
+define('TABLE_NAME_PDF_PARTS_LIST', 'onetime_pdf_parts');
+
+/** pdf作成用商品テーブル */
+define('TABLE_NAME_PDF_ITEM', 'onetime_pdf_item');
+
+/** 商品アイコンテーブル */
+define('TABLE_NAME_STATUS_LIST', 'item_icon');
+
+/** システムステータステーブル */
+define('TABLE_NAME_SYSTEM_STATUS', 'system_status');
+
 /** ユーザテーブル */
 define('TABLE_NAME_USER', 'user');
 
+/*----------------------------
+ ユーザテーブル
+-----------------------------*/
 /** カラム名：ユーザ名 */
 define('COLUMN_NAME_USER_NAME', 'user_name');
 
 /** カラム名：パスワード */
 define('COLUMN_NAME_PASS_WORD', 'pass_word');
 
-/** 配列番号：ユーザ名(0) */
+/** カラム番号：ユーザ名(0) */
 define('ARRAY_NO_USER_NAME', '0');
 
-/** 配列番号：パスワード(1) */
+/** カラム番号：パスワード(1) */
 define('ARRAY_NO_PASS_WORD', '1');
 
 /*----------------------------
@@ -715,8 +722,20 @@ define('CSV_FILE_NAME_ITEM_STATUS_MASTER', 'item_status_master.csv');
 /** csvファイル名（カテゴリマスタ） */
 define('CSV_FILE_NAME_CATEGORY_MASTER', 'category_master.csv');
 
+/** csvファイル名（PDF作成用商品csvファイル） */
+define('CSV_FILE_NAME_ONETIME_ITEM', 'onetime_item.csv');
+
 /** csvファイル名（PDF作成用部品csvファイル） */
 define('CSV_FILE_NAME_ONETIME_PARTS', 'onetime_parst.csv');
+
+/** csvファイル名（PDF作成中csvファイル） */
+define('MAKING_PDF_CSV', 'making_pdf.csv');
+
+/** csvファイル名（DB更新中csvファイル） */
+define('UPDATE_CSV', 'item_update.csv');
+
+/** csvファイル名（前回のDB更新データ） */
+define('OLD_PARTS_DB_CSV', 'old_parts_db.csv');
 
 /*----------------------------
   アップロードディレクトリ
@@ -737,6 +756,6 @@ define('ONETIME_PDF_FOLDER', 'onetime_bunkai/');
 define('PDF_FOLDER', 'bunkai');
 
 /** csvアップロードフォルダ */
-define('CSV_FOLDER', '../../save_csv/');
+define('CSV_FOLDER', '../../system/save_csv/');
 
 ?>

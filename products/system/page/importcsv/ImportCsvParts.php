@@ -33,27 +33,8 @@
 	 * @return $result		チェック結果
 	 */
 	protected function dataDBCheck($checkData, $line_count) {
-		$deleteFlg = "";
-		$where = "";
-		$table = TABLE_NAME_PDF_PARTS_LIST;
-		$result = true;
-
-		// 削除フラグ取得
-		$deleteFlg = $this->convertDeleteFlg($checkData[DELETE_COLUMN_PARTS]);
-
-		// 削除フラグ
-		if($deleteFlg){
-			// where句生成
-			$where = COLUMN_NAME_NO." = '".$checkData[NO_COLUMN_PARTS]."' AND "
-					.COLUMN_NAME_PARTS_ID." = '".$checkData[PARTS_ID_COLUMN_PARTS]."' AND "
-					.COLUMN_NAME_ITEM_ID." = '".$checkData[ITEM_COLUMN_PARTS]."'";
-			$result = $this->manager->db_manager->get($table)->checkData($where);
-		}
-
-		if(!$result) {
-			$this->{KEY_DB_CHECK_MESSAGE} = "対象のデータが存在しません。 {$line_count}行目<br>";
-		}
-		return $result;
+		// 処理なし
+		return true;
 	}
 
 	/**
@@ -88,12 +69,12 @@
 		return true;
  	}
 
- 	/**
- 	 * CSVアップロード実行
- 	 * @param	$filePath	保存対象ファイルパス
+	/**
+	 * CSVアップロード実行
+	 * @param	$filePath	保存対象ファイルパス
 	 * @return	$result		アップロード実行結果
- 	 */
- 	protected function csvUpload($filePath) {
+	 */
+	protected function csvUpload($filePath) {
 		$result = true;
 
 		// ファイルアップロード
@@ -107,7 +88,7 @@
 		}
 
 		return $result;
- 	}
+	}
 }
 
 ?>

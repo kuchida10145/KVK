@@ -11,6 +11,8 @@
 	// インスタンス化
 	$makePdf = new CommonMakePDF();
 	$viewArray = $makePdf->getViewData();
+	// PDF作成日時取得
+	$makePdf->getMakePdfTime();
 
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
@@ -38,31 +40,34 @@
 		if(isset($_POST['update_button']) && $_POST['update_button'] == "update") {
 // TODO:デバッグ用
 //			$result = $makePdf->updateData();
-			$result = $makePdf->partsUpdateDebug();
-			$result = $makePdf->itemUpdateDebug();
+			$result = $makePdf->partsUpdateDebug(dirname(__FILE__));
+//			$result = $makePdf->itemUpdateDebug();
 		}
 
 		// メッセージ取得
 		$resultMessage	= $makePdf->getResultMessage($result);
 		$errorMessage	= $makePdf->getErrorMessage();
+
+		// 画面表示データ取得
+		$makePdf->getMakePdfTime();
 	}
 
-	// 画面表示データ取得
-	$viewArray = $makePdf->getViewData();
-	$systemStatus = $makePdf->convertSystemStatus($viewArray[COLUMN_NAME_SYSTEM_STATUS]);
-	$startTime = $viewArray[COLUMN_NAME_PDF_TIME];
+	$pdfDay = $makePdf->dayVal;
+	$pdfHour = $makePdf->dayHour;
+	$pdfMin = $makePdf->dayMin;
+
+	$startTime = $pdfDay." ".$pdfHour.":".$pdfMin.":"."00";
+	$systemStatus = $makePdf->pdfStatus;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Navs</title>
-
+		<title>管理画面｜PDF作成</title>
 		<!-- Bootstrap -->
-		<link href="../../system/style_code/css/bootstrap.min.css" rel="stylesheet">
-
+			<link href="../../system/style_code/css/bootstrap.min.css" rel="stylesheet" media="screen">
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 		<!--[if lt IE 9]>
@@ -72,20 +77,23 @@
 	</head>
 	<body>
 		<div  class="container">
-		<!-- Tabs -->
-			<section>
-				<h1>KVK 管理画面（PDF設定）</h1>
-				<div>
-					<ul class="nav nav-tabs">
-						<li><a href="itemCsv.php">商品データ</a></li>
-						<li><a href="itemStatus.php">商品ステータス</a></li>
-						<li><a href="parts.php">部品データ</a></li>
-						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
-						<li><a href="category.php">カテゴリマスタ</a></li>
-						<li class="active"><a href="#">PDF設定</a></li>
+			<div class="page-header">
+				<h1>WEBサイト管理
+					<small>PDF作成</small>
+				</h1>
+			</div>
+			<div class="row">
+				<div class="col-md-2">
+					<ul class="nav nav-pills nav-stacked">
+						<li><a href="itemCsv.php">商品情報更新</a></li>
+						<li><a href="itemStatusMaster.php">マスタデータ更新</a></li>
+						<li class="active"><a href="#">PDF作成</a></li>
 					</ul>
 				</div>
-				<div>
+				<div class="col-md-10">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#">PDF設定</a></li>
+					</ul>
 					<form class="form-horizontal well" action="#" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
 						<div class="form-group">
@@ -148,7 +156,7 @@
 						</div>
 					</form>
 				</div>
-			</section>
+			</div>
 		</div>
 		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>

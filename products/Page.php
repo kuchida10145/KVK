@@ -170,16 +170,67 @@ abstract class Page
 	}
 
 	/**
+	 * PDF作成予定時間取得
+	 */
+	public function getMakePdfTime(){
+		$nowDataArray = array();
+		$nowDataRow = array();
+		$explodeVal = array();
+		$status = "";
+
+		$nowDataArray = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getAll();
+		$nowDataRow = $nowDataArray[0];
+
+		// 日付、時間、分を共通変数に登録
+		foreach ($nowDataRow as $key => $value) {
+			if($key == COLUMN_NAME_SYSTEM_STATUS){
+				$status = $value;
+			} elseif($key == COLUMN_NAME_PDF_TIME) {
+				$explodeVal = explode(" ", $value);
+				$this->dayVal = $explodeVal[0];
+				$explodeVal = explode(":", $explodeVal[1]);
+				$this->dayHour = $explodeVal[0];
+				$this->dayMin = $explodeVal[1];
+			}
+		}
+
+		// 共通変数チェック
+		if($this->dayVal == "0000-00-00"){
+			$this->dayVal = date("Y-m-d");
+		}
+
+		if($status == SYSTEM_STATUS_NORMAL) {
+			$this->pdfStatus = SYSTEM_STATUS_NORMAL_VAL;
+		} elseif ($status == SYSTEM_STATUS_PDF_WAIT) {
+			$this->pdfStatus = SYSTEM_STATUS_PDF_WAIT_VAL;
+		} elseif ($status == SYSTEM_STATUS_PDF_MAKE) {
+			$this->pdfStatus = SYSTEM_STATUS_PDF_MAKE_VAL;
+		} elseif ($status == SYSTEM_STATUS_PDF_FINISH) {
+			$this->pdfStatus = SYSTEM_STATUS_PDF_FINISH_VAL;
+		} elseif ($status == SYSTEM_STATUS_PDF_STOP) {
+			$this->pdfStatus = SYSTEM_STATUS_PDF_STOP_VAL;
+		}
+	}
+
+	/**
 	 * システムステータス登録時間保持
-	 * @param	$day,$hour,$min
+	 * @param	$day		日付選択値
+	 * @param	$hour		時間入力値
+	 * @param	$min		分入力値
+	 * @param	$dayLabel	日付初期値
 	 * @return	boolean	$result(true：時間セット完了	false：時間セット失敗)
 	 */
-	public function setPdfTime($day, $hour, $min) {
+	public function setPdfTime($day, $hour, $min, $dayLabel) {
 		$checkTime = "";
 		$nowData = date("Y-m-d H:i:s");
 
+		// 日付セット
+		if($day == '') {
+			$day = $dayLabel;
+		}
+
 		// 空白チェック
-		if($day == '' or $hour == '' or $min == '') {
+		if($hour == '' or $min == '') {
 			$this->{KEY_ERROR_MESSAGE} = MINYURYOKU_NG;
 			return false;
 		}
@@ -189,7 +240,6 @@ abstract class Page
 		$min = sprintf("%02d", $min);
 
 		$checkTime = $day." ".$hour.":".$min.":00";
-		$checkTime = str_replace('/', '-', $checkTime);
 
 		// 日付チェック
 		if($this->validateDate($checkTime)) {
@@ -208,68 +258,6 @@ abstract class Page
 		$this->pdfTime = $checkTime;
 
 		return true;
-	}
-
-
-
-	/**
-	 * サーバJOB登録
-	 * @param	$viewData
-	 * @param	$viewHour
-	 * @param	$viewMin
-	 * @return	$jobNum
-	 */
-	public function registJob($viewData, $viewHour, $viewMin){
-		$year = "";
-		$month = "";
-		$day = "";
-		$hour = "";
-		$min = "";
-		$command = "";
-		$jobNum = "";
-		$dateArray = array();
-
-		// 日付設定
-		$dateArray = explode("/", $viewData);
-		$year = $dateArray[0];
-		$month = $dateArray[1];
-		$day = $dateArray[2];
-		$hour = $viewHour;
-		$min = $viewMin;
-
-//		$command = JOB_COMMAND;
-		$command = "ls > /system/page/makepdf/ExecuteMakePdfFile.php";
-
-		$desc = array(
-				0 => array("pipe", "r"),
-				1 => array("pipe", "w"),
-				2 => array("pipe", "w"),
-		);
-
-		/* at コマンド実行 (at hhmm MMDDYYYY) */
-		if(($proc = proc_open(sprintf("%s %02d%02d %02d%02d%04d",
-				"/usr/bin/at", $hour, $min, $month, $day, $year), $desc, $pipe))){
-
-			/* コマンド登録 */
-			fputs($pipe[0], $command);
-			fclose($pipe[0]);
-
-			/* job 番号を STDERR から取得 */
-			$buf = trim(fgets($pipe[2], 4096));
-			fclose($pipe[2]);
-
-			/* STDOUT close */
-			fclose($pipe[1]);
-
-			proc_close($proc);
-
-			/* job 番号をリターン */
-			$jobNum = preg_replace("/^job\s+(\d+).*$/", "$1", $buf);
-		}
-
-		$jobNum = mb_convert_encoding($jobNum, SYSTEM_CODE, CSV_CODE);
-
-		return $jobNum;
 	}
 
 	/**

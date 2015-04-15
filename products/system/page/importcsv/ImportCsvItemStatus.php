@@ -180,6 +180,17 @@
 
 		return $dbCheck;
 	}
+
+	/**
+	 * CSVアップロード実行
+	 * @param	$filePath	保存対象ファイルパス
+	 * @return	$result		アップロード実行結果
+	 */
+	protected function csvUpload($filePath) {
+		// 処理なし
+		$result = true;
+		return $result;
+	}
 }
 
 ?>

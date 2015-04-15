@@ -32,7 +32,7 @@
 			$fileName = $_FILES["file"]["name"];
 
 			// csv取込処理実行
-			$result = $importCsv->executeImport($filePath, $fileName, $testFlg);
+			$result = $importCsv->executeImport($filePath, $fileName, $testFlg, $updateFlg = DB_UPDATE);
 			// メッセージ取得
 			$resultMessage	= $importCsv->getResultMessage($result);
 			$errorMessage	= $importCsv->getErrorMessage();
@@ -42,16 +42,14 @@
 	}
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Navs</title>
-
+		<title>管理画面｜商品機能アイコン変更</title>
 		<!-- Bootstrap -->
-		<link href="../../system/style_code/css/bootstrap.min.css" rel="stylesheet">
-
+			<link href="../../system/style_code/css/bootstrap.min.css" rel="stylesheet" media="screen">
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 		<!--[if lt IE 9]>
@@ -61,20 +59,25 @@
 	</head>
 	<body>
 		<div  class="container">
-		<!-- Tabs -->
-			<section>
-				<h1>KVK 管理画面（商品ステータス）</h1>
-				<div>
-					<ul class="nav nav-tabs">
-						<li><a href="itemCSV.php">商品データ</a></li>
-						<li class="active"><a href="#">商品ステータス</a></li>
-						<li><a href="parts.php">部品データ</a></li>
-						<li><a href="itemStatusMaster.php">商品ステータスマスタ</a></li>
-						<li><a href="category.php">カテゴリマスタ</a></li>
-						<li><a href="makePdf.php">PDF設定</a></li>
+			<div class="page-header">
+				<h1>WEBサイト管理
+					<small>商品データ更新</small>
+				</h1>
+			</div>
+			<div class="row">
+				<div class="col-md-2">
+					<ul class="nav nav-pills nav-stacked">
+						<li class="active"><a href="#">商品情報更新</a></li>
+						<li><a href="itemStatusMaster.php">マスタデータ更新</a></li>
+						<li><a href="makePdf.php">PDF作成</a></li>
 					</ul>
 				</div>
-				<div>
+				<div class="col-md-10">
+					<ul class="nav nav-tabs">
+						<li><a href="itemCsv.php">商品情報更新</a></li>
+						<li><a href="parts.php">部品情報更新</a></li>
+						<li class="active"><a href="#">商品機能アイコン変更</a></li>
+					</ul>
 					<form class="form-horizontal well" action="#" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
 						<div class="form-group">
@@ -106,7 +109,7 @@
 						</div>
 					</form>
 				</div>
-			</section>
+			</div>
 		</div>
 		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
