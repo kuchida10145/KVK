@@ -39,6 +39,10 @@ define( 'VIEW_NG' , 1 );
 define( 'INISIAL_DISP' , 0 );
 define( 'CSV_DOWNLOAD' , 1 );
 
+// PDFステータス
+define( 'NOT_MAKE' , 0 );
+define( 'MAKED' , 1 );
+
 // DB取込ステータス
 define( 'CSV_UPDATE' , true );
 define( 'DB_UPDATE' , false );
@@ -129,8 +133,9 @@ define('PDF_STATUS_MISAKUSEI', '0');
 /** pdf作成ステータス(1：作成済み) */
 define('PDF_STATUS_ZUMI', '1');
 
-/** JOBコマンド */
-define('JOB_COMMAND', 'ls > /products/system/controller/page/makepdf/ExecuteMakePdfFile.php');
+/** pdf作成件数 */
+define('MAKE_PDF_COUNT', '3');
+
 
 /**
  * カテゴリ系
@@ -731,6 +736,9 @@ define('CSV_FILE_NAME_ONETIME_PARTS', 'onetime_parst.csv');
 /** csvファイル名（PDF作成中csvファイル） */
 define('MAKING_PDF_CSV', 'making_pdf.csv');
 
+/** csvファイル名（PDF作成中csvファイル） */
+define('MAKING_PDF_ITEM_CSV', 'making_pdf_item.csv');
+
 /** csvファイル名（DB更新中csvファイル） */
 define('UPDATE_CSV', 'item_update.csv');
 
@@ -757,5 +765,16 @@ define('PDF_FOLDER', 'bunkai');
 
 /** csvアップロードフォルダ */
 define('CSV_FOLDER', '../../system/save_csv/');
+/*----------------------------
+| PDF作成処理
+-----------------------------*/
+//PDFテンプレート
+define('PDF_TEMPLATE',dirname(__FILE__)."/../include/fram2.pdf");
+//PDFセーブ先ディレクトリ
+define('PDF_SAVE_DIR',dirname(__FILE__)."/savepdf/onetime_bunkai");
+//PDFセーブ先ディレクトリ（リンク用）
+define('PDF_SAVE_URL',"/savepdf/onetime_bunkai");
+//PDF画像保存先
+define('PDF_IMAGE_DIR',dirname(__FILE__)."/../products/upload");
 
 ?>

@@ -122,6 +122,33 @@ abstract class Page
 	}
 
 	/**
+	 * システムステータス更新
+	 * @param	$updateStatus	更新後ステータス
+	 * @return	$result			実行結果
+	 */
+	public function systemStatusUpdate($updateStatus) {
+		$whereSystem = "";			// システムデータ更新用where句
+		$dbCheck = "";
+		$nowStatus = "";
+		$updateArray = array();
+
+		$nowStatus = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
+
+		$updateArray = array(
+				COLUMN_NAME_SYSTEM_STATUS=>$updateStatus,
+		);
+
+		$whereSystem = COLUMN_NAME_SYSTEM_STATUS." = '".$nowStatus."'";
+		$dbCheck = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->update($updateArray, $whereSystem);
+
+		if(!$dbCheck) {
+			$this->{KEY_DB_CHECK_MESSAGE} = "システムステータスの更新に失敗しました。<br>";
+		}
+
+		return $dbCheck;
+	}
+
+	/**
 	 * 画面ステータス取得
 	 * @param	$dispName		対象画面
 	 * @return	$returnVal		画面ステータス
@@ -130,6 +157,19 @@ abstract class Page
 		$returnVal = "";
 
 		$returnVal = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getDispStatus($dispName);
+
+		return $returnVal;
+	}
+
+	/**
+	 * システムステータス取得
+	 * @param	-
+	 * @return	$returnVal		システムステータス
+	 */
+	public function getSystemStatus() {
+		$returnVal = "";
+
+		$returnVal = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
 
 		return $returnVal;
 	}

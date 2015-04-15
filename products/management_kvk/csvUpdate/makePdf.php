@@ -1,5 +1,5 @@
 <?php
-	include(dirname(__FILE__) . '/../../system/page/makepdf/ExecuteMakePdfFile.php');
+	include(dirname(__FILE__) . '/../../system/page/makepdf/CommonMakePDF.php');
 
 	// セッション
 	session_start();
@@ -40,7 +40,7 @@
 		if(isset($_POST['update_button']) && $_POST['update_button'] == "update") {
 // TODO:デバッグ用
 //			$result = $makePdf->updateData();
-			$result = $makePdf->partsUpdateDebug(dirname(__FILE__));
+			$result = $makePdf->executeMakePdf(dirname(__FILE__));
 //			$result = $makePdf->itemUpdateDebug();
 		}
 
