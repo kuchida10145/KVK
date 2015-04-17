@@ -739,6 +739,9 @@ define('MAKING_PDF_CSV', 'making_pdf.csv');
 /** csvファイル名（PDF作成中csvファイル） */
 define('MAKING_PDF_ITEM_CSV', 'making_pdf_item.csv');
 
+/** csvファイル名（バックアップ商品csvファイル） */
+define('BACK_UP_ITEM_CSV', 'backup_item.csv');
+
 /** csvファイル名（DB更新中csvファイル） */
 define('UPDATE_CSV', 'item_update.csv');
 
@@ -775,6 +778,6 @@ define('PDF_SAVE_DIR',dirname(__FILE__)."/savepdf/onetime_bunkai");
 //PDFセーブ先ディレクトリ（リンク用）
 define('PDF_SAVE_URL',"/savepdf/onetime_bunkai");
 //PDF画像保存先
-define('PDF_IMAGE_DIR',dirname(__FILE__)."/../products/upload");
+define('PDF_IMAGE_DIR',dirname(__FILE__)."/../upload");
 
 ?>

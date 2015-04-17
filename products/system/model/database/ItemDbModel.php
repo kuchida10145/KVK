@@ -32,6 +32,7 @@ class ItemDbModel extends DbModel
 				'variation_no',
 				'note',
 				'item_image',
+				'parent_id',
 				'category_id',
 				'pdf_status',
 				'search_word',
@@ -295,7 +296,42 @@ class ItemDbModel extends DbModel
 
 		$dbRow = $this->db->getData($sql);
 
-		$updateClm = compareData($dbRow, $targetData);
+		$updateClm = array_diff($targetData, $dbRow);
+
+		return $updateClm;
+	}
+
+	/**
+	 * データの差異をチェックする。
+	 *
+	 * @param  array	$dbData		DBから取得したデータ
+	 * @param  array	$targetData	チェック対象データ
+	 * @return array	$updateClm	更新対象データ
+	 */
+	protected function compareData($dbData, $targetData) {
+		$updateClm = array();
+
+		foreach ($dbData as $key => $value) {
+			// 取込データにid,登録日,更新日は無い
+			if($key == 'id'){
+				$updateClm[$key] = $value;
+				continue;
+			} elseif($key == COLUMN_NAME_PDF_STATUS) {
+				$updateClm[$key] = $value;
+				continue;
+			} elseif ($key == COLUMN_NAME_REGIST_DATE) {
+				$updateClm[$key] = $value;
+				continue;
+			} elseif ($key == COLUMN_NAME_UPDATE_DATE) {
+				$updateClm[$key] = $value;
+				continue;
+			}
+
+			// 値が違えば更新対象データ
+			if($value != $targetData[$key]){
+				$updateClm[$key] = $targetData[$key];
+			}
+		}
 
 		return $updateClm;
 	}

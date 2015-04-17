@@ -38,7 +38,7 @@
 			$this->sytemStatus = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->getSystemStatus();
 
 			// csvアップロード情報
-			$this->uploadInfo = CSV_FOLDER.CSV_FILE_NAME_ONETIME_ITEM;
+			$this->uploadInfo = CSV_FOLDER.MAKING_PDF_ITEM_CSV;
 		}
 
 	/**
@@ -225,9 +225,33 @@
 	 */
 	protected function csvUpload($filePath) {
 		$result = true;
+		$csvArray = array();
+		$backupArray = array();
+		$checkArray = array();
+		$uploadArray = array();
+		$uploadFlg = true;
 
-		// ファイルアップロード
-		$result = move_uploaded_file($filePath, $this->uploadInfo);
+// 		if(file_exists(CSV_FOLDER.BACK_UP_ITEM_CSV)) {
+// 			// バックアップファイルとデータ比較
+// 			$csvArray = $this->getCsvData($filePath);
+// 			$backupArray = $this->getCsvData(CSV_FOLDER.BACK_UP_ITEM_CSV);
+// 			foreach ($backupArray as $key=>$val) {
+// 				foreach ($backupArray as $back_key=>$back_val) {
+// 					$checkArray = array_diff($val, $back_val);
+// 					if(empty($checkArray)) {
+// 						$uploadFlg = false;
+// 						break;
+// 					}
+// 				}
+// 				if($uploadFlg) {
+// 					$uploadArray[] = $val;
+// 				}
+// 			}
+// 			$result = $this->setExportItem($uploadArray);
+// 		} else {
+			// ファイルアップロード
+			$result = move_uploaded_file($filePath, $this->uploadInfo);
+// 		}
 
 		if($result) {
 			// システムステータス更新
@@ -235,6 +259,113 @@
 		} else {
 			$this->{KEY_DB_CHECK_MESSAGE} = "商品CSVファイルのアップロードに失敗しました。<br>";
 		}
+
+		return $result;
+	}
+
+	/**
+	 * CSVデータ取得
+	 * @param  $csvFile	csvファイルパス
+	 * @return $csv		UTF-8変換後のcsvデータ
+	 */
+	protected function getCsvData($csvFile) {
+		$csv  = array();
+		// csvから取り込んだデータをUTF-8に変換する
+		$data = file_get_contents($csvFile);
+		$data = mb_convert_encoding($data, SYSTEM_CODE, CSV_CODE);
+		$temp = tmpfile();
+
+		fwrite($temp, $data);
+		rewind($temp);
+
+		while (($data = fgetcsv($temp, 0, ",")) !== FALSE) {
+			$csv[] = $data;
+		}
+		fclose($temp);
+
+		return $csv;
+	}
+
+	/**
+	 * csvファイル出力メイン処理(商品)
+	 * @param	array()		csv保存対象データ
+	 * @return	$result		出力結果（true：csv取込成功	false：csv取込失敗）
+	 */
+	protected function setExportItem($updateArray) {
+		$filePointer = "";			// ファイルポインタ
+		$headerArray = array();		// csvヘッダー行
+		$result = true;
+		$makeFilePath = $this->uploadInfo;
+
+		// csvファイル書き込み
+		$filePointer = fopen($makeFilePath, 'w');
+		$headerArray = $this->csvHeaderItem;
+		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
+		fputcsv($filePointer, $headerArray);
+
+		foreach ($updateArray as $itemDataRow){
+			$csvDataArray = array(
+					// 品番
+					$itemDataRow[ITEM_ID_COLUMN_ITEM],
+					// 品名
+					$itemDataRow[ITEM_NAME_COLUMN_ITEM],
+					// 写真
+					$itemDataRow[ITEM_PHOTO_COLUMN_ITEM],
+					// 図面
+					$itemDataRow[MAP_COLUMN_ITEM],
+					// 取説
+					$itemDataRow[TORISETSU_COLUMN_ITEM],
+					// 施工
+					$itemDataRow[SEKOU_COLUMN_ITEM],
+					// 分解図本体
+					$itemDataRow[BUNKAI_COLUMN_ITEM],
+					// 分解図_シャワー
+					$itemDataRow[SHOWER_COLUMN_ITEM],
+					// 購入
+					$itemDataRow[BUY_STATUS_COLUMN_ITEM],
+					// 価格
+					$itemDataRow[PRICE_COLUMN_ITEM],
+					// 価格（税込み）
+					$itemDataRow[PRICE_ZEI_COLUMN_ITEM],
+					// 備考
+					$itemDataRow[NOTE_COLUMN_ITEM],
+					// 商品イメージ
+					$itemDataRow[ITEM_IMAGE_COLUMN_ITEM],
+					// バリエーション親品番
+					$itemDataRow[VARIATION_NAME_COLUMN_ITEM],
+					// バリエーション順序
+					$itemDataRow[VARIATION_NO_COLUMN_ITEM],
+					// カタログ年度
+					$itemDataRow[CATALOG_YEAR_COLUMN_ITEM],
+					// カタログページ
+					$itemDataRow[CATALOG_PAGE_COLUMN_ITEM],
+					// 検索ワード
+					$itemDataRow[SEARCH_WORD_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_1_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_2_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_3_COLUMN_ITEM],
+					// 発売時期
+					$itemDataRow[SELL_KIKAN_COLUMN_ITEM],
+					// 代替品
+					$itemDataRow[DAIGAE_COLUMN_ITEM],
+					// 本体取付穴
+					$itemDataRow[SUNPOU_COLUMN_ITEM],
+					// ピッチ
+					$itemDataRow[PITCH_COLUMN_ITEM],
+					// シャワーS取付穴
+					$itemDataRow[SHOWER_SUNPOU_COLUMN_ITEM],
+					// 削除
+					$itemDataRow[DELETE_COLUMN_ITEM],
+					// カテゴリID
+					$itemDataRow[CATEGORY_ID_COLUMN_ITEM],
+			);
+			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
+			fputcsv($filePointer, $csvDataArray);
+		}
+		fclose($filePointer);
 
 		return $result;
 	}

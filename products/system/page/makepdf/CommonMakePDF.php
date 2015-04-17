@@ -22,6 +22,9 @@ class CommonMakePDF extends Page{
 		// pdf作成中商品csvファイル
 		$this->makingPdfCsvInfoItem = CSV_FOLDER.MAKING_PDF_ITEM_CSV;
 
+		// バックアップ商品csvファイル
+		$this->backupCsvInfoItem = CSV_FOLDER.BACK_UP_ITEM_CSV;
+
 		// 出力csvファイルのヘッダー行（パーツ）
 		$this->csvHeader = array(
 				'番号',
@@ -318,8 +321,8 @@ class CommonMakePDF extends Page{
 		$pdfTime = $this->dayVal." ".$this->dayHour.":".$this->dayMin.":"."00";
 		$result = true;
 
-		// csvファイル存在チェック
-		if(!file_exists($this->uploadInfoItem)) {
+		// 商品csvファイル存在チェック
+		if(!file_exists($this->makingPdfCsvInfoItem)) {
 			// システムステータス更新（pdf作成待ち：1⇒pdf作成中：2）
 			$result = $this->systemStatusUpdate(SYSTEM_STATUS_PDF_MAKE);
 		}
@@ -333,13 +336,11 @@ class CommonMakePDF extends Page{
 				$result = $this->itemUpdate($executePath);
 			}
 		} elseif($systemStatus == SYSTEM_STATUS_PDF_MAKE) {
-			// csvファイル存在チェック
-			if(!file_exists($this->uploadInfo)) {
+			// 部品csvファイル存在チェック
+			if(!file_exists($this->makingPdfCsvInfo)) {
 				// システムステータス更新（pdf作成中：2⇒pdf作成完了：3）
-				$result = $this->systemStatusUpdate(SYSTEM_STATUS_PDF_FINISH);
-			}
-			// 日付チェック
-			if($nowData > $pdfTime) {
+				$result = $this->systemStatusUpdate(SYSTEM_STATUS_NORMAL);
+			} elseif($nowData > $pdfTime) {
 				// 部品データ更新
 				$result = $this->partsUpdate($executePath);
 			}
@@ -377,6 +378,8 @@ class CommonMakePDF extends Page{
 		$pdfCount = 0;
 		$dataGetFlg = false;
 		$pdfResult = false;
+		$itemUpload = true;
+		$dbPartsCheck = true;
 
 		// ファイル存在チェック
 		if(file_exists($this->makingPdfCsvInfo)) {
@@ -409,6 +412,8 @@ class CommonMakePDF extends Page{
 				if($dataGetFlg) {
 					if(!empty($nextArray)) {
 						$makePdfArray = $nextArray;
+						$nextArray = array();
+						$itemUpload = true;
 					}
 					// pdf作成用データ取得
 					$makePdfArray[] = $value;
@@ -457,7 +462,7 @@ class CommonMakePDF extends Page{
 							}
 
 							// PDF作成エラーチェック
-							if($dbPartsCheck) {
+							if($dbPartsCheck && $itemUpload) {
 								// 商品データ更新
 								$itemUpdateKey = explode("・", $makePdfArray[0][ITEM_COLUMN_PARTS]);
 								foreach ($itemUpdateKey as $key=>$value) {
@@ -481,7 +486,8 @@ class CommonMakePDF extends Page{
 										$result = false;
 									}
 								}
-							} else {
+								$itemUpload = false;
+							} elseif(!$dbPartsCheck && $itemUpload) {
 								// 商品データを非表示にする
 								$itemUpdateKey = explode("・", $makePdfArray[0][ITEM_COLUMN_PARTS]);
 								foreach ($itemUpdateKey as $key=>$value) {
@@ -502,6 +508,7 @@ class CommonMakePDF extends Page{
 								}
 								$this->{KEY_ERROR_MESSAGE} = $this->{KEY_ERROR_MESSAGE}.MESSAGE_FAIL_UPDATE_PARTS.$dataArray[COLUMN_NAME_PARTS_ID]."<br>";
 								$result = false;
+								$itemUpload = false;
 							}
 						}
 					} else {
@@ -542,7 +549,7 @@ class CommonMakePDF extends Page{
 			}
 		}
 
-		if($dataCount == 1 && $pdfCount == 0) {
+		if(empty($updateArray)) {
 			// csvファイル削除
 			$result = unlink($this->makingPdfCsvInfo);
 			$result = $this->systemStatusUpdate(SYSTEM_STATUS_PDF_FINISH);
@@ -568,22 +575,13 @@ class CommonMakePDF extends Page{
 		$updateArray = array();	// 更新対象配列
 		$pdfArrat = array();
 		$makeCount = 0;
-		$keyItemID = $targetArray[ITEM_ID_COLUMN_ITEM];				// 検索key(品番：部品)
-		$keyCategoryNo = $targetArray[CATEGORY_ID_COLUMN_ITEM];		// 検索Key(ファイル名)
 		$limit = "";
 		$order = "";
-
-		// カタログファイル名作成
-		$catalogLink = $this->makeCatalogFileName(
-				$targetArray[CATALOG_YEAR_COLUMN_ITEM], $targetArray[CATALOG_PAGE_COLUMN_ITEM]);
-
-		// カテゴリID分解
-		$parentIDVal = mb_substr($targetArray[CATEGORY_ID_COLUMN_ITEM], -4, NULL);
-		$categoryIDVal = substr($targetArray[CATEGORY_ID_COLUMN_ITEM], -3);
+		$errorMessage = array();
 
 		// ファイル存在チェック
 		if(file_exists($this->makingPdfCsvInfoItem)) {
-			// pdf作成、DB更新処理実行
+			// DB更新処理実行
 			$pdfArrat = $this->getCsvData($this->makingPdfCsvInfoItem);
 			// 商品データ更新
 			foreach($pdfArrat as $key=>$targetArray) {
@@ -593,94 +591,43 @@ class CommonMakePDF extends Page{
 				}
 
 				if($makeCount < 500) {
-					//DB登録データ作成
-					// 商品DB登録データ生成
-					$dataArray = array(
-							// 品番（商品）
-							COLUMN_NAME_ITEM_ID=>$targetArray[ITEM_ID_COLUMN_ITEM],
-							// 品名
-							COLUMN_NAME_ITEM_NAME=>$targetArray[ITEM_NAME_COLUMN_ITEM],
-							// 表示ステータス
-							COLUMN_NAME_VIEW_STATUS=>$targetArray[DELETE_COLUMN_ITEM],
-							// 商品ステータス
-							COLUMN_NAME_ITEM_STATUS=>"",
-							// 希望小売価格
-							COLUMN_NAME_PRICE=>$targetArray[PRICE_COLUMN_ITEM],
-							// 希望小売価格（税込み）
-							COLUMN_NAME_PRICE_ZEI=>$targetArray[PRICE_ZEI_COLUMN_ITEM],
-							// 図面データ
-							COLUMN_NAME_MAP_DATA=>$targetArray[MAP_COLUMN_ITEM],
-							// 取説データ
-							COLUMN_NAME_TORISETSU_DATA=>$targetArray[TORISETSU_COLUMN_ITEM],
-							// 工説データ
-							COLUMN_NAME_KOUSETSU_DATA=>$targetArray[SEKOU_COLUMN_ITEM],
-							// 分解図データ
-							COLUMN_NAME_BUNKAI_DATA=>$targetArray[BUNKAI_COLUMN_ITEM],
-							// シャワーデータ
-							COLUMN_NAME_SHOWER_DATA=>$targetArray[SHOWER_COLUMN_ITEM],
-							// 購入フラグ
-							COLUMN_NAME_BUY_STATUS=>$targetArray[BUY_STATUS_COLUMN_ITEM],
-							// カタログへのリンク
-							COLUMN_NAME_CATALOG_LINK=>$catalogLink,
-							// バリエーション親品番
-							COLUMN_NAME_PARENT_VARIATION=>$targetArray[VARIATION_NAME_COLUMN_ITEM],
-							// バリエーション表示順
-							COLUMN_NAME_VARIATION_NO=>$targetArray[VARIATION_NO_COLUMN_ITEM],
-							// 備考
-							COLUMN_NAME_NOTE=>$targetArray[NOTE_COLUMN_ITEM],
-							// 商品イメージ画像
-							COLUMN_NAME_ITEM_IMAGE=>"",
-							// 親カテゴリID
-							COLUMN_NAME_PARENT_ID=>$parentIDVal,
-							// 子カテゴリID
-							COLUMN_NAME_CATEGORY_ID=>$categoryIDVal,
-							// 検索ワード
-							COLUMN_NAME_SEARCH_WORD=>$targetArray[SEARCH_WORD_COLUMN_ITEM],
-							// 分岐金具1
-							COLUMN_NAME_BUNKI_KANAGU_1=>$targetArray[BUNKI_KANAGU_1_COLUMN_ITEM],
-							// 分岐金具2
-							COLUMN_NAME_BUNKI_KANAGU_2=>$targetArray[BUNKI_KANAGU_2_COLUMN_ITEM],
-							// 分岐金具3
-							COLUMN_NAME_BUNKI_KANAGU_3=>$targetArray[BUNKI_KANAGU_3_COLUMN_ITEM],
-							// 販売時期
-							COLUMN_NAME_SELL_TIME=>$targetArray[SELL_KIKAN_COLUMN_ITEM],
-							// 代替品
-							COLUMN_NAME_SUB_ITEM=>$targetArray[DAIGAE_COLUMN_ITEM],
-							// 本体取付穴
-							COLUMN_NAME_SUNPOU=>$targetArray[SUNPOU_COLUMN_ITEM],
-							// ピッチ
-							COLUMN_NAME_PITCH=>$targetArray[PITCH_COLUMN_ITEM],
-							// シャワー取付穴
-							COLUMN_NAME_SHOWER_SUNPOU=>$targetArray[SHOWER_SUNPOU_COLUMN_ITEM],
-							// 更新日
-							COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
-					);
+					$dataArray = $this->convertCsvData($targetArray);
 
-					// where句生成
-					$where = COLUMN_NAME_ITEM_ID." = '".$keyItemID."' AND ".COLUMN_NAME_CATEGORY_ID." = '".$keyCategoryNo."'";
+					// where句
+					// カテゴリID分解
+					$parentIDVal = substr($targetArray[CATEGORY_ID_COLUMN_ITEM], -4, 1);
+					$categoryIDVal = substr($targetArray[CATEGORY_ID_COLUMN_ITEM], -3);
+					$where = COLUMN_NAME_ITEM_ID." = '".$targetArray[ITEM_ID_COLUMN_ITEM].
+					"' AND ".COLUMN_NAME_PARENT_ID." = '".$parentIDVal.
+					"' AND ".COLUMN_NAME_CATEGORY_ID." = '".$categoryIDVal."'";
 
 					// 削除フラグ取得
 					$deleteFlg = $this->convertDeleteFlg($targetArray[DELETE_COLUMN_ITEM]);
 					//削除フラグチェック
 					if($deleteFlg){
 						// DB削除処理(表示フラグ更新)
-						$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->update($dataArray, $where);
+						$dbCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->update($dataArray, $where);
 					} else {
 						// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
-						$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->checkData($where);
+						$dbCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->checkData($where);
 						if($dbCheck) {
 							// DBUpdate処理
-							$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->update($dataArray, $where);
+							$dbCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->update($dataArray, $where);
 						} else {
 							// DBinsert処理
 							$dataArray[COLUMN_NAME_PDF_STATUS] = NOT_MAKE;				// pdf未作成
 							$dataArray[COLUMN_NAME_VIEW_STATUS] = VIEW_NG;				// 非表示（pdfファイルが未作成なので）
 							$dataArray[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日追加
-							$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->insertDB($dataArray);
+							$dbCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->insertDB($dataArray);
+						}
+
+						if(!$dbCheck) {
+							$errorMessage[] = "商品データの登録に失敗しました。品番：{$targetArray[ITEM_ID_COLUMN_ITEM]}<br>";
+							$result = false;
 						}
 					}
 				} else {
-					$updateArray[] = $partsRow;
+					$updateArray[] = $targetArray;
 				}
 				$makeCount = $makeCount + 1;
 			}
@@ -692,13 +639,19 @@ class CommonMakePDF extends Page{
 					continue;
 				}
 				// where句
-				$where = COLUMN_NAME_ITEM_ID." = '".$keyItemID."' AND ".COLUMN_NAME_CATEGORY_ID." = '".$keyCategoryNo."'";
+				// カテゴリID分解
+				$parentIDVal = substr($value[CATEGORY_ID_COLUMN_ITEM], -4, 1);
+				$categoryIDVal = substr($value[CATEGORY_ID_COLUMN_ITEM], -3);
+				$where = COLUMN_NAME_ITEM_ID." = '".$value[ITEM_ID_COLUMN_ITEM].
+				"' AND ".COLUMN_NAME_PARENT_ID." = '".$parentIDVal.
+				"' AND ".COLUMN_NAME_CATEGORY_ID." = '".$categoryIDVal."'";
 				// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
-				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_PDF_ITEM)->checkData($where);
+				$dbCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->checkData($where);
 				if($dbCheck) {
+					$dataArray = $this->convertCsvData($value);
 					$targetArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->updateCheck($value, $where);
-					$checkArray = array_diff($value, $targetArray);
-					if(!empty($checkArray)){
+//					$checkArray = array_diff($value, $targetArray);
+					if(!empty($targetArray)){
 						$updateArray[] = $value;
 					}
 				} else {
@@ -707,18 +660,107 @@ class CommonMakePDF extends Page{
 			}
 		}
 
-		if($makeCount == 1) {
+		if(empty($updateArray)) {
 			// csvファイル削除
 			$result = unlink($this->makingPdfCsvInfoItem);
-
 			// システムステータス更新（pdf作成待ち：1⇒pdf作成中：2）
 			$result = $this->systemStatusUpdate(SYSTEM_STATUS_PDF_MAKE);
+			// バックアップcsv作成
+			$result = $this->backupItem();
 		} else {
 			// csvファイル作成
-			$result = $this->setExport($updateArray, $path);
+			$result = $this->setExportItem($updateArray, $path);
+		}
+
+		// エラーメッセージセット
+		if(!$result) {
+			foreach ($errorMessage as $key=>$value) {
+				$errorMessageValue = $errorMessageValue.$value;
+			}
+			$this->{KEY_ERROR_MESSAGE} = $errorMessageValue;
 		}
 
 		return $result;
+	}
+
+	/**
+	 * 商品csvデータ加工
+	 * @param	array $csvData	csvデータ
+	 * @return	array $dbData	DB更新用データ
+	 */
+	protected function convertCsvData($csvData) {
+		// カタログファイル名作成
+		$catalogLink = $this->makeCatalogFileName(
+				$csvData[CATALOG_YEAR_COLUMN_ITEM], $csvData[CATALOG_PAGE_COLUMN_ITEM]);
+
+		// カテゴリID分解
+		$parentIDVal = substr($csvData[CATEGORY_ID_COLUMN_ITEM], -4, 1);
+		$categoryIDVal = substr($csvData[CATEGORY_ID_COLUMN_ITEM], -3);
+
+		//DB登録データ作成
+		// 商品DB登録データ生成
+		$dbData = array(
+				// 品番（商品）
+				COLUMN_NAME_ITEM_ID=>$csvData[ITEM_ID_COLUMN_ITEM],
+				// 品名
+				COLUMN_NAME_ITEM_NAME=>$csvData[ITEM_NAME_COLUMN_ITEM],
+				// 表示ステータス
+				COLUMN_NAME_VIEW_STATUS=>$csvData[DELETE_COLUMN_ITEM],
+				// 商品ステータス
+				COLUMN_NAME_ITEM_STATUS=>"",
+				// 希望小売価格
+				COLUMN_NAME_PRICE=>$csvData[PRICE_COLUMN_ITEM],
+				// 希望小売価格（税込み）
+				COLUMN_NAME_PRICE_ZEI=>$csvData[PRICE_ZEI_COLUMN_ITEM],
+				// 図面データ
+				COLUMN_NAME_MAP_DATA=>$csvData[MAP_COLUMN_ITEM],
+				// 取説データ
+				COLUMN_NAME_TORISETSU_DATA=>$csvData[TORISETSU_COLUMN_ITEM],
+				// 工説データ
+				COLUMN_NAME_KOUSETSU_DATA=>$csvData[SEKOU_COLUMN_ITEM],
+				// 分解図データ
+				COLUMN_NAME_BUNKAI_DATA=>$csvData[BUNKAI_COLUMN_ITEM],
+				// シャワーデータ
+				COLUMN_NAME_SHOWER_DATA=>$csvData[SHOWER_COLUMN_ITEM],
+				// 購入フラグ
+				COLUMN_NAME_BUY_STATUS=>$csvData[BUY_STATUS_COLUMN_ITEM],
+				// カタログへのリンク
+				COLUMN_NAME_CATALOG_LINK=>$catalogLink,
+				// バリエーション親品番
+		COLUMN_NAME_PARENT_VARIATION=>$csvData[VARIATION_NAME_COLUMN_ITEM],
+		// バリエーション表示順
+		COLUMN_NAME_VARIATION_NO=>$csvData[VARIATION_NO_COLUMN_ITEM],
+		// 備考
+		COLUMN_NAME_NOTE=>$csvData[NOTE_COLUMN_ITEM],
+		// 商品イメージ画像
+		COLUMN_NAME_ITEM_IMAGE=>"",
+		// 親カテゴリID
+		COLUMN_NAME_PARENT_ID=>$parentIDVal,
+		// 子カテゴリID
+		COLUMN_NAME_CATEGORY_ID=>$categoryIDVal,
+		// 検索ワード
+		COLUMN_NAME_SEARCH_WORD=>$csvData[SEARCH_WORD_COLUMN_ITEM],
+		// 分岐金具1
+		COLUMN_NAME_BUNKI_KANAGU_1=>$csvData[BUNKI_KANAGU_1_COLUMN_ITEM],
+		// 分岐金具2
+		COLUMN_NAME_BUNKI_KANAGU_2=>$csvData[BUNKI_KANAGU_2_COLUMN_ITEM],
+		// 分岐金具3
+		COLUMN_NAME_BUNKI_KANAGU_3=>$csvData[BUNKI_KANAGU_3_COLUMN_ITEM],
+		// 販売時期
+		COLUMN_NAME_SELL_TIME=>$csvData[SELL_KIKAN_COLUMN_ITEM],
+		// 代替品
+		COLUMN_NAME_SUB_ITEM=>$csvData[DAIGAE_COLUMN_ITEM],
+		// 本体取付穴
+		COLUMN_NAME_SUNPOU=>$csvData[SUNPOU_COLUMN_ITEM],
+		// ピッチ
+		COLUMN_NAME_PITCH=>$csvData[PITCH_COLUMN_ITEM],
+		// シャワー取付穴
+		COLUMN_NAME_SHOWER_SUNPOU=>$csvData[SHOWER_SUNPOU_COLUMN_ITEM],
+		// 更新日
+		COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
+		);
+
+		return $dbData;
 	}
 
 	/**
@@ -791,6 +833,182 @@ class CommonMakePDF extends Page{
 	}
 
 	/**
+	 * csvファイル出力メイン処理(商品)
+	 * @param	array()		csv保存対象データ
+	 * @return	$result		出力結果（true：csv取込成功	false：csv取込失敗）
+	 */
+	protected function setExportItem($updateArray, $executePath) {
+		$filePointer = "";			// ファイルポインタ
+		$headerArray = array();		// csvヘッダー行
+		$result = true;
+		$makeFilePath = $this->makingPdfCsvInfoItem;
+
+		// csvファイル書き込み
+		$filePointer = fopen($makeFilePath, 'w');
+		$headerArray = $this->csvHeaderItem;
+		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
+		fputcsv($filePointer, $headerArray);
+
+		foreach ($updateArray as $itemDataRow){
+			$csvDataArray = array(
+					// 品番
+					$itemDataRow[ITEM_ID_COLUMN_ITEM],
+					// 品名
+					$itemDataRow[ITEM_NAME_COLUMN_ITEM],
+					// 写真
+					$itemDataRow[ITEM_PHOTO_COLUMN_ITEM],
+					// 図面
+					$itemDataRow[MAP_COLUMN_ITEM],
+					// 取説
+					$itemDataRow[TORISETSU_COLUMN_ITEM],
+					// 施工
+					$itemDataRow[SEKOU_COLUMN_ITEM],
+					// 分解図本体
+					$itemDataRow[BUNKAI_COLUMN_ITEM],
+					// 分解図_シャワー
+					$itemDataRow[SHOWER_COLUMN_ITEM],
+					// 購入
+					$itemDataRow[BUY_STATUS_COLUMN_ITEM],
+					// 価格
+					$itemDataRow[PRICE_COLUMN_ITEM],
+					// 価格（税込み）
+					$itemDataRow[PRICE_ZEI_COLUMN_ITEM],
+					// 備考
+					$itemDataRow[NOTE_COLUMN_ITEM],
+					// 商品イメージ
+					$itemDataRow[ITEM_IMAGE_COLUMN_ITEM],
+					// バリエーション親品番
+					$itemDataRow[VARIATION_NAME_COLUMN_ITEM],
+					// バリエーション順序
+					$itemDataRow[VARIATION_NO_COLUMN_ITEM],
+					// カタログ年度
+					$itemDataRow[CATALOG_YEAR_COLUMN_ITEM],
+					// カタログページ
+					$itemDataRow[CATALOG_PAGE_COLUMN_ITEM],
+					// 検索ワード
+					$itemDataRow[SEARCH_WORD_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_1_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_2_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_3_COLUMN_ITEM],
+					// 発売時期
+					$itemDataRow[SELL_KIKAN_COLUMN_ITEM],
+					// 代替品
+					$itemDataRow[DAIGAE_COLUMN_ITEM],
+					// 本体取付穴
+					$itemDataRow[SUNPOU_COLUMN_ITEM],
+					// ピッチ
+					$itemDataRow[PITCH_COLUMN_ITEM],
+					// シャワーS取付穴
+					$itemDataRow[SHOWER_SUNPOU_COLUMN_ITEM],
+					// 削除
+					$itemDataRow[DELETE_COLUMN_ITEM],
+					// カテゴリID
+					$itemDataRow[CATEGORY_ID_COLUMN_ITEM],
+			);
+			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
+			fputcsv($filePointer, $csvDataArray);
+		}
+		fclose($filePointer);
+
+		return $result;
+	}
+
+	/**
+	 * バックアップ用csvファイル出力
+	 * @return	$result		出力結果（true：csv取込成功	false：csv取込失敗）
+	 */
+	protected function backupItem() {
+		$filePointer = "";			// ファイルポインタ
+		$headerArray = array();		// csvヘッダー行
+		$result = true;
+		$makeFilePath = $this->backupCsvInfoItem;
+
+		// csvファイル書き込み
+		$filePointer = fopen($makeFilePath, 'w');
+		$headerArray = $this->csvHeaderItem;
+		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
+		fputcsv($filePointer, $headerArray);
+
+		// データ取得
+		$itemCodeArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->getAll();
+
+		foreach ($itemCodeArray as $itemDataRow){
+			// カタログページ分割
+			$fileName = explode(".",$itemDataRow[COLUMN_NAME_CATALOG_LINK]);
+			$catalogYear = explode("-",$fileName[0]);
+			$catalogPage = explode("_",$catalogYear[1]);
+
+			$csvDataArray = array(
+					// 品番
+					$itemDataRow[COLUMN_NAME_ITEM_ID],
+					// 品名
+					$itemDataRow[COLUMN_NAME_ITEM_NAME],
+					// 写真
+					$itemDataRow[COLUMN_NAME_ITEM_IMAGE],
+					// 図面
+					$itemDataRow[COLUMN_NAME_MAP_DATA],
+					// 取説
+					$itemDataRow[COLUMN_NAME_TORISETSU_DATA],
+					// 施工
+					$itemDataRow[COLUMN_NAME_KOUSETSU_DATA],
+					// 分解図本体
+					$itemDataRow[COLUMN_NAME_BUNKAI_DATA],
+					// 分解図_シャワー
+					$itemDataRow[COLUMN_NAME_SHOWER_DATA],
+					// 購入
+					$itemDataRow[COLUMN_NAME_BUY_STATUS],
+					// 価格
+					$itemDataRow[COLUMN_NAME_PRICE],
+					// 価格（税込み）
+					$itemDataRow[COLUMN_NAME_PRICE_ZEI],
+					// 備考
+					$itemDataRow[COLUMN_NAME_NOTE],
+					// 商品イメージ
+					$itemDataRow[COLUMN_NAME_ITEM_IMAGE],
+					// バリエーション親品番
+					$itemDataRow[COLUMN_NAME_PARENT_VARIATION],
+					// バリエーション順序
+					$itemDataRow[COLUMN_NAME_VARIATION_NO],
+					// カタログ年度
+					$catalogYear[0],
+					// カタログページ
+					$catalogPage[1],
+					// 検索ワード
+					$itemDataRow[COLUMN_NAME_SEARCH_WORD],
+					// 分岐金具
+					$itemDataRow[COLUMN_NAME_BUNKI_KANAGU_1],
+					// 分岐金具
+					$itemDataRow[COLUMN_NAME_BUNKI_KANAGU_2],
+					// 分岐金具
+					$itemDataRow[COLUMN_NAME_BUNKI_KANAGU_3],
+					// 発売時期
+					$itemDataRow[COLUMN_NAME_SELL_TIME],
+					// 代替品
+					$itemDataRow[COLUMN_NAME_SUB_ITEM],
+					// 本体取付穴
+					$itemDataRow[COLUMN_NAME_SUNPOU],
+					// ピッチ
+					$itemDataRow[COLUMN_NAME_PITCH],
+					// シャワーS取付穴
+					$itemDataRow[COLUMN_NAME_SHOWER_SUNPOU],
+					// 削除
+					$itemDataRow[COLUMN_NAME_VIEW_STATUS],
+					// カテゴリID
+					$itemDataRow[COLUMN_NAME_PARENT_ID].$itemDataRow[COLUMN_NAME_CATEGORY_ID]
+			);
+			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
+			fputcsv($filePointer, $csvDataArray);
+		}
+		fclose($filePointer);
+		return $result;
+	}
+
+
+
+	/**
 	 * @param array $pdfArray ＰＤＦ作成部品データ
 	 * @return bool
 	 */
@@ -815,13 +1033,13 @@ class CommonMakePDF extends Page{
 		}
 		//画像取得
 
-		$file_name = getParam($pdfArray[0],'file_name');
+		$file_name = getParam($pdfArray[0],FILE_COLUMN_PARTS);
 		if($file_name == ''){
 			return false;
 		}
 
 		//分解図名
-		$name = getParam($pdfArray[0],'item_id');
+		$name = getParam($pdfArray[0],ITEM_COLUMN_PARTS);
 		if($name == ''){
 			return false;
 		}
@@ -847,26 +1065,57 @@ class CommonMakePDF extends Page{
 
 		foreach($pdfArray as $key => $parts){
 			$objPdf->SetX(180.0);
-			if($parts['parts_no'] != ''){
-				$price = '￥'.number_format($parts['price']).'(税込￥'.number_format($parts['price_zei']).')';
-				$objPdf->Cell($width_ar['parts_no']  , $line, $parts['parts_no'] , 1,0, 'C');
-				$objPdf->Cell($width_ar['parts_id']   , $line, $parts['parts_id'] , 1);
-				$objPdf->Cell($width_ar['parts_name'], $line, $parts['parts_name'] , 1);
+			if($parts[NO_COLUMN_PARTS] != ''){
+				$price = '￥'.number_format($parts[PRICE_COLUMN_PARTS]).'(税込￥'.number_format($parts[PRICE_ZEI_COLUMN_PARTS]).')';
+				$objPdf->Cell($width_ar['parts_no']  , $line, $parts[NO_COLUMN_PARTS] , 1,0, 'C');
+				$objPdf->Cell($width_ar['parts_id']   , $line, $parts[PARTS_ID_COLUMN_PARTS] , 1);
+				$objPdf->Cell($width_ar['parts_name'], $line, $parts[PARTS_NAME_COLUMN_PARTS] , 1);
 				$objPdf->Cell($width_ar['price_zei'] , $line, $price , 1);
-				$objPdf->Cell($width_ar['note'] ,      $line, $parts['note'] , 1,1);
+				$objPdf->Cell($width_ar['note'] ,      $line, $parts[NOTE_COLUMN_PARTS] , 1,1);
 			}
 			else{
-				$objPdf->Cell(104, $line, $parts['parts_name'], 1,1);
+				$objPdf->Cell(104, $line, $parts[PARTS_ID_COLUMN_PARTS], 1,1);
 			}
 		}
 
-		$objPdf->Image(PDF_IMAGE_DIR.'/'.$file_name.'.png', 20, 30,150);
+		$objPdf->Image(PDF_IMAGE_DIR.'/'.$file_name, 20, 30,150);
 
-		$objPdf->Output(PDF_SAVE_DIR.'/'.$file_name.'.pdf', 'F');
+		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $name);
+		$objPdf->Output(PDF_SAVE_DIR.'/'.$name.'.pdf', 'F');
 
 		// pdfファイル名を保持
-		$this->pdfFileName = $file_name.'.pdf';
+		$this->pdfFileName = $name.'.pdf';
 
 		return true;
+	}
+
+	/**
+	 * カタログPDFファイル名作成
+	 * @param	$year		年
+	 * @param	$page		ページ
+	 * @return	$fileName	ファイル名
+	 */
+	protected function makeCatalogFileName($year, $page) {
+		$fileName = "";
+		$nextYear = $year + 1;
+
+		$fileName = $year."-".$nextYear."_".$page.".pdf";
+
+		return $fileName;
+	}
+
+	/**
+	 * 削除フラグ変換
+	 * @param	$dalete_flg	削除フラグ
+	 * @return	$result		変換後削除フラグ（true：非表示（データ削除扱い）, false：表示）
+	 */
+	public function convertDeleteFlg($dalete_flg){
+		$result = false;
+
+		if ($dalete_flg == DELETE_FLG){
+			$result = true;
+		}
+
+		return $result;
 	}
 }

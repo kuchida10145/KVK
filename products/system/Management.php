@@ -7,6 +7,8 @@ require_once(dirname(__FILE__).'/config.php');
 require_once(dirname(__FILE__).'/core/DatabaseManager.php');
 require_once(dirname(__FILE__).'/core/Validation.php');
 require_once(dirname(__FILE__).'/core/ValidationColumns.php');
+require_once(dirname(__FILE__).'/helper/Util.php');
+require_once(dirname(__FILE__).'/helper/Form.php');
 
 class Management
 {

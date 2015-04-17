@@ -43,6 +43,9 @@
 	protected function setExport() {
 		$filePointer = "";			// ファイルポインタ
 		$headerArray = array();		// csvヘッダー行
+		$fileName = array();		// ファイル名
+		$catalogYear = array();		// カタログ年度
+		$catalogPage = array();		// カタログページ
 		$result = true;
 
 		// csvファイル書き込み
@@ -53,6 +56,11 @@
 
 		// データ取得
 		$itemCodeArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->getAll();
+
+		// カタログページ分割
+		$fileName = explode(".",$itemDataRow[COLUMN_NAME_CATALOG_LINK]);
+		$catalogYear = explode("-",$fileName[0]);
+		$catalogPage = explode("_",$catalogYear[1]);
 
 		foreach ($itemCodeArray as $itemDataRow){
 			$csvDataArray = array(
@@ -80,16 +88,16 @@
 					$itemDataRow[COLUMN_NAME_PRICE_ZEI],
 					// 備考
 					$itemDataRow[COLUMN_NAME_NOTE],
-					// TODO：使用確定後修正（商品イメージ）
-					'商品イメージ',
+					// 商品イメージ
+					$itemDataRow[COLUMN_NAME_ITEM_IMAGE],
 					// バリエーション親品番
 					$itemDataRow[COLUMN_NAME_PARENT_VARIATION],
 					// バリエーション順序
 					$itemDataRow[COLUMN_NAME_VARIATION_NO],
-					// TODO：使用確定後修正（カタログ年度）
-					'2014',
-					// TODO：使用確定後修正（カタログページ）
-					'1',
+					// カタログ年度
+					$catalogYear[0],
+					// カタログページ
+					$catalogPage[1],
 					// 検索ワード
 					$itemDataRow[COLUMN_NAME_SEARCH_WORD],
 					// 分岐金具
@@ -111,7 +119,7 @@
 					// 削除
 					$itemDataRow[COLUMN_NAME_VIEW_STATUS],
 					// カテゴリID
-					$itemDataRow[COLUMN_NAME_CATEGORY_ID]
+					$itemDataRow[COLUMN_NAME_PARENT_ID].$itemDataRow[COLUMN_NAME_CATEGORY_ID]
 			);
 			mb_convert_variables('sjis', 'utf-8', $csvDataArray);
 			fputcsv($filePointer, $csvDataArray);
