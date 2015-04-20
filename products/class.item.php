@@ -4,10 +4,10 @@
  * 主にHTMLパーツの生成を行う
  */
 class Item extends Page {
-	
+
 	var $get;
 	var $itemData = array();
-	
+
 	/**
 	 * GETデータ取得
 	 */
@@ -19,12 +19,12 @@ class Item extends Page {
 			return false;
 		}
 	}
-	
-	/** 
+
+	/**
 	  * アイテムデータ生成
 	  */
 	public function createItemData( $id=NULL ){
-		
+
 		// 値チェック
 		if( NULL || !is_numeric($id) ){
 			$this->error('アイテムIDが指定されていないか、不正なIDです。');
@@ -39,9 +39,9 @@ class Item extends Page {
 		$this->itemData = $res;
 		return true;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * ItemId
 	 */
@@ -53,7 +53,7 @@ class Item extends Page {
 			 return NULL;
 		 }
 	 }
-	
+
 	 /**
 	 * IconData
 	 *
@@ -62,7 +62,7 @@ class Item extends Page {
 	 public function getIconData(){
 		 return $this->manager->db_manager->get('item_icon')->getAllItem();
 	 }
-	 
+
 	 /**
 	 * アイテム名
 	 *
@@ -72,7 +72,7 @@ class Item extends Page {
 		$str = htmlspecialchars($this->itemData['item_name']);
 		return $str;
 	}
-	
+
 	/**
 	 * アイテム型番
 	 *
@@ -82,7 +82,7 @@ class Item extends Page {
 		$str = htmlspecialchars($this->itemData['item_id']);
 		return $str;
 	}
-	
+
 	/**
 	 * コメント
 	 *
@@ -96,7 +96,7 @@ class Item extends Page {
 		}
 		return $str;
 	}
-	
+
 	/**
 	 * 価格
 	 *
@@ -110,7 +110,7 @@ class Item extends Page {
 		}
 		return $num;
 	}
-	
+
 	/**
 	 * 価格（税込み）
 	 *
@@ -124,7 +124,7 @@ class Item extends Page {
 		}
 		return $num;
 	}
-	
+
 	/**
 	 * 販売時期
 	 *
@@ -138,38 +138,38 @@ class Item extends Page {
 		}
 		return $str;
 	}
-	
+
 	/**
 	 * メイン画像
 	 * メインの画像を１点取得する
-	 * 
+	 *
 	 * @return 画像ファイル名
 	 */
 	public function getMainImage(){
-		
+
 		$img = $this->itemData['item_image'];
 		$ar = explode(',',$img);
-		
+
 		if( count($ar)>1 ){
 			return $ar[0];
 		}else{
 			return $img;
 		}
 	}
-	
+
 	/**
 	 * 画像の取得
 	 * カンマ区切りで保存されている画像のファイル名を配列に変換して取得する
-	 * 
+	 *
 	 * @return Array 画像ファイル１〜３を配列に保存
 	 */
 	public function getImages(){
-		
+
 		$img = $this->itemData['item_image'];
 		$ar = explode(',',$img);
 		return $ar;
 	}
-	
+
 	/**
 	 * ピッチ
 	 *
@@ -183,17 +183,17 @@ class Item extends Page {
 		}
 		return $str;
 	}
-	
+
 	/**
 	 * カタログリンク
 	 *
 	 * @return Mixed リンク先ファイル名とディレクトリ名、存在しない場合はNULL
 	 */
 	public function getCatalogLink(){
-		
+
 		// ファイル名取得
 		$filename = $this->itemData['catalog_link'];
-		
+
 		if( $filename != "" ){
 			$ar = explode( '_',$filename);
 			if( count($ar)==2){
@@ -206,7 +206,7 @@ class Item extends Page {
 		}
 		return array('filename'=>$filename,'dirname'=>$dir_name);
 	}
-	
+
 	/**
 	 * 寸法｜寸法とシャワー寸法を接続して出力
 	 *
@@ -227,7 +227,7 @@ class Item extends Page {
 		}
 		return $str;
 	}
-	
+
 	/**
 	 * パーツ表を取得
 	 *
@@ -245,40 +245,48 @@ class Item extends Page {
 				$buff_ar[] = '<th>品番</th>';
 				$buff_ar[] = '<th>品名</th>';
 				$buff_ar[] = '<th>希望小売価格</th>';
+				$buff_ar[] = '<th>備考</th>';
 				$buff_ar[] = '</tr>';
 				foreach( $res as $key=>$row ){
-					$buff_ar[] = '<tr>';
-					$buff_ar[] = '<td align="center">'.($key+1).'</td>';
-					$buff_ar[] = '<td>'.$row['parts_id'].'</td>';
-					$buff_ar[] = '<td>'.$row['parts_name'].'</td>';
-					$buff_ar[] = '<td align="right">￥'.number_format($row['price']).'(税込￥'.number_format($row['price_zei']).')</td>';
-					$buff_ar[] = '</tr>';
+					if($row['parts_no'] == 0) {
+						$buff_ar[] = '<tr>';
+						$buff_ar[] = '<td colspan="5">'.$row['parts_id'].'</td>';
+						$buff_ar[] = '</tr>';
+					} else {
+						$buff_ar[] = '<tr>';
+						$buff_ar[] = '<td align="center">'.$row['parts_no'].'</td>';
+						$buff_ar[] = '<td>'.$row['parts_id'].'</td>';
+						$buff_ar[] = '<td>'.$row['parts_name'].'</td>';
+						$buff_ar[] = '<td align="right">￥'.number_format($row['price']).'(税込￥'.number_format($row['price_zei']).')</td>';
+						$buff_ar[] = '<td>'.$row['note'].'</td>';
+						$buff_ar[] = '</tr>';
+					}
 				}
 				$buff_ar[] = '</table>';
 				$str = implode(PHP_EOL,$buff_ar);
 			}else{
 				$str = '関連する部品は登録されていません。';
 			}
-			
+
 		}else{
 			$str = "";
 		}
 		return $str;
 	}
-	
+
 	/**
 	 * バリエーションを取得
 	 * item_id（型番）から他のアイテム(バリエーション)を抽出する
-	 * 
+	 *
 	 *
 	 * @return String バリエーションのテキスト・リンク
 	 */
 	public function getVariation(){
 		$item_id = $this->itemData['item_id'];
-		
+
 		// データ取得
 		$res = $this->manager->db_manager->get('item')->getVariationItem( $item_id );
-		
+
 		// 取得時、HTML生成
 		if( $res ){
 			$buff_ar = array();

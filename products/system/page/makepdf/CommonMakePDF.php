@@ -385,6 +385,7 @@ class CommonMakePDF extends Page{
 		if(file_exists($this->makingPdfCsvInfo)) {
 			//DB更新処理実行
 			$pdfArray = $this->getCsvData($this->makingPdfCsvInfo);
+			$endCount = count($pdfArray) - 1;
 			// 部品データ更新
 			foreach($pdfArray as $key=>$value) {
 				if($dataCount == 0){
@@ -399,10 +400,14 @@ class CommonMakePDF extends Page{
 				}
 
 				// データ取り込みフラグ変更
-				if($value[NO_COLUMN_PARTS] == 1) {
+				if($value[NO_COLUMN_PARTS] == 1 || $dataCount == $endCount) {
 					if($dataGetFlg) {
 						$dataGetFlg = false;
-						$nextArray[] = $value;
+						if($value[NO_COLUMN_PARTS] == 1) {
+							$nextArray[] = $value;
+						} else {
+							$makePdfArray[] = $value;
+						}
 					} else {
 						$dataGetFlg = true;
 					}
@@ -727,37 +732,37 @@ class CommonMakePDF extends Page{
 				// カタログへのリンク
 				COLUMN_NAME_CATALOG_LINK=>$catalogLink,
 				// バリエーション親品番
-		COLUMN_NAME_PARENT_VARIATION=>$csvData[VARIATION_NAME_COLUMN_ITEM],
-		// バリエーション表示順
-		COLUMN_NAME_VARIATION_NO=>$csvData[VARIATION_NO_COLUMN_ITEM],
-		// 備考
-		COLUMN_NAME_NOTE=>$csvData[NOTE_COLUMN_ITEM],
-		// 商品イメージ画像
-		COLUMN_NAME_ITEM_IMAGE=>"",
-		// 親カテゴリID
-		COLUMN_NAME_PARENT_ID=>$parentIDVal,
-		// 子カテゴリID
-		COLUMN_NAME_CATEGORY_ID=>$categoryIDVal,
-		// 検索ワード
-		COLUMN_NAME_SEARCH_WORD=>$csvData[SEARCH_WORD_COLUMN_ITEM],
-		// 分岐金具1
-		COLUMN_NAME_BUNKI_KANAGU_1=>$csvData[BUNKI_KANAGU_1_COLUMN_ITEM],
-		// 分岐金具2
-		COLUMN_NAME_BUNKI_KANAGU_2=>$csvData[BUNKI_KANAGU_2_COLUMN_ITEM],
-		// 分岐金具3
-		COLUMN_NAME_BUNKI_KANAGU_3=>$csvData[BUNKI_KANAGU_3_COLUMN_ITEM],
-		// 販売時期
-		COLUMN_NAME_SELL_TIME=>$csvData[SELL_KIKAN_COLUMN_ITEM],
-		// 代替品
-		COLUMN_NAME_SUB_ITEM=>$csvData[DAIGAE_COLUMN_ITEM],
-		// 本体取付穴
-		COLUMN_NAME_SUNPOU=>$csvData[SUNPOU_COLUMN_ITEM],
-		// ピッチ
-		COLUMN_NAME_PITCH=>$csvData[PITCH_COLUMN_ITEM],
-		// シャワー取付穴
-		COLUMN_NAME_SHOWER_SUNPOU=>$csvData[SHOWER_SUNPOU_COLUMN_ITEM],
-		// 更新日
-		COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
+				COLUMN_NAME_PARENT_VARIATION=>$csvData[VARIATION_NAME_COLUMN_ITEM],
+				// バリエーション表示順
+				COLUMN_NAME_VARIATION_NO=>$csvData[VARIATION_NO_COLUMN_ITEM],
+				// 備考
+				COLUMN_NAME_NOTE=>$csvData[NOTE_COLUMN_ITEM],
+				// 商品イメージ画像
+				COLUMN_NAME_ITEM_IMAGE=>$csvData[ITEM_PHOTO_COLUMN_ITEM],
+				// 親カテゴリID
+				COLUMN_NAME_PARENT_ID=>$parentIDVal,
+				// 子カテゴリID
+				COLUMN_NAME_CATEGORY_ID=>$categoryIDVal,
+				// 検索ワード
+				COLUMN_NAME_SEARCH_WORD=>$csvData[SEARCH_WORD_COLUMN_ITEM],
+				// 分岐金具1
+				COLUMN_NAME_BUNKI_KANAGU_1=>$csvData[BUNKI_KANAGU_1_COLUMN_ITEM],
+				// 分岐金具2
+				COLUMN_NAME_BUNKI_KANAGU_2=>$csvData[BUNKI_KANAGU_2_COLUMN_ITEM],
+				// 分岐金具3
+				COLUMN_NAME_BUNKI_KANAGU_3=>$csvData[BUNKI_KANAGU_3_COLUMN_ITEM],
+				// 販売時期
+				COLUMN_NAME_SELL_TIME=>$csvData[SELL_KIKAN_COLUMN_ITEM],
+				// 代替品
+				COLUMN_NAME_SUB_ITEM=>$csvData[DAIGAE_COLUMN_ITEM],
+				// 本体取付穴
+				COLUMN_NAME_SUNPOU=>$csvData[SUNPOU_COLUMN_ITEM],
+				// ピッチ
+				COLUMN_NAME_PITCH=>$csvData[PITCH_COLUMN_ITEM],
+				// シャワー取付穴
+				COLUMN_NAME_SHOWER_SUNPOU=>$csvData[SHOWER_SUNPOU_COLUMN_ITEM],
+				// 更新日
+				COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
 		);
 
 		return $dbData;

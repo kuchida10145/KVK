@@ -5,6 +5,7 @@
 	// セッション
 	session_start();
 
+	$importCsv = new ImportCsvCategory();
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
 	$viewFilePath	= "";	// 画面表示用csvファイルパス
@@ -14,12 +15,11 @@
 		if(isset($_POST['download_button']) && $_POST['download_button'] == "download") {
 			// csv出力処理インスタンス化
 			$exportCsv = new ExportCsvCategory();
-			if($exportCsv->executeExport() && !$importCsv->viewInitial(COLUMN_NAME_ITEM_DISP_STATUS, CSV_DOWNLOAD)) {
+			if($exportCsv->executeExport() && !$importCsv->viewInitial(COLUMN_NAME_CATEGORY_DISP_STATUS, CSV_DOWNLOAD)) {
 				$errorMessage	= $importCsv->getErrorMessage();
 			}
 		} else {
 			// csv取込処理インスタンス化
-			$importCsv = new ImportCsvCategory();
 			$filePath		= "";	// csvファイルパス
 			$fileName		= "";	// csvファイル名
 			$testFlg = false;		// 取込処理フラグ
@@ -69,7 +69,7 @@
 					<ul class="nav nav-pills nav-stacked">
 						<li><a href="itemCsv.php">商品情報更新</a></li>
 						<li class="active"><a href="#">マスタデータ更新</a></li>
-						<li><a href="makePdf.php">PDF作成</a></li>
+						<li><a href="makePdf.php">データ更新</a></li>
 					</ul>
 				</div>
 				<div class="col-md-10">
@@ -97,7 +97,7 @@
 						<div align="center">
 							<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="test_button" value="test">取込テスト</button>
 							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="run_button" value="run">CSV 取込</button>
-							<!-- <button type="submit" class="btn btn-warning"  onclick="document.form.submit();" name="download_button" value="download">CSV ダウンロード</button> -->
+							<button type="submit" class="btn btn-warning"  onclick="document.form.submit();" name="download_button" value="download">CSV ダウンロード</button>
 						</div>
 						<div>
 							実行結果：<?php echo $resultMessage ?>

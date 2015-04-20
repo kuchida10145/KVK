@@ -35,7 +35,7 @@ abstract class Page
 // ■ 共通関数
 // --------------------------------------------------------------
 
-	function getDirname( $filename ){
+	public function getDirname( $filename ){
 		if( $filename != "" ){
 			$ar = explode( '_',$filename);
 			if( count($ar)==2){
@@ -137,6 +137,12 @@ abstract class Page
 		$updateArray = array(
 				COLUMN_NAME_SYSTEM_STATUS=>$updateStatus,
 		);
+
+		if($updateStatus == SYSTEM_STATUS_NORMAL ||
+		$updateStatus == SYSTEM_STATUS_PDF_FINISH ||
+		$updateStatus == SYSTEM_STATUS_PDF_STOP) {
+			$updateArray[COLUMN_NAME_PDF_TIME] = "";
+		}
 
 		$whereSystem = COLUMN_NAME_SYSTEM_STATUS." = '".$nowStatus."'";
 		$dbCheck = $this->manager->db_manager->get(TABLE_NAME_SYSTEM_STATUS)->update($updateArray, $whereSystem);

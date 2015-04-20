@@ -4,11 +4,11 @@
  * 主にHTMLパーツの生成を行う
  */
 class Product extends Page {
-	
+
 	var $get;
 	var $post;
 	var $parent_id;
-	
+
 	private function getParam( $str=NULL ){
 		if( isset( $_GET[$str] ) ){
 			$this->get = mysql_real_escape_string($_GET[$str]);
@@ -17,27 +17,32 @@ class Product extends Page {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * サーチメニューのOPTIONを取得
-	 * 
+	 *
 	 * @return String オプションタグ
 	 */
 	public function getSearchMenu(){
+
+		// 親カテゴリ
 		$parentcategory	 = $this->manager->db_manager->get('parent_category')->getAllEnabled();
 		$buff_ar = array();
 		foreach ( $parentcategory as $row ) {
-			
+
+			// HTML生成とselected処理
 			if( $_GET['category_id'] == $row['parent_id'] ){
 				$buff_ar[] = '<option value="'.$row['parent_id'].'" selected="selected">'.$row['parent_name'].'</option>';
 			}else{
 				$buff_ar[] = '<option value="'.$row['parent_id'].'">'.$row['parent_name'].'</option>';
 			}
-			
-			$child_category	 = $this->manager->db_manager->get('child_category')->getAllEnabled();
+
+			// 子カテゴリ
+			$child_category	 = $this->manager->db_manager->get('child_category')->findByParentId( $row['parent_id'] );
 			if( $child_category ){
+
+				// HTML生成とselected処理
 				foreach( $child_category as $child_row ){
-					
 					if( isset($_GET['category_id']) && $_GET['category_id'] == $row['parent_id'].'_'.$child_row['category_id'] ){
 						$buff_ar[] = '<option value="'.$row['parent_id'].'_'.$child_row['category_id'].'" selected="selected">&nbsp;&nbsp;'.$child_row['category_name'].'</option>';
 					}else{
@@ -45,11 +50,11 @@ class Product extends Page {
 					}
 				}
 			}
-			
+
 		}
 		return implode( PHP_EOL , $buff_ar );
 	}
-	
+
 	/**
 	 * セルフ判定
 	 */
@@ -60,18 +65,18 @@ class Product extends Page {
 			return false;
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	private function getParentId( $key , $id ){
 		if( $key=="parent_id" ){
 			return $id;
 		}
-		
+
 	}
-	
-	
+
+
 	/**
 	 * 子カテゴリーIDから親カテゴリーIDを取得
 	 *
@@ -86,7 +91,7 @@ class Product extends Page {
 			echo "error";exit;
 		}
 	}
-	
+
 	/**
 	 * 商品IDから親カテゴリーIDを取得
 	 *
@@ -99,13 +104,15 @@ class Product extends Page {
 			return $res_category["parent_id"];
 		}
 	}
-	
+
 	/**
 	 * サイドメニュー取得
 	 *
 	 * @return Striong メニューのHTML
 	 */
 	public function getSidemenu( $key=NULL,$value=NULL ){
+
+
 		if( $key!=NULL && $value!= NULL ){
 			if( $key=="category_id" ){
 				$this->parent_id = $this->getParentIdByCategoryId($value);
@@ -117,7 +124,7 @@ class Product extends Page {
 				$this->parent_id = mysql_real_escape_string( $_GET['parent_id'] );
 			}
 		}
-		
+
 		// 親カテゴリ一覧
 		$parentcategory = $this->manager->db_manager->get('parent_category')->getAllEnabled();
 		$buff_ar = array();
@@ -129,30 +136,30 @@ class Product extends Page {
 		}
 		return implode( PHP_EOL , $buff_ar );
 	}
-	
+
 	/**
 	 * サイドメニューのサブカテゴリー展開
 	 *
 	 * @return Striong サブメニューのHTML
 	 */
 	private function getSidemenuSubcategory( $parent_id ){
-		
+
 		$childcategory = $this->manager->db_manager->get('child_category')->findByParentId($parent_id);
-		
+
 		if( $childcategory ){
 			$buff_ar = array();
 			foreach ( $childcategory as $row ) {
 			// 20150401
-//				$buff_ar[] = '<dd><a href="/products/parent/category/?category_id='.$row['category_id'].'">'.$row['category_name'].'</a></dd>';
+//				$buff_ar[] = '<dd><a href="/kvk/products/parent/category/?category_id='.$row['category_id'].'">'.$row['category_name'].'</a></dd>';
 				$buff_ar[] = '<dd><a href="/products/parent/category/?category_id='.$row['category_id'].'&parent_id='.$parent_id.'">'.$row['category_name'].'</a></dd>';
 			}
 			return implode( PHP_EOL , $buff_ar );
 		}else{
 			return "";
 		}
-		
+
 	}
-	
+
 	public function getParentCategoryData(){
 		if( isset($_GET['parent_id']) && is_numeric( $_GET['parent_id'] ) ){
 			$parent_id = $_GET['parent_id'];
@@ -160,50 +167,51 @@ class Product extends Page {
 			$this->error('親カテゴリIDが指定されていません。');
 			exit;
 		}
+
 		$this->parentCategory_data = $this->manager->db_manager->get('parent_category')->findByParentId($parent_id);
 		if( $this->parentCategory_data == NULL ){
 			$this->error('親カテゴリIDは存在していないか、または非公開です。');
 			exit;
 		}
 	}
-	
+
 	/**
 	 * 子カテゴリ一覧出力
 	 * データを取得し、メンバー変数childCategory_dataに結果を保存する
 	 */
 	public function getChildCategoryData( $category_id=NULL ){
-		
+
 		if( $category_id != NULL ){
 			$this->childCategory_data = $this->manager->db_manager->get('child_category')->findByCategoryId($category_id);
 		}else{
 			$this->error('子カテゴリIDが指定されていません');
 			exit;
 		}
-		
+
 		if( $this->childCategory_data == NULL ){
 			$this->error('子カテゴリIDは存在していないか、または非公開です。');
 			exit;
 		}
 	}
-	
+
 	/**
 	 * 親カテゴリ一覧データの取得
 	 */
 	public function getParentCategoryItemList(){
-		
+
 		$res = $this->manager->db_manager->get('parent_category')->getAllEnabled();
-		
+
 		if( $res ){
-			
+
 			$buff_ar = array();
 			foreach( $res as $val ){
-				
+
 				if( is_file($_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val["parent_image"]) ){
 					$img_path = DIR_UPLOAD.$val["parent_image"];
 				}else{
 					$img_path = DIR_UPLOAD.'blank_category.jpg';
 				}
-				
+
 				$buff_ar[] = '<dl>';
 				$buff_ar[] = '<dt><a href="/products/parent/?parent_id='.$val["parent_id"].'"><img src="'.$img_path.'" alt="" /></a></dt>';
 				$buff_ar[] = '<dd>'.$val['parent_name'].'</dd>';
@@ -211,28 +219,28 @@ class Product extends Page {
 			}
 			return implode( PHP_EOL , $buff_ar );
 		}
-	
+
 	}
-	
+
 	public function getChildCategoryItemList(){
 		if( isset( $this->parentCategory_data["parent_id"] ) ){
 			$parent_id = $this->parentCategory_data["parent_id"];
 			$res = $this->manager->db_manager->get('child_category')->findByParentId($parent_id);
-			
+
 			if( $res ){
-				
+
 				$buff_ar = array();
 				foreach( $res as $val ){
-					
+
 					if( is_file($_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val["category_image"]) ){
 						$img_path = DIR_UPLOAD.$val["category_image"];
 					}else{
 						$img_path = DIR_UPLOAD.'blank_category.jpg';
 					}
-					
+
 					$buff_ar[] = '<dl>';
 					// 20150401
-//					$buff_ar[] = '<dt><a href="/products/parent/category/?category_id='.$val["category_id"].'"><img src="'.$img_path.'" /></a></dt>';
+//					$buff_ar[] = '<dt><a href="/kvk/products/parent/category/?category_id='.$val["category_id"].'"><img src="'.$img_path.'" /></a></dt>';
 					$buff_ar[] = '<dt><a href="/products/parent/category/?category_id='.$val["category_id"].'&parent_id='.$parent_id.'"><img src="'.$img_path.'" /></a></dt>';
 					$buff_ar[] = '<dd>'.$val['category_name'].'</dd>';
 					$buff_ar[] = '</dl>';
@@ -241,7 +249,7 @@ class Product extends Page {
 			}
 		}
 	}
-	
+
 	/**
 	 * アイテムのディレクトリ
 	 *
@@ -250,7 +258,7 @@ class Product extends Page {
 	private function getItemDir(){
 		return '/products/parent/category/item/';
 	}
-	
+
 	/**
 	 * 子カテゴリの商品一覧
 	 * 子カテゴリ一覧ページと検索結果ページで共通となる
@@ -270,7 +278,7 @@ class Product extends Page {
 		}else{
 			$search_mode_enabled = false;
 		}
-		
+
 		if( $search_mode_enabled ){
 			// search mode
 			// 処理無し
@@ -279,49 +287,48 @@ class Product extends Page {
 			// カテゴリーデータ取得
 			$this->childCategory_data = $this->manager->db_manager->get('child_category')->findByCategoryId($category_id);
 		}
-		
-		
+
+
 		// 子カテゴリがあるか
 		if( isset( $this->childCategory_data["category_id"] ) || $search_mode_enabled ){
-			
+
 			// IDから登録アイテムを取得
-			//$category_id = $this->childCategory_data["category_id"]
-			$key_category = $parent.$category_id;
+			$category_id = $this->childCategory_data["category_id"];
 			if( $search_mode_enabled ){
 				// 検索実行
-				$ListData = $this->manager->db_manager->get('item')->getItemListBySearch($key_category,$page,$mode,$word,$parent_id);
+				$ListData = $this->manager->db_manager->get('item')->getItemListBySearch($category_id,$page,$mode,$word,$parent_id);
 			}else{
 				// 子カテゴリからアイテム取得
-				$ListData = $this->manager->db_manager->get('item')->getItemListByCategoryId($key_category,$page,$mode);
+				$ListData = $this->manager->db_manager->get('item')->getItemListByCategoryId($category_id,$page,$mode);
 			}
-			
+
 			// データ
 			$res = $ListData['data'];
-			
+
 			// ページ管理に必要なデータ
 			$this->page = $ListData['page'];
 			$this->cnt = $ListData['cnt'];
 			$this->limit = $ListData['limit'];
 			$this->start = $ListData['start'];
 			$this->page_max = $ListData['page_max'];
-			
+
 			//var_dump( $res[0] );exit;
-			
+
 			$item_filename= "item.html?id=";
-			
+
 			if( $res ){
 				//var_dump($res);exit;
 				$buff_ar = array();
 				foreach( $res as $val ){
-					
+
 					$img_ar = explode(',',$val['item_image']);
-					
+
 					if( is_file($_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$img_ar[0]) ){
 						$img_path = DIR_UPLOAD.$img_ar[0];
 					}else{
 						$img_path = DIR_UPLOAD.'blank_item_thumbnail.jpg';
 					}
-					
+
 					$buff_ar[] = '<!--1件-->';
 					$buff_ar[] = '<dl>';
 					$buff_ar[] = '<dt><a href="'.$this->getItemDir().$item_filename.$val["id"].'"><img src="'.$img_path.'" alt="" /></a></dt>';
@@ -329,7 +336,7 @@ class Product extends Page {
 					$buff_ar[] = ''.$val["item_id"].'<br />';
 					$buff_ar[] = '￥'.number_format($val["price"]).'（税込￥'.$val["price_zei"].'）';
 					$buff_ar[] = '<div class="iconbox">';
-					
+
 					if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['map_data'] ) ){
 						$buff_ar[] = '<a href="/products/parent/category/item/authentication.html?file='.$val['map_data'].'" class="icondrawing balloonbtn" title="商品の外観図面をPDF形式で表示します" rel="shadowbox;width=720">図面</a>';
 					}
@@ -345,11 +352,11 @@ class Product extends Page {
 					if( $val['map_data'] || $val['torisetsu_data'] || $val['kousetsu_data'] || $val['buy_status'] ){
 						$buff_ar[] = '<br />';
 					}
-					
+
 					if( $val['bunkai_data'] || $val['shower_data'] ){
-						
+
 						$buff_ar[] = '分解図<br />';
-						
+
 						if( $val['bunkai_data'] ){
 							$buff_ar[] = '<a href="/products/parent/category/item/map.html?id='.$val["id"].'&file='.$val['bunkai_data'].'" class="iconfaucet balloonbtn" title="水栓です">水栓</a>';
 						}
@@ -358,7 +365,7 @@ class Product extends Page {
 						}
 					}
 					$buff_ar[] = '</div>';
-					
+
 					$buff_ar[] = '</dd>';
 					$buff_ar[] = '</dl>';
 					$buff_ar[] = '<!--/1件-->';
@@ -369,12 +376,12 @@ class Product extends Page {
 			}
 		}
 	}
-	
-	/** 
+
+	/**
 	  * アイテムデータ生成
 	  */
 	public function createItemData( $id=NULL ){
-		
+
 		// 値チェック
 		if( NULL || !is_numeric($id) ){
 			return false;
@@ -383,34 +390,34 @@ class Product extends Page {
 		$this->itemData = $res;
 		return true;
 	}
-	
+
 	/**
 	 * アイテムのタイトル
 	 */
 	public function getItemTitle(){
-		
+
 	}
-	
+
 	/**
 	 * パンくず生成
 	 */
 	public function getTopicPath( $category_id , $disabled_category_link=false ){
-		
+
 		// データ取得
 		$res = $this->manager->db_manager->get('item')->getCategoryData( $category_id );
-		
+
 		// 生成
 		if( $disabled_category_link != true ){
 		// 20150401
-//			$topicpath = '<a href="/products/">商品情報 </a> &gt; <a href="/products/parent/?parent_id='.$res["parent_id"].'">'.$res["parent_name"].'</a> &gt; <a href="/products/parent/category/?category_id='.$res["category_id"].'">'.$res["category_name"].'</a>';
-			$topicpath = '<a href="/products/">商品情報 </a> &gt; <a href="/products/parent/?parent_id='.$res["parent_id"].'">'.$res["parent_name"].'</a> &gt; <a href="/products/parent/category/?category_id='.$res["category_id"].'&parent_id='.$parent_id.'">'.$res["category_name"].'</a>';
+//			$topicpath = '<a href="/kvk/products/">商品情報 </a> &gt; <a href="/kvk/products/parent/?parent_id='.$res["parent_id"].'">'.$res["parent_name"].'</a> &gt; <a href="/kvk/products/parent/category/?category_id='.$res["category_id"].'">'.$res["category_name"].'</a>';
+			$topicpath = '<a href="/products/">商品情報 </a> &gt; <a href="/products/parent/?parent_id='.$res["parent_id"].'">'.$res["parent_name"].'</a> &gt; <a href="/products/parent/category/?category_id='.$res["category_id"].'&parent_id='.$res["parent_id"].'">'.$res["category_name"].'</a>';
 		}else{
 			$topicpath = '<a href="/products/">商品情報 </a> &gt; <a href="/products/parent/?parent_id='.$res["parent_id"].'">'.$res["parent_name"].'</a> &gt; '.$res["category_name"].'';
 		}
-		
+
 		return $topicpath;
 	}
-	
+
 	/**
 	 * コーディング参考
 	 */
@@ -530,7 +537,7 @@ class Product extends Page {
 			print($row['update_date'].', ');
 			print('<br />');
 		}
-		
+
 		$parts_list = null;
 		$row = null;
 
@@ -562,5 +569,5 @@ class Product extends Page {
 		$status_list = null;
 		$row = null;
 	}
-	
+
 }

@@ -79,7 +79,7 @@
 		<div  class="container">
 			<div class="page-header">
 				<h1>WEBサイト管理
-					<small>PDF作成</small>
+					<small>データ更新</small>
 				</h1>
 			</div>
 			<div class="row">
@@ -87,12 +87,12 @@
 					<ul class="nav nav-pills nav-stacked">
 						<li><a href="itemCsv.php">商品情報更新</a></li>
 						<li><a href="itemStatusMaster.php">マスタデータ更新</a></li>
-						<li class="active"><a href="#">PDF作成</a></li>
+						<li class="active"><a href="#">データ更新</a></li>
 					</ul>
 				</div>
 				<div class="col-md-10">
 					<ul class="nav nav-tabs">
-						<li class="active"><a href="#">PDF設定</a></li>
+						<li class="active"><a href="#">データ更新設定</a></li>
 					</ul>
 					<form class="form-horizontal well" action="#" method="post" name="form" enctype="multipart/form-data">
 					<input type="hidden" name="mode" value="step1" />
@@ -103,13 +103,13 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="col-sm-2 control-label">PDF作成開始時間</label>
+							<label class="col-sm-2 control-label">データ更新開始時間</label>
 							<div class="col-sm-10">
 								<label class="col-sm-0 control-label"><?php echo $startTime ?></label>
 							</div>
 						</div>
 												<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">PDF作成日変更</label>
+							<label for="upload" class="col-sm-2 control-label">データ更新日変更</label>
 							<div class="col-sm-10">
 								<div class="btn-group">
 									<div class="dropdown">
@@ -132,7 +132,7 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">PDF作成開始時間変更</label>
+							<label for="upload" class="col-sm-2 control-label">データ更新開始時間変更</label>
 							<div class="col-sm-10">
 								<div class="input-group">
 									<input style="width:50px;" type="text" id="hour" name="hour" class="form-control"  maxlength="2" pattern="^[0-9]+$">
@@ -144,7 +144,7 @@
 						<div align="center">
 						<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="unset_button" value="unset">設定解除</button>
 							<button type="submit" class="btn btn-default" onclick="document.form.submit();" name="set_button" value="set">設定変更</button>
-							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="stop_button" value="stop">PDF作成中止</button>
+							<button type="submit" class="btn btn-success"  onclick="document.form.submit();" name="stop_button" value="stop">データ更新中止</button>
 							<button type="submit" class="btn btn-warning" onclick="document.form.submit();" name="update_button" value="update">商品データ更新</button>
 						</div>
 						<div>

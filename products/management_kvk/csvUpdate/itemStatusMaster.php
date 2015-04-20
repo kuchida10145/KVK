@@ -5,6 +5,8 @@
 	// セッション
 	session_start();
 
+	$importCsv = new ImportCsvItemStatusMaster();
+
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
 	$viewFilePath	= "";	// 画面表示用csvファイルパス
@@ -14,12 +16,11 @@
 		if(isset($_POST['download_button']) && $_POST['download_button'] == "download") {
 			// csv出力処理インスタンス化
 			$exportCsv = new ExportCsvItemStatusMaster();
-			if($exportCsv->executeExport() && !$importCsv->viewInitial(COLUMN_NAME_ITEM_DISP_STATUS, CSV_DOWNLOAD)) {
+			if($exportCsv->executeExport() && !$importCsv->viewInitial(COLUMN_NAME_STATUS_MASTER_DISP_STATUS, CSV_DOWNLOAD)) {
 				$errorMessage	= $importCsv->getErrorMessage();
 			}
 		} else {
 			// csv取込処理インスタンス化
-			$importCsv = new ImportCsvItemStatusMaster();
 			$filePath		= "";	// csvファイルパス
 			$fileName		= "";	// csvファイル名
 			$testFlg = false;		// 取込処理フラグ
@@ -69,7 +70,7 @@
 					<ul class="nav nav-pills nav-stacked">
 						<li><a href="itemCsv.php">商品情報更新</a></li>
 						<li class="active"><a href="#">マスタデータ更新</a></li>
-						<li><a href="makePdf.php">PDF作成</a></li>
+						<li><a href="makePdf.php">データ更新</a></li>
 					</ul>
 				</div>
 				<div class="col-md-10">

@@ -89,7 +89,7 @@
 					<ul class="nav nav-pills nav-stacked">
 						<li class="active"><a href="#">商品情報更新</a></li>
 						<li><a href="itemStatusMaster.php">マスタデータ更新</a></li>
-						<li><a href="makePdf.php">PDF作成</a></li>
+						<li><a href="makePdf.php">データ更新</a></li>
 					</ul>
 				</div>
 				<div class="col-md-10">
@@ -122,7 +122,7 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">PDF作成日</label>
+							<label for="upload" class="col-sm-2 control-label">データ更新日</label>
 							<div class="col-sm-10">
 								<div class="btn-group">
 									<div class="dropdown">
@@ -145,7 +145,7 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="upload" class="col-sm-2 control-label">PDF作成開始時間</label>
+							<label for="upload" class="col-sm-2 control-label">データ更新開始時間</label>
 							<div class="col-sm-10">
 								<div class="input-group">
 									<input style="width:50px;" type="text" id="hour" name="hour" class="form-control"  maxlength="2" pattern="^[0-9]+$" value="<?php echo $pdfHour ?>">

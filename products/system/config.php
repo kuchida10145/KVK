@@ -651,16 +651,16 @@ define('SYSTEM_STATUS_PDF_STOP', '4');
 define('SYSTEM_STATUS_NORMAL_VAL', 'なし');
 
 /** システムステータス(1：PDF作成待ち) */
-define('SYSTEM_STATUS_PDF_WAIT_VAL', 'PDF作成待ち');
+define('SYSTEM_STATUS_PDF_WAIT_VAL', 'データ更新待ち');
 
 /** システムステータス(2：PDF作成中) */
-define('SYSTEM_STATUS_PDF_MAKE_VAL', 'PDF作成中');
+define('SYSTEM_STATUS_PDF_MAKE_VAL', 'データ更新中');
 
 /** システムステータス(3：PDF作成完了) */
-define('SYSTEM_STATUS_PDF_FINISH_VAL', 'PDF作成完了');
+define('SYSTEM_STATUS_PDF_FINISH_VAL', 'データ更新完了');
 
 /** システムステータス(4：PDF作成中断) */
-define('SYSTEM_STATUS_PDF_STOP_VAL', 'PDF作成中断');
+define('SYSTEM_STATUS_PDF_STOP_VAL', 'データ更新中断');
 
 /*
 |------------------------------
@@ -767,14 +767,15 @@ define('ONETIME_PDF_FOLDER', 'onetime_bunkai/');
 define('PDF_FOLDER', 'bunkai');
 
 /** csvアップロードフォルダ */
-define('CSV_FOLDER', '../../system/save_csv/');
+define('CSV_FOLDER', dirname(__FILE__).'/save_csv/');
 /*----------------------------
 | PDF作成処理
 -----------------------------*/
 //PDFテンプレート
 define('PDF_TEMPLATE',dirname(__FILE__)."/../include/fram2.pdf");
 //PDFセーブ先ディレクトリ
-define('PDF_SAVE_DIR',dirname(__FILE__)."/savepdf/onetime_bunkai");
+//define('PDF_SAVE_DIR',dirname(__FILE__)."/savepdf/onetime_bunkai");
+define('PDF_SAVE_DIR',dirname(__FILE__)."/../upload");
 //PDFセーブ先ディレクトリ（リンク用）
 define('PDF_SAVE_URL',"/savepdf/onetime_bunkai");
 //PDF画像保存先

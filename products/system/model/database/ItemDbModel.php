@@ -127,7 +127,8 @@ class ItemDbModel extends DbModel
 	 */
 	public function getPartsData( $item_id , $file ){
 		// 指定範囲のみ取得
-		$sql = "SELECT * FROM `parts_list` WHERE `item_id` = '".$item_id."' AND `file_name` = '".$file."' AND `view_status` = ".VIEW_OK." ORDER BY `parts_no` ASC";
+		//$sql = "SELECT * FROM `parts_list` WHERE `item_id` = '".$item_id."' AND `file_name` = '".$file."' AND `view_status` = ".VIEW_OK." ORDER BY `parts_no` ASC";
+		$sql = "SELECT * FROM `parts_list` WHERE `item_id` LIKE '"."%".$item_id."%"."' AND `view_status` = ".VIEW_OK." ORDER BY `id` ASC";
 		$res = $this->db->getAllData($sql);
 		//var_dump($res,$sql);
 		return $res;

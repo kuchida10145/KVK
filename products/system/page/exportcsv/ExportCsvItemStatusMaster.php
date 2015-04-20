@@ -38,7 +38,7 @@
 					// アイコンファイル名
 					$itemDataRow[COLUMN_NAME_ICON],
 			);
-			mb_convert_variables('sjis', 'utf-8', $csvDataArray);
+			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
 			fputcsv($filePointer, $csvDataArray);
 		}
 		fclose($filePointer);

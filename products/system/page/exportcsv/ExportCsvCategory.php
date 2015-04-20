@@ -20,6 +20,7 @@
 	protected function setExport() {
 		$filePointer = "";			// ファイルポインタ
 		$headerArray = array();		// csvヘッダー行
+		$childCategory = array();	// 子カテゴリ一覧
 		$result = true;
 
 		// csvファイル書き込み
@@ -29,23 +30,42 @@
  		fputcsv($filePointer, $headerArray);
 
 		// データ取得
-		$itemCodeArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->getAll();
+		$itemCodeArray = $this->manager->db_manager->get(TABLE_NAME_PARENT_CATEGORY)->getAll();
 
-		foreach ($itemCodeArray as $itemDataRow){
+		foreach ($itemCodeArray as $parentKey=>$itemDataRow){
 			$csvDataArray = array(
 					// カテゴリID
-// 					$itemDataRow[],
+ 					$itemDataRow[COLUMN_NAME_PARENT_ID],
 					// カテゴリ名
-// 					$itemDataRow[],
+ 					$itemDataRow[COLUMN_NAME_PARENT_NAME],
 					// 親カテゴリID
-// 					$itemDataRow[],
+ 					"0",
 					// イメージ画像
-// 					$itemDataRow[],
+ 					$itemDataRow[COLUMN_NAME_PARENT_IMAGE],
 					// 削除
-// 					$itemDataRow[],
+ 					$itemDataRow[COLUMN_NAME_VIEW_STATUS],
 			);
-			mb_convert_variables('sjis', 'utf-8', $csvDataArray);
+			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
 			fputcsv($filePointer, $csvDataArray);
+
+			// 子カテゴリ取得
+			$childCategory = $this->manager->db_manager->get(TABLE_NAME_CHILD_CATEGORY)->findByParentId($itemDataRow[COLUMN_NAME_PARENT_ID]);
+			foreach ($childCategory as $childKey=>$childValue) {
+				$csvDataArray = array(
+						// カテゴリID
+						$childValue[COLUMN_NAME_CATEGORY_ID],
+						// カテゴリ名
+						$childValue[COLUMN_NAME_CATEGORY_NAME],
+						// 親カテゴリID
+						$childValue[COLUMN_NAME_PARENT_ID],
+						// イメージ画像
+						$childValue[COLUMN_NAME_CATEGORY_IMAGE],
+						// 削除
+						$childValue[COLUMN_NAME_VIEW_STATUS],
+				);
+				mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
+				fputcsv($filePointer, $csvDataArray);
+			}
 		}
 		fclose($filePointer);
 
@@ -55,6 +75,10 @@
 		header('Content-Length: ' . filesize(CSV_FILE_NAME_CATEGORY_MASTER));
 		readfile(CSV_FILE_NAME_CATEGORY_MASTER);
 		return $result;
+	}
+
+	protected function setCsvArray($filePointer, $dataArray) {
+
 	}
 }
 
