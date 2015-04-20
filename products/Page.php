@@ -313,4 +313,55 @@ abstract class Page
 		$d = DateTime::createFromFormat($format, $date);
 		return $d && $d->format($format) == $date;
 	}
+
+	/**
+	 * ログインチェック
+	 * @param	-
+	 * @return	bool	$result	チェック結果（true：ログイン済み, false：ログインしていない）
+	 */
+	public function loginCheck() {
+		$result = true;
+
+		if (empty($_SESSION['login'])) {
+			$result = false;
+		}
+
+		if($result) {
+			// ユーザチェック
+			$where = COLUMN_NAME_USER_NAME." = '".$_SESSION['login']."'";
+			$check = $this->manager->db_manager->get(TABLE_NAME_USER)->checkData($where);
+			if(!$check) {
+				$result = false;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * ログアウト
+	 * @param	-
+	 * @return	bool	$result	セッション破棄結果（true：破棄成功, false：破棄失敗）
+	 */
+	public function logOut() {
+		$result = true;
+
+		// セッション変数を全て解除する
+		$_SESSION = array();
+
+		// セッションを切断するにはセッションクッキーも削除する。
+		// Note: セッション情報だけでなくセッションを破壊する。
+		if (ini_get("session.use_cookies")) {
+		    $params = session_get_cookie_params();
+		    setcookie(session_name(), '', time() - 42000,
+		        $params["path"], $params["domain"],
+		        $params["secure"], $params["httponly"]
+		    );
+		}
+
+		// 最終的に、セッションを破壊する
+		$result = session_destroy();
+
+		return $result;
+	}
 }

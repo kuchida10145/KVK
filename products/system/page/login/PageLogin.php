@@ -6,12 +6,12 @@
 		}
 
 	/**
-	 * ログインチェック
+	 * パスワードチェック
 	 * @param  $userName	ユーザ名
 	 * @param  $passWord	パスワード
 	 * @return $result		チェック結果
 	 */
-	public function loginCheck($userName, $passWord) {
+	public function passWordCheck($userName, $passWord) {
 		$deleteFlg = "";
 		$where = "";
 		$table = TABLE_NAME_USER;

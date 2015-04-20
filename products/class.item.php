@@ -247,6 +247,7 @@ class Item extends Page {
 				$buff_ar[] = '<th>希望小売価格</th>';
 				$buff_ar[] = '<th>備考</th>';
 				$buff_ar[] = '</tr>';
+				$partsCount = 1;// 部品表示順
 				foreach( $res as $key=>$row ){
 					if($row['parts_no'] == 0) {
 						$buff_ar[] = '<tr>';
@@ -254,12 +255,14 @@ class Item extends Page {
 						$buff_ar[] = '</tr>';
 					} else {
 						$buff_ar[] = '<tr>';
-						$buff_ar[] = '<td align="center">'.$row['parts_no'].'</td>';
+						//$buff_ar[] = '<td align="center">'.$row['parts_no'].'</td>';
+						$buff_ar[] = '<td align="center">'.$partsCount.'</td>';
 						$buff_ar[] = '<td>'.$row['parts_id'].'</td>';
 						$buff_ar[] = '<td>'.$row['parts_name'].'</td>';
 						$buff_ar[] = '<td align="right">￥'.number_format($row['price']).'(税込￥'.number_format($row['price_zei']).')</td>';
 						$buff_ar[] = '<td>'.$row['note'].'</td>';
 						$buff_ar[] = '</tr>';
+						$partsCount = $partsCount + 1;
 					}
 				}
 				$buff_ar[] = '</table>';

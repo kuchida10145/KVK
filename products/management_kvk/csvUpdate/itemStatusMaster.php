@@ -7,6 +7,19 @@
 
 	$importCsv = new ImportCsvItemStatusMaster();
 
+	// ログインチェック
+	if(!$importCsv->loginCheck()) {
+		header('location: ../login/login.php');
+		$_SESSION['message'] = "ログインを行ってください。";
+	}
+
+	// ログアウトボタン押下時
+	if(isset($_POST['logout_button']) && $_POST['logout_button'] == "logout") {
+		if($importCsv->logOut()) {
+			header('location: ../login/login.php');
+		}
+	}
+
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
 	$viewFilePath	= "";	// 画面表示用csvファイルパス
@@ -64,6 +77,11 @@
 				<h1>WEBサイト管理
 					<small>マスターデータ更新</small>
 				</h1>
+			</div>
+			<div align="right">
+				<form action="#" method="post" name="form">
+					<button type="submit" class="btn btn-info" onclick="document.form.submit();" name="logout_button" value="logout">ログアウト</button>
+				</form>
 			</div>
 			<div class="row">
 				<div class="col-md-2">

@@ -474,14 +474,14 @@ class CommonMakePDF extends Page{
 									// where句生成
 									$whereItem = COLUMN_NAME_ITEM_ID." = '{$value}'";
 									$itemUpdateArray = array(
-										// 分解図データ
-										COLUMN_NAME_BUNKAI_DATA=>$this->pdfFileName,
-										// PDF作成済フラグ
-										COLUMN_NAME_PDF_STATUS=>MAKED,
-										// 表示フラグ
-										COLUMN_NAME_VIEW_STATUS=>VIEW_OK,
-										// 更新日
-										COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
+											// 分解図データ
+											COLUMN_NAME_BUNKAI_DATA=>$this->pdfFileName,
+											// PDF作成済フラグ
+											COLUMN_NAME_PDF_STATUS=>MAKED,
+											// 表示フラグ
+											COLUMN_NAME_VIEW_STATUS=>VIEW_OK,
+											// 更新日
+											COLUMN_NAME_UPDATE_DATE=>date("Y-m-d H:i:s"),
 									);
 									// DBUpdate処理
 									$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->update($itemUpdateArray, $whereItem);
@@ -532,14 +532,14 @@ class CommonMakePDF extends Page{
 			}
 		} else {
 			// pdf作成対象データを取得
- 			$nowArray = $this->getCsvData($this->uploadInfo);
+			$nowArray = $this->getCsvData($this->uploadInfo);
 			foreach($nowArray as $key=>$value) {
 				if($key == "0") {
 					continue;
 				}
 				// where句生成
 				$whereParts = 	COLUMN_NAME_NO." = '".$value[PARTS_ID_COLUMN_PARTS]."' AND "
-								.COLUMN_NAME_ITEM_ID." = '".$value[ITEM_COLUMN_PARTS]."'";
+						.COLUMN_NAME_ITEM_ID." = '".$value[ITEM_COLUMN_PARTS]."'";
 				// データ存在チェック（true：データあり（データ更新）、false：データなし（データ追加））
 				$dbPartsCheck = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->checkData($whereParts);
 				if($dbPartsCheck) {
@@ -1068,11 +1068,17 @@ class CommonMakePDF extends Page{
 		$objPdf->Cell($width_ar['price_zei'], $line, '希望小売価格(税込み)', 1,0, 'C');
 		$objPdf->Cell($width_ar['note'],      $line, '備考', 1,1, 'C');
 
+		$passCount = 0;	// 非表示行カウント
 		foreach($pdfArray as $key => $parts){
+			// 部品データが非表示の場合データを書き込まない
+			if($parts[DELETE_COLUMN_PARTS] == 1) {
+				$passCount = $passCount + 1;
+				continue;
+			}
 			$objPdf->SetX(180.0);
 			if($parts[NO_COLUMN_PARTS] != ''){
 				$price = '￥'.number_format($parts[PRICE_COLUMN_PARTS]).'(税込￥'.number_format($parts[PRICE_ZEI_COLUMN_PARTS]).')';
-				$objPdf->Cell($width_ar['parts_no']  , $line, $parts[NO_COLUMN_PARTS] , 1,0, 'C');
+				$objPdf->Cell($width_ar['parts_no']  , $line, $parts[NO_COLUMN_PARTS] - $passCount , 1,0, 'C');
 				$objPdf->Cell($width_ar['parts_id']   , $line, $parts[PARTS_ID_COLUMN_PARTS] , 1);
 				$objPdf->Cell($width_ar['parts_name'], $line, $parts[PARTS_NAME_COLUMN_PARTS] , 1);
 				$objPdf->Cell($width_ar['price_zei'] , $line, $price , 1);

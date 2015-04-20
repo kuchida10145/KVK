@@ -7,6 +7,20 @@
 
 	// csv取込処理インスタンス化
 	$importCsv = new ImportCsvParts();
+
+	// ログインチェック
+	if(!$importCsv->loginCheck()) {
+		header('location: ../login/login.php');
+		$_SESSION['message'] = "ログインを行ってください。";
+	}
+
+	// ログアウトボタン押下時
+	if(isset($_POST['logout_button']) && $_POST['logout_button'] == "logout") {
+		if($importCsv->logOut()) {
+			header('location: ../login/login.php');
+		}
+	}
+
 	// PDF作成日時取得
 	$importCsv->getMakePdfTime();
 	$pdfDay = $importCsv->dayVal;
@@ -83,6 +97,11 @@
 				<h1>WEBサイト管理
 					<small>商品データ更新</small>
 				</h1>
+			</div>
+			<div align="right">
+				<form action="#" method="post" name="form">
+					<button type="submit" class="btn btn-info" onclick="document.form.submit();" name="logout_button" value="logout">ログアウト</button>
+				</form>
 			</div>
 			<div class="row">
 				<div class="col-md-2">

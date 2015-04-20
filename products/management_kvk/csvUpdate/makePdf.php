@@ -4,12 +4,26 @@
 	// セッション
 	session_start();
 
+	// インスタンス化
+	$makePdf = new CommonMakePDF();
+
+	// ログインチェック
+	if(!$makePdf->loginCheck()) {
+		header('location: ../login/login.php');
+		$_SESSION['message'] = "ログインを行ってください。";
+	}
+
+	// ログアウトボタン押下時
+	if(isset($_POST['logout_button']) && $_POST['logout_button'] == "logout") {
+		if($makePdf->logOut()) {
+			header('location: ../login/login.php');
+		}
+	}
+
 	$today			= date("Y/m/d");
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
 
-	// インスタンス化
-	$makePdf = new CommonMakePDF();
 	$viewArray = $makePdf->getViewData();
 	// PDF作成日時取得
 	$makePdf->getMakePdfTime();
@@ -81,6 +95,11 @@
 				<h1>WEBサイト管理
 					<small>データ更新</small>
 				</h1>
+			</div>
+			<div align="right">
+				<form action="#" method="post" name="form">
+					<button type="submit" class="btn btn-info" onclick="document.form.submit();" name="logout_button" value="logout">ログアウト</button>
+				</form>
 			</div>
 			<div class="row">
 				<div class="col-md-2">

@@ -67,6 +67,48 @@ class ItemDbModel extends DbModel
 		return $this->db->getAllData($sql);
 	}
 
+	/**
+	 * 対象のカテゴリIDに該当する商品件数を取得する
+	 *
+	 * @param	int $category_id	カテゴリID
+	 * @return	int $itemCount		商品件数
+	 */
+	public function findByCategoryCount($category_id)
+	{
+		$itemArray = array();
+
+		$category_id = $this->escape_string($category_id);
+
+		$field = implode(',',$this->getField());
+
+		$sql = "SELECT * FROM item WHERE category_id ='{$category_id}' AND view_status = 0";
+
+		$itemArray = $this->db->getAllData($sql);
+
+		return count($itemArray);
+	}
+
+	/**
+	 * 対象の親カテゴリIDに該当する商品件数を取得する
+	 *
+	 * @param	int $parent_id	親カテゴリID
+	 * @return	int $itemCount	商品件数
+	 */
+	public function findByParentCount($parent_id)
+	{
+		$itemArray = array();
+
+		$parent_id = $this->escape_string($parent_id);
+
+		$field = implode(',',$this->getField());
+
+		$sql = "SELECT * FROM item WHERE parent_id ='{$parent_id}' AND view_status = 0";
+
+		$itemArray = $this->db->getAllData($sql);
+
+		return count($itemArray);
+	}
+
 	public function getCategoryData( $category_id=NULL ){
 		if( $category_id != NULL ){
 			$sql = "SELECT `child_category`.`category_id` , `parent_category`.`parent_id`,`parent_name`,`category_name`  FROM `child_category` INNER JOIN `parent_category` USING(`parent_id`) WHERE `category_id` = {$category_id}";

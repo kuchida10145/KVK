@@ -129,7 +129,9 @@ class Product extends Page {
 		$parentcategory = $this->manager->db_manager->get('parent_category')->getAllEnabled();
 		$buff_ar = array();
 		foreach ( $parentcategory as $row ) {
-			$buff_ar[] = '<dt><a href="/products/parent/?parent_id='.$row['parent_id'].'">'.$row['parent_name'].'</a></dt>';
+			// データ件数取得
+			$itemCount = $this->manager->db_manager->get('item')->findByParentCount($row['parent_id']);
+			$buff_ar[] = '<dt><a href="/products/parent/?parent_id='.$row['parent_id'].'">'.$row['parent_name']."(".$itemCount.")".'</a></dt>';
 			if( $this->checkParentId( $row['parent_id'] ) ){
 				$buff_ar[] = $this->getSidemenuSubcategory( $row['parent_id'] );
 			}
@@ -149,9 +151,11 @@ class Product extends Page {
 		if( $childcategory ){
 			$buff_ar = array();
 			foreach ( $childcategory as $row ) {
+				// データ件数取得
+				$itemCount = $this->manager->db_manager->get('item')->findByCategoryCount($row['category_id']);
 			// 20150401
 //				$buff_ar[] = '<dd><a href="/kvk/products/parent/category/?category_id='.$row['category_id'].'">'.$row['category_name'].'</a></dd>';
-				$buff_ar[] = '<dd><a href="/products/parent/category/?category_id='.$row['category_id'].'&parent_id='.$parent_id.'">'.$row['category_name'].'</a></dd>';
+				$buff_ar[] = '<dd><a href="/products/parent/category/?category_id='.$row['category_id'].'&parent_id='.$parent_id.'">'.$row['category_name']."(".$itemCount.")".'</a></dd>';
 			}
 			return implode( PHP_EOL , $buff_ar );
 		}else{
