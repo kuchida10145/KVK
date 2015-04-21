@@ -106,7 +106,8 @@
 					<ul class="nav nav-pills nav-stacked">
 						<li><a href="itemCsv.php">商品情報更新</a></li>
 						<li><a href="itemStatusMaster.php">マスタデータ更新</a></li>
-						<li class="active"><a href="#">データ更新</a></li>
+						<li class="active"><a href="#">データ更新情報</a></li>
+						<li><a href="topics.php">トピックス更新</a></li>
 					</ul>
 				</div>
 				<div class="col-md-10">
