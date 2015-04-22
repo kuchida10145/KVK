@@ -343,11 +343,9 @@ class MakePDF extends Page{
 		$order = "";
 		$errorMessage = array();
 
-		// ファイル存在チェック
+		// 商品データ更新
 		if(file_exists($this->makingPdfCsvInfoItem)) {
-			// DB更新処理実行
 			$pdfArrat = $this->getCsvData($this->makingPdfCsvInfoItem);
-			// 商品データ更新
 			foreach($pdfArrat as $key=>$targetArray) {
 				if($makeCount == 0){
 					$makeCount = $makeCount + 1;
@@ -379,6 +377,7 @@ class MakePDF extends Page{
 							$dbCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->update($dataArray, $where);
 						} else {
 							// DBinsert処理
+							$dataArray[COLUMN_NAME_ITEM_STATUS] = "";					// 商品ステータス
 							$dataArray[COLUMN_NAME_PDF_STATUS] = NOT_MAKE;				// pdf未作成
 							$dataArray[COLUMN_NAME_REGIST_DATE] = date("Y-m-d H:i:s");	// 登録日追加
 							$dbCheck = $this->manager->db_manager->get(TABLE_NAME_ITEM)->insertDB($dataArray);
@@ -469,8 +468,6 @@ class MakePDF extends Page{
 				COLUMN_NAME_ITEM_NAME=>$csvData[ITEM_NAME_COLUMN_ITEM],
 				// 表示ステータス
 				COLUMN_NAME_VIEW_STATUS=>$csvData[DELETE_COLUMN_ITEM],
-				// 商品ステータス
-				COLUMN_NAME_ITEM_STATUS=>"",
 				// 希望小売価格
 				COLUMN_NAME_PRICE=>$csvData[PRICE_COLUMN_ITEM],
 				// 希望小売価格（税込み）

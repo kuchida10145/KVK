@@ -57,12 +57,12 @@
 		// データ取得
 		$itemCodeArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->getAll();
 
-		// カタログページ分割
-		$fileName = explode(".",$itemDataRow[COLUMN_NAME_CATALOG_LINK]);
-		$catalogYear = explode("-",$fileName[0]);
-		$catalogPage = explode("_",$catalogYear[1]);
-
 		foreach ($itemCodeArray as $itemDataRow){
+			// カタログページ分割
+			$fileName = explode(".",$itemDataRow[COLUMN_NAME_CATALOG_LINK]);
+			$catalogYear = explode("-",$fileName[0]);
+			$catalogPage = explode("_",$catalogYear[1]);
+
 			$csvDataArray = array(
 					// 品番
 					$itemDataRow[COLUMN_NAME_ITEM_ID],
