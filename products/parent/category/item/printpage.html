@@ -1,0 +1,240 @@
+<?php
+/**
+ * アイテム詳細の印刷ページ
+ */
+
+// --------------------------------------------------------------
+// ■ 読み込み
+// --------------------------------------------------------------
+
+include_once('../../../Page.php');
+include_once('../../../class.product.php');
+include_once('../../../class.icon.php');
+include_once('../../../class.item.php');
+
+// --------------------------------------------------------------
+// ■ 設定
+// --------------------------------------------------------------
+
+$cls_product = new Product();
+$cls_item = new Item();
+
+// --------------------------------------------------------------
+// ■ メイン処理
+// --------------------------------------------------------------
+
+//$cls_product->getChildCategoryData();
+
+if( $cls_item->getItemId() ){
+	$item_id = $cls_item->getItemId();
+}else{
+	exit;
+}
+
+// データ取得
+$cls_item->createItemData( $item_id );
+$data = $cls_item->itemData;
+
+// チェック
+if( $data["view_status"] == VIEW_NG ){
+	$cls_item->error('表示が許可されていません');
+}
+
+// ファイル名チェック
+if( isset($_GET['file']) && $_GET['file'] != '' ){
+	$file = $_GET['file'];
+}else{
+	$cls_product->error("ファイル名指定無し");
+}
+
+// --------------------------------------------------------------
+// ■ 変数の設定
+// --------------------------------------------------------------
+
+// トピックパス
+$topicpath = $cls_product->getTopicPath($data["category_id"]);
+
+// タイトル・商品名
+$page_title = $cls_item->getTitle();
+
+// 型番
+$kataban = $cls_item->getKataban();
+
+// 価格
+$price = $cls_item->getPrice();
+$price_zei = $cls_item->getPriceZei();
+
+// 画像
+$mainImage = DIR_UPLOAD.str_replace(".pdf",".png",str_replace('/','',$file));
+
+// 表
+$table = $cls_item->getPartsTable( mysql_real_escape_string($file) );
+
+// PDFファイル
+$pdfFile = $data["bunkai_data"];
+
+// --------------------------------------------------------------
+// ■ アイコンの設定
+// --------------------------------------------------------------
+
+$icon_ar = $cls_item->getIconData();
+$cls_icon = new Icon;
+$cls_icon->setIconData( $icon_ar );
+
+// グループ１
+$group1_ar = array();
+for( $i=1; $i<=7; $i++ ){
+	$group1_ar[] = $i;
+}
+
+// グループ２
+$group2_ar = array();
+for( $i=8; $i<=30; $i++ ){
+	$group2_ar[] = $i;
+}
+
+// グループ３
+$group3_ar = array();
+for( $i=31; $i<=33; $i++ ){
+	$group3_ar[] = $i;
+}
+
+// アイコン設定を取得
+$icon_selected = explode(",",$data['item_status']);
+
+// バッファ
+$icons_group = array();
+$icons_group[1] = "";
+$icons_group[2] = "";
+$icons_group[3] = "";
+for($i=1;$i<=3;$i++){
+	$buff_ar = array();
+	foreach( $icon_selected as $row ){
+		switch($i){
+			case 1: $tar_ar = $group1_ar;break;
+			case 2: $tar_ar = $group2_ar;break;
+			case 3: $tar_ar = $group3_ar;break;
+		}
+		if( in_array($row,$tar_ar) ){
+			$buff_ar[] = $cls_icon->createIconImage($row);
+		}
+	}
+	$icons_group[$i] = implode( '' , $buff_ar);
+}
+
+// --------------------------------------------------------------
+// ■ 画面出力
+// --------------------------------------------------------------
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title><?php echo $page_title;?>印刷ページ | 「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。</title>
+<meta name="description" content="「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。" />
+<meta name="keywords" content="水周り商品の販売,浴室用水栓,キッチン用水栓,洗面用水栓,給水栓,継手,配管,サーモスタット" />
+<link href="../../../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../../../css/print.css" rel="stylesheet" type="text/css" media="print" />
+
+<!--フォントアイコンの設定-->
+<link rel="stylesheet" href="../../../css/fontello/css/fontello.css">
+<link rel="stylesheet" href="../../../css/fontello/css/animation.css">
+<!--[if IE 7]><link rel="stylesheet" href="/css/fontello/css/fontello-ie7.css"><![endif]-->
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans">
+
+
+<script type="text/javascript" src="../../../js/jquery.js"></script>
+<script type="text/javascript" src="../../../js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../../../js/obj.js"></script>
+
+<script type="text/javascript" src="../../../js/acc.js"></script>
+
+
+
+
+</head>
+<body id="printpage">
+<!--全体-->
+<div id="wrap">
+
+<a name="top"></a>
+
+
+<!--ヘッダ全体-->
+<div id="headerwrap" class="clearfix">
+<!--ヘッダ-->
+<div id="header">
+<!--ロゴ-->
+<div id="logo">
+<h1><a href="../../../index.html">KVK 商品情報</a></h1>
+</div>
+<!--ロゴ-->
+
+
+<div id="printbtn">
+<p>
+<a href="authentication.html?file=<?php echo $pdfFile;?>" class="icondrawing balloonbtn" title="分解図をPDF形式で表示します" rel="shadowbox;width=720"><i class="icon-print-1"></i>このページを印刷する</a></p>
+</div>
+
+</div>
+<!--/ヘッダ-->
+</div>
+<!--/ヘッダ全体-->
+
+
+<div class="mainbody clearfix">
+
+<!--メイン-->
+<div class="main">
+
+
+<!--コンテンツ-->
+<div class="contents">
+
+<div class="printtitle">
+<h2><?php echo $page_title;?></h2>
+</div>
+
+<div class="printleft">
+
+<h3><strong>分解図</strong></h3>
+<p class="txt120"><?php echo $kataban;?></p>
+<?php if( is_file($_SERVER['DOCUMENT_ROOT'].$mainImage) ):?>
+<p class="alncenter"><img src="<?php echo $mainImage;?>" /></p>
+<?php endif;?>
+</div>
+
+<div class="printright">
+<h3><strong>部品一覧表 </strong></h3>
+<?php echo str_replace('class="table03"','class="table03 txt70"',$table) ;?>
+</div>
+
+
+</div>
+<!--/コンテンツ-->
+
+
+
+
+
+
+
+
+
+</div>
+<!--/メイン-->
+
+</div>
+
+
+
+
+
+
+
+
+
+</div>
+<!--/全体-->
+</body>
+</html>

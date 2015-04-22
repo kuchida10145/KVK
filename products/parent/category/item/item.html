@@ -1,0 +1,514 @@
+<?php
+/**
+ * アイテム詳細ページ
+ */
+
+// --------------------------------------------------------------
+// ■ 読み込み
+// --------------------------------------------------------------
+
+include_once('../../../Page.php');
+include_once('../../../class.product.php');
+include_once('../../../class.icon.php');
+include_once('../../../class.item.php');
+
+// --------------------------------------------------------------
+// ■ 設定
+// --------------------------------------------------------------
+
+$cls_product = new Product();
+$cls_item = new Item();
+
+// --------------------------------------------------------------
+// ■ メイン処理
+// --------------------------------------------------------------
+
+//$cls_product->getChildCategoryData();
+
+if( $cls_item->getItemId('id') ){
+	$item_id = $cls_item->getItemId();
+}else{
+	$cls_product->error('アイテムIDが指定されていません');
+	exit;
+}
+
+$cls_item->createItemData( $item_id );
+
+$data = $cls_item->itemData;
+
+$topicpath = $cls_product->getTopicPath($data["category_id"]);
+
+// --------------------------------------------------------------
+// ■ 変数の設定
+// --------------------------------------------------------------
+
+// タイトル・商品名
+$page_title = $cls_item->getTitle();
+
+// 型番
+$kataban = $cls_item->getKataban();
+
+// 価格
+$price = $cls_item->getPrice();
+$price_zei = $cls_item->getPriceZei();
+
+// 時期
+$sell_time = $cls_item->getSellTime();
+
+// 備考欄
+$comment = $cls_item->getComment();
+
+// ピッチ
+$pitch = $cls_item->getPitch();
+
+// 寸法
+$sunpou = $cls_item->getSunpou();
+
+// 画像
+$img_ar = $cls_item->getImages();
+if( isset($img_ar[0]) && is_file($_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$img_ar[0]) ){
+	$img1 = $img_ar[0];
+}else{
+	$img1 = 'blank_mainimage.jpg';
+}
+if( isset($img_ar[1]) && is_file($_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$img_ar[1]) ){
+	$img2 = $img_ar[1];
+}else{
+	$img2 = NULL;
+}
+if( isset($img_ar[2]) && is_file($_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$img_ar[2]) ){
+	$img3 = $img_ar[2];
+}else{
+	$img3 = NULL;
+}
+
+// バリエーション
+$variation = $cls_item->getVariation();
+
+// --------------------------------------------------------------
+// ■ アイコンの設定
+// --------------------------------------------------------------
+
+$icon_ar = $cls_item->getIconData();
+$cls_icon = new Icon;
+$cls_icon->setIconData( $icon_ar );
+
+// グループ１
+$group1_ar = array();
+for( $i=1; $i<=7; $i++ ){
+	$group1_ar[] = $i;
+}
+
+// グループ２
+$group2_ar = array();
+for( $i=8; $i<=30; $i++ ){
+	$group2_ar[] = $i;
+}
+
+// グループ３
+$group3_ar = array();
+for( $i=31; $i<=36; $i++ ){
+	$group3_ar[] = $i;
+}
+
+// アイコン設定を取得
+$icon_selected = explode(",",$data['item_status']);
+
+// バッファ
+$icons_group = array();
+$icons_group[1] = "";
+$icons_group[2] = "";
+$icons_group[3] = "";
+for($i=1;$i<=3;$i++){
+	$buff_ar = array();
+	foreach( $icon_selected as $row ){
+		switch($i){
+			case 1: $tar_ar = $group1_ar;break;
+			case 2: $tar_ar = $group2_ar;break;
+			case 3: $tar_ar = $group3_ar;break;
+		}
+		if( in_array($row,$tar_ar) ){
+			$buff_ar[] = $cls_icon->createIconImage($row);
+		}
+	}
+	$icons_group[$i] = implode( '' , $buff_ar);
+}
+// --------------------------------------------------------------
+// ■ カタログリンク
+// --------------------------------------------------------------
+
+$catalog_link_ar = $cls_item->getCatalogLink();
+$catalog_link_filename = $catalog_link_ar["filename"];
+$catalog_link_dirname= $catalog_link_ar["dirname"];
+$catalog_link_enabled = false; // 初期値
+
+// カタログへのリンクを有効にするかどうか
+//20150401
+if( $dirname = $cls_item->getDirname($catalog_link_filename) ){
+	if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_CATALOG.$dirname."/".$catalog_link_filename ) ){
+		$catalog_link_enabled = true;
+	}
+}
+
+// --------------------------------------------------------------
+// ■ サイドメニュー
+// --------------------------------------------------------------
+
+$key="category_id";
+$value=mysql_real_escape_string($data['category_id']);
+
+// --------------------------------------------------------------
+// ■ 画面出力
+// --------------------------------------------------------------
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title><?php echo $page_title;?> | 「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。</title>
+<meta name="description" content="「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。" />
+<meta name="keywords" content="水周り商品の販売,浴室用水栓,キッチン用水栓,洗面用水栓,給水栓,継手,配管,サーモスタット" />
+<link href="../../../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../../../css/print.css" rel="stylesheet" type="text/css" media="print" />
+
+<!--フォントアイコンの設定-->
+<link rel="stylesheet" href="../../../css/fontello/css/fontello.css">
+<link rel="stylesheet" href="../../../css/fontello/css/animation.css">
+<!--[if IE 7]><link rel="stylesheet" href="/css/fontello/css/fontello-ie7.css"><![endif]-->
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans">
+
+
+<script type="text/javascript" src="../../../js/jquery.js"></script>
+<script type="text/javascript" src="../../../js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../../../js/obj.js"></script>
+
+<script type="text/javascript" src="../../../js/acc.js"></script>
+
+
+<!--別ウィンドウを開く-->
+<link rel="stylesheet" type="text/css" href="../../../js/shadowbox/shadowbox.css">
+<script type="text/javascript" src="../../../js/shadowbox/shadowbox.js"></script>
+
+
+<!--吹き出し設定-->
+<script>
+$(function() {
+	$('.balloonbtn').balloon({ position: "top" });
+});
+</script>
+
+
+<!--画像の切り替え-->
+<script type="text/javascript" src="../../../js/multihero.js"></script>
+<script type="text/javascript">
+// multihero.js Customize
+multihero.interval = 5000;
+multihero.speed = "slow";//fast
+</script>
+
+</head>
+<body id="index">
+<!--全体-->
+<div id="wrap">
+
+<a name="top"></a>
+
+
+<!--ヘッダ全体-->
+<div id="headerwrap" class="clearfix">
+<!--ヘッダ-->
+<div id="header">
+<!--ロゴ-->
+<div id="logo">
+<h1><a href="../../../index.html">KVK 商品情報</a></h1>
+</div>
+<!--ロゴ-->
+
+
+
+<!--メインメニュー全体-->
+<div id="gnaviwrap">
+<!--グローバルメニュー-->
+<div id="gnavi">
+<ul class="clearfix">
+<?php include("../../../common.globalmenu.php");?>
+</ul>
+</div>
+<!--/グローバルメニュー-->
+
+
+</div>
+<!--/ヘッダ-->
+</div>
+<!--/ヘッダ全体-->
+
+<!--検索-->
+<div id="headersearchwrap">
+<?php include( "../../../common.search.php" ); ?>
+</div>
+<!--/検索-->
+
+</div>
+<!--/メインメニュー全体-->
+<!--ページメイン部分-->
+
+<div class="mainbodywrap">
+
+<div class="mainbody clearfix column2">
+
+
+<!--メイン-->
+<div class="main">
+
+<!--コンテンツ-->
+<div class="contents">
+
+
+<h2><strong><?php echo $page_title;?></strong></h2>
+
+<!--ぱんくず-->
+<div class="topicpath">
+<p><?php echo $topicpath;?>&gt; <?php echo $page_title;?></p>
+</div>
+<!--/ぱんくず-->
+
+
+<div class="whitewrap">
+
+<div class="clearfix pb30 mb20">
+<div class="detailphoto">
+<div id="multiHero">
+<ul id="multiHeroContents">
+<?php /*-----画像１〜３を出力-----*/ ?>
+<?php if( $img1 ): ?>
+<li><img src="<?php echo DIR_UPLOAD.$img1;?>" alt=""/></li>
+<?php endif;?>
+<?php if( $img2 ): ?>
+<li><img src="<?php echo DIR_UPLOAD.$img2;?>" alt=""/></li>
+<?php endif;?>
+<?php if( $img3 ): ?>
+<li><img src="<?php echo DIR_UPLOAD.$img3;?>" alt=""/></li>
+<?php endif;?>
+</ul>
+
+<ul id="multiHeroControls" class="clearfix">
+<?php /*-----サムネイル画像１〜３を出力。ただし、２か３のデータが無ければ１のサムネイルも無し-----*/ ?>
+<?php $hero_cnt = 1;?>
+<?php if( $img1 && ( $img2 || $img3 ) ): ?>
+<li><a href="javascript:multihero.show(<?php echo $hero_cnt;?>);"><img src="<?php echo DIR_UPLOAD.$img1;?>" alt="" /></a></li>
+<?php
+$hero_cnt++;
+endif;
+?>
+<?php if( $img2 ): ?>
+<li><a href="javascript:multihero.show(<?php echo $hero_cnt;?>);"><img src="<?php echo DIR_UPLOAD.$img2;?>" alt="" /></a></li>
+<?php
+$hero_cnt++;
+endif;
+?>
+<?php if( $img2 ): ?>
+<li><a href="javascript:multihero.show(<?php echo $hero_cnt;?>);"><img src="<?php echo DIR_UPLOAD.$img3;?>" alt="" /></a></li>
+<?php
+$hero_cnt++;
+endif;
+?>
+</ul>
+</div>
+</div>
+
+<script>
+$("#multiHeroContents img").MyThumbnail({
+    thumbWidth:300,
+    thumbHeight:300
+});
+</script>
+
+<script>
+$("#multiHeroControls img").MyThumbnail({
+    thumbWidth:100,
+    thumbHeight:100
+});
+</script>
+
+<div class="detailinfo">
+<div class="iconbox">
+<?php if(is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$data['map_data'])):?><a href="authentication.html?file=<?php echo $data['map_data'];?>" class="icondrawing balloonbtn" title="商品の外観図面をPDF形式で表示します" rel="shadowbox;width=720">図面</a><?php endif;?>
+<?php if(is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$data['torisetsu_data'] )):?><a href="authentication.html?file=<?php echo $data['torisetsu_data'];?>" class="iconmanual balloonbtn" title="商品の取扱説明書をPDF形式で表示します" rel="shadowbox;width=720">取扱説明書</a><?php endif;?>
+<?php if(is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$data['kousetsu_data'] )):?><a href="authentication.html?file=<?php echo $data['kousetsu_data'];?>" class="iconconstruction balloonbtn" title="商品の施工説明書をPDF形式で表示します" rel="shadowbox;width=720">施工説明書</a><?php endif;?>
+<?php if( $data['buy_status'] ):?><a href="<?php echo $data['buy_status'];?>" target="_blank" class="iconbuy balloonbtn" title="商品のご購入窓口にリンクします">購入</a><?php endif;?>
+<?php if( $data['map_data'] || $data['torisetsu_data'] || $data['kousetsu_data'] || $data['buy_status'] ):?><br /><?php endif;?>
+<?php if(is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$data['bunkai_data']) || is_file($_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$data['shower_data']) ):?>分解図　<?php endif;?>
+<?php if(is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$data['bunkai_data'] )):?><a href="map.html?id=<?php echo $item_id;?>&file=<?php echo $data['bunkai_data'];?>" class="iconfaucet balloonbtn" title="水栓です">水栓</a><?php endif;?>
+<?php if(is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$data['shower_data'] )):?><a href="map.html?id=<?php echo $item_id;?>&file=<?php echo $data['shower_data'];?>" class="iconshower balloonbtn" title="シャワーです">シャワー</a><?php endif;?>
+</div>
+<table border="0" cellpadding="0" cellspacing="0" class="table01">
+<tbody>
+<tr>
+<th width="20%" nowrap="nowrap">表示マーク</th>
+<td>
+<?php
+if( $icons_group[1] != "" ){
+	echo $icons_group[1];
+}else{
+	'&nbsp;';
+}
+?>
+</td>
+</tr>
+<tr>
+<th nowrap="nowrap">機能マーク</th>
+<td><?php
+if( $icons_group[2] != "" ){
+	echo $icons_group[2];
+}else{
+	'&nbsp;';
+}
+?></td>
+</tr>
+<tr>
+<th nowrap="nowrap">節湯</th>
+<td><?php
+if( $icons_group[3] != "" ){
+	echo $icons_group[3];
+}else{
+	'&nbsp;';
+}
+?></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+
+<table border="0" cellpadding="0" cellspacing="0" class="table01">
+<tbody>
+<tr>
+<th nowrap="nowrap">品名</th>
+<td><?php echo $page_title;?></td>
+</tr>
+<tr>
+<th nowrap="nowrap">品番</th>
+<td><?php echo $kataban;?></td>
+</tr>
+<tr>
+<th nowrap="nowrap">価格</th>
+<td>￥<?php echo number_format($price);?>（税込 ￥<?php echo number_format($price_zei);?>）</td>
+</tr>
+<?php if( $pitch ): ?>
+<tr>
+<th nowrap="nowrap">ピッチ</th>
+<td><?php echo $pitch;?></td>
+</tr>
+<?php endif; ?>
+<?php if( $sunpou ): ?>
+<tr>
+<th nowrap="nowrap">取付寸法</th>
+<td><?php echo $sunpou;?></td>
+</tr>
+<?php endif; ?>
+<tr>
+<th nowrap="nowrap">販売時期</th>
+<td><?php echo $sell_time;?></td>
+</tr>
+<?php if( $variation ): ?>
+<tr>
+<th nowrap="nowrap">バリエーション</th>
+<td><?php echo $variation;?></td>
+</tr>
+<?php endif;?>
+<?php if( $comment ): ?>
+<tr>
+<th nowrap="nowrap">備考</th>
+<td><?php echo nl2br($comment);?></td>
+</tr>
+<?php endif; ?>
+</tbody>
+</table>
+
+<?php if( $catalog_link_enabled ):?>
+<p class="alncenter"><a href="catalog.html?file=<?php echo $catalog_link_filename;?>" class="linkbtn" rel="shadowbox;width=720"><i class="icon-file-pdf"></i>この商品のカタログをみる(PDF)</a></p>
+<?php endif;?>
+
+</div>
+
+
+
+
+
+</div>
+<!--/コンテンツ-->
+
+
+</div>
+<!--/メイン-->
+
+<!--サイド-->
+<div class="side">
+
+<!--サイドメニュー-->
+<div class="sidemenu">
+<?php include( "../../../common.sidemenu.php" ); ?>
+</div>
+<!--/サイドメニュー-->
+
+<!--サイドバナー-->
+<div class="sidebanner">
+<ul>
+<li><a href="#"><img src="../../../img/banner/01.png" alt="" /></a></li>
+<li><a href="#"><img src="../../../img/banner/02.png" alt="" /></a></li>
+</ul>
+</div>
+<!--サイドバナー-->
+
+</div>
+<!--/サイド-->
+
+<!--フッターメニュー-->
+<div id="pagetop" class="clearfix">
+<p><a href="#top" onclick="backToTop(); return false" onkeypress="">このページの先頭へ<i class="icon-angle-circled-up"></i></a></p>
+</div>
+<!--/フッターメニュー-->
+
+</div>
+
+
+</div>
+<!--/ページメイン部分-->
+
+
+<!--フッター全体-->
+<div id="footerwrap" class="clearfix">
+
+
+<!--フッター-->
+<div id="footer" class="clearfix">
+
+<div id="footermenu" class="clearfix">
+<ul class="clearfix">
+<li><a href="#">ご利用条件</a></li>
+<li><a href="#">プライバシーポリシー</a></li>
+</ul>
+</div>
+
+<!--コピーライト-->
+<div id="copyright" class="clearfix">
+<address>
+Copyright (c) 2015 KVK CORPORATION. All rights reserved.</address>
+</div>
+<!--/コピーライト-->
+
+</div>
+<!--/フッター-->
+
+<div class="clear"></div>
+
+
+
+</div>
+<!--フッター全体-->
+
+</div>
+<!--/全体-->
+</body>
+</html>

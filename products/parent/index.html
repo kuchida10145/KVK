@@ -1,0 +1,237 @@
+<?php
+/**
+ * 子カテゴリー一覧ページ
+ */
+
+// --------------------------------------------------------------
+// ■ 読み込み
+// --------------------------------------------------------------
+
+include_once('../Page.php');
+include_once('../class.product.php');
+
+// --------------------------------------------------------------
+// ■ 設定
+// --------------------------------------------------------------
+
+$cls_product = new Product();
+
+// --------------------------------------------------------------
+// ■ メイン処理
+// --------------------------------------------------------------
+
+$cls_product->getParentCategoryData(); 
+
+// --------------------------------------------------------------
+// ■ 変数の設定
+// --------------------------------------------------------------
+
+$page_title = $cls_product->parentCategory_data['parent_name'];
+$itemlist = $cls_product->getChildCategoryItemList();
+
+// --------------------------------------------------------------
+// ■ サイドメニュー
+// --------------------------------------------------------------
+
+$key=NULL;
+$value=NULL;
+
+// --------------------------------------------------------------
+// ■ 画面出力
+// --------------------------------------------------------------
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title><?php echo $page_title;?> | 「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。</title>
+<meta name="description" content="「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。" />
+<meta name="keywords" content="水周り商品の販売,浴室用水栓,キッチン用水栓,洗面用水栓,給水栓,継手,配管,サーモスタット" />
+<link href="../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../css/print.css" rel="stylesheet" type="text/css" media="print" />
+
+<!--フォントアイコンの設定-->
+<link rel="stylesheet" href="../css/fontello/css/fontello.css">
+<link rel="stylesheet" href="../css/fontello/css/animation.css">
+<!--[if IE 7]><link rel="stylesheet" href="/css/fontello/css/fontello-ie7.css"><![endif]-->
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans">
+
+
+<script type="text/javascript" src="../js/jquery.js"></script>
+<script type="text/javascript" src="../js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../js/obj.js"></script>
+
+<script type="text/javascript" src="../js/acc.js"></script>
+
+
+<!--別ウィンドウを開く-->
+<link rel="stylesheet" type="text/css" href="../js/shadowbox/shadowbox.css">
+<script type="text/javascript" src="../js/shadowbox/shadowbox.js"></script>
+
+
+<!--吹き出し設定-->
+<script>
+$(function() {
+	$('.balloonbtn').balloon({ position: "top" });
+});
+</script>
+
+
+<!--画像の切り替え-->
+<script type="text/javascript" src="../js/multihero.js"></script>
+<script type="text/javascript">
+// multihero.js Customize
+multihero.interval = 5000;
+multihero.speed = "slow";//fast
+</script>
+
+</head>
+<body id="index">
+<!--全体-->
+<div id="wrap">
+
+<a name="top"></a>
+
+
+<!--ヘッダ全体-->
+<div id="headerwrap" class="clearfix">
+<!--ヘッダ-->
+<div id="header">
+<!--ロゴ-->
+<div id="logo">
+<h1><a href="../index.html">KVK 商品情報</a></h1>
+</div>
+<!--ロゴ-->
+
+
+
+<!--メインメニュー全体-->
+<div id="gnaviwrap">
+<!--グローバルメニュー-->
+<div id="gnavi">
+<ul class="clearfix">
+<?php include("../common.globalmenu.php");?>
+</ul>
+</div>
+<!--/グローバルメニュー-->
+
+
+</div>
+<!--/ヘッダ-->
+</div>
+<!--/ヘッダ全体-->
+
+<!--検索-->
+<div id="headersearchwrap">
+<?php include( "../common.search.php" ); ?>
+</div>
+<!--/検索-->
+
+</div>
+<!--/メインメニュー全体-->
+<!--ページメイン部分-->
+
+<div class="mainbodywrap">
+
+<div class="mainbody clearfix column2">
+
+
+<!--メイン-->
+<div class="main">
+
+<!--コンテンツ-->
+<div class="contents">
+
+
+<h2><strong><?php echo $page_title;?></strong></h2>
+
+<!--ぱんくず-->
+<div class="topicpath">
+<p><a href="#">商品情報 </a> &gt; <?php echo $page_title;?></p>
+</div>
+<!--/ぱんくず-->
+
+
+<div class="itemlist3 fixHeight clearfix">
+
+<?php echo $itemlist;?>
+
+</div>
+
+
+</div>
+<!--/コンテンツ-->
+
+
+</div>
+<!--/メイン-->
+
+<!--サイド-->
+<div class="side">
+
+<!--サイドメニュー-->
+<div class="sidemenu">
+<?php include( "../common.sidemenu.php" ); ?>
+</div>
+<!--/サイドメニュー-->
+
+<!--サイドバナー-->
+<div class="sidebanner">
+<ul>
+<li><a href="#"><img src="../img/banner/01.png" alt="" /></a></li>
+<li><a href="#"><img src="../img/banner/02.png" alt="" /></a></li>
+</ul>
+</div>
+<!--サイドバナー-->
+
+</div>
+<!--/サイド-->
+
+<!--フッターメニュー-->
+<div id="pagetop" class="clearfix"> 
+<p><a href="#top" onclick="backToTop(); return false" onkeypress="">このページの先頭へ<i class="icon-angle-circled-up"></i></a></p>
+</div>
+<!--/フッターメニュー-->    
+
+</div>
+
+
+</div>
+<!--/ページメイン部分-->
+
+
+<!--フッター全体-->
+<div id="footerwrap" class="clearfix"> 
+
+
+<!--フッター-->
+<div id="footer" class="clearfix">
+
+<div id="footermenu" class="clearfix">
+<ul class="clearfix">
+<li><a href="#">ご利用条件</a></li>
+<li><a href="#">プライバシーポリシー</a></li>
+</ul>
+</div>
+
+<!--コピーライト-->
+<div id="copyright" class="clearfix">
+<address>
+Copyright (c) 2015 KVK CORPORATION. All rights reserved.</address>
+</div>
+<!--/コピーライト-->  
+
+</div>
+<!--/フッター-->      
+
+<div class="clear"></div>
+
+
+
+</div>
+<!--フッター全体-->
+
+</div>
+<!--/全体-->
+</body>
+</html>

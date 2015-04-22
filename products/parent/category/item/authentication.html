@@ -1,0 +1,148 @@
+<?php
+/**
+ * PDFダウンロードページ
+ * 同意を必須とするため、一時キーを発行している
+ */
+
+// --------------------------------------------------------------
+// ■ 読み込み
+// --------------------------------------------------------------
+
+include_once('../../../Page.php');
+include_once('../../../class.product.php');
+include_once('../../../class.icon.php');
+include_once('../../../class.item.php');
+
+// --------------------------------------------------------------
+// ■ 設定
+// --------------------------------------------------------------
+
+$cls_product = new Product();
+$cls_item = new Item();
+
+// --------------------------------------------------------------
+// ■ メイン処理
+// --------------------------------------------------------------
+
+session_start();
+
+if( isset($_GET['key']) && $_GET['key'] != "" ){
+	$filename = $_SESSION['download_file'][$_GET['key']];
+	$dir = $_SERVER['DOCUMENT_ROOT']."/products/upload/";
+
+	header('Content-Type: application/pdf');
+	readfile( $dir.$filename );
+	exit;
+}
+
+// ファイル名の指定があるか
+if( isset($_GET['file']) && $_GET['file'] != "" ){
+
+	$filename = str_replace('/','',$_GET['file']);
+
+	if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$filename ) ){
+	$rand = rand(10000,99999).time();
+	$_SESSION['download_file'][$rand] = $filename;
+	}else{
+		$cls_product->error('ファイルが存在しません。');
+	}
+
+
+}else{
+	$cls_product->error('表示するカタログが指定されていません。');
+}
+
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>株式会社KVK商品情報ページ | 「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。</title>
+<meta name="description" content="「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。" />
+<meta name="keywords" content="水周り商品の販売,浴室用水栓,キッチン用水栓,洗面用水栓,給水栓,継手,配管,サーモスタット" />
+<link href="../../../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../../../css/print.css" rel="stylesheet" type="text/css" media="print" />
+
+<!--フォントアイコンの設定-->
+<link rel="stylesheet" href="../../../css/fontello/css/fontello.css">
+<link rel="stylesheet" href="../../../css/fontello/css/animation.css">
+<!--[if IE 7]><link rel="stylesheet" href="/css/fontello/css/fontello-ie7.css"><![endif]-->
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans">
+
+
+<script type="text/javascript" src="../../../js/jquery.js"></script>
+<script type="text/javascript" src="../../../js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../../../js/obj.js"></script>
+
+<script type="text/javascript" src="../../../js/acc.js"></script>
+
+
+
+
+</head>
+<body id="smallwindow">
+<!--全体-->
+<div id="wrap">
+
+<a name="top"></a>
+
+
+
+
+
+
+<!--メイン-->
+<div class="main">
+
+
+<!--コンテンツ-->
+<div class="contents">
+
+<h2>外観図面・分解図・取扱説明書・施工説明書のご利用条件 </h2>
+<p> 本サービスによって、電子的に提供される外観図面・分解図・取扱説明書・施工説明書（以下「商品データ」という）については、 以下のご利用条件にご同意いただいた上で、ご利用ください。<br />
+なお、商品データは、PDFファイル形式になっておりますので、アクロバットリーダーが必要です。<br />
+バージョンによっては、不具合が発生する場合もありますので最新バージョンを推奨しております。</p>
+<ol>
+<li>当社の許可なく本サービスの商品データの一部、または全部を複製、改変、転載、もしくは送信したりすることはできません。</li>
+<li> 本サービスでは、当社が販売した主な商品データのみで、全ての商品データが掲載されているわけではありません。</li>
+<li> 商品により予告なしに内容・仕様・寸法・価格など改訂する場合があり、最新の内容と異なる場合があります。</li>
+<li> また、予告なしに部品供給できない場合がありますのであらかじめご了承ください。<br />
+本サービスの利用、または利用できなかったことにより万一損害が生じた場合、当社は一切責任を負いませんことをご了承ください。</li>
+<li> 本サービスは予告なく中止、または内容を変更する場合があります。あらかじめご了承ください。</li>
+<li> <span class="clrblue">シングルレバー式水栓の場合、上吐水仕様（レバーを上げると湯水が出るタイプ）と下吐水仕様（レバーを下げると湯水が出るタイプ）により、カートリッジが違いますので、分解図などでご確認ください。</span><br />
+</li>
+<li><span class="clrred">2014年4月1日より製品希望小売価格を改定いたしました。<br />
+分解図の表示価格は旧価格を含んでおります。　改定後の新価格につきましては、お近くの支社・営業所へご確認ください。</span></li>
+<li class="clrred"> 分解図の税込価格表示は旧税率（5%）に基づく価格となっており、消費税法改正後の新税率に基づく価格とは異なりますのでご注意ください。</li>
+</ol>
+<br />
+
+<p class="alncenter"><a href="#" class="linkbtn3">同意しない</a>　<a href="authentication.html?key=<?php echo $rand;?>" class="linkbtn2">同意する</a></p>
+</div>
+<!--/コンテンツ-->
+
+
+
+
+
+
+
+
+
+</div>
+<!--/メイン-->
+
+
+
+
+
+
+
+
+
+
+
+</div>
+<!--/全体-->
+</body>
+</html>

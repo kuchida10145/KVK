@@ -1,0 +1,413 @@
+<?php
+/**
+ * 子カテゴリー一覧ページ
+ */
+
+/*
+パラメタ解説
+p=ページ数
+category_id = 子カテゴリのID
+sort new(default) | id 新着が品番か
+
+新着と品番を入れ替えた場合は順番がリセットされるため、ページは１固定で
+*/
+
+// --------------------------------------------------------------
+// ■ 読み込み
+// --------------------------------------------------------------
+
+include_once('../../Page.php');
+include_once('../../class.product.php');
+
+// --------------------------------------------------------------
+// ■ 設定
+// --------------------------------------------------------------
+
+$cls_product = new Product();
+
+// --------------------------------------------------------------
+// ■ 変数の設定
+// --------------------------------------------------------------
+
+$page_title = '株式会社KVK商品情報ページ';
+
+// --------------------------------------------------------------
+// ■ メイン処理
+// --------------------------------------------------------------
+
+if( isset($_GET['category_id']) && is_numeric($_GET['category_id']) ){
+	$category_id = $_GET['category_id'];
+}else{
+	$cls_product->error('カテゴリーIDが指定されていません');
+	exit;
+}
+
+if( isset($_GET['parent_id']) && is_numeric($_GET['parent_id']) ){
+	$parent_id = $_GET['parent_id'];
+}else{
+	$cls_product->error('親カテゴリーIDが指定されていません');
+	exit;
+}
+
+if( isset($_GET['p']) && is_numeric($_GET['p']) && $_GET['p'] > 0 ){
+	$page = $_GET['p'];
+}else{
+	$page = 1;
+}
+if( isset($_GET['mode']) ){
+	$mode = $_GET['mode'];
+	switch( $mode ){
+		case SORT_MODE_ID;
+			$mode = SORT_MODE_ID;
+			break;
+		default:
+			$mode = SORT_MODE_NEW;
+			break;
+	}
+}else{
+	$mode = SORT_MODE_NEW;
+}
+
+// --------------------------------------------------------------
+// ■ 変数の設定
+// --------------------------------------------------------------
+
+$cls_product->getChildCategoryData( $category_id  );
+$page_title = $cls_product->childCategory_data['category_name'];
+$itemlist = $cls_product->getProductItemList( $parent_id, $category_id , $page , $mode );
+$topicpath = $cls_product->getTopicPath( $category_id , true );
+
+$total_cnt = $cls_product->cnt;
+$start = $cls_product->start;
+$limit = $cls_product->limit;
+$page_max = $cls_product->page_max;
+
+// ページ管理
+if( $total_cnt > 0 ){
+
+	$i_start = 1;
+
+	// １０件以上で発動
+	if( $page_max > 10 ){
+
+			// 最初のページは出力範囲のみ制限
+			if( $page <=3 ){
+				$i_start = 1;
+				$page_max_limit = 8;
+			}
+
+			// 一定以上ページが進行した場合は前後を省略
+			if( $page > 3 ){
+				if($page==5){
+					$i_start = $page-2;
+				}else{
+					$i_start = $page-3;
+				}
+				$page_max_limit = $i_start+6;
+			}
+
+			// 終わりに近づいたらページ省略は前半のみ
+			if( $page >= $page_max-3 ){
+				$i_start = $page_max-7;
+				$page_max_limit = $page_max;
+			}
+
+			if( $page == $page_max-4 ){
+				$i_start = $page_max-8;
+				$page_max_limit = $page_max-2;
+			}
+
+	}else{
+		$i_start = 1;
+		$page_max_limit = $page_max;
+	}
+
+	$buff_ar = array();
+
+	if( $i_start > 2 ){
+			$buff_ar[] = '<li class="page"><a href="'.'?category_id='.$category_id.'&p=1&mode='.$mode.'">1...</a></li>';
+	}
+
+	for($i=$i_start;$i<=$page_max;$i++){
+
+		$url_str = '?category_id='.$category_id.'&p='.$i.'&mode='.$mode;
+
+		if( $i==$page ){
+			$buff_ar[] = '<li class="focus"><a href="'.$url_str.'">'.$i.'</a></li>';
+		}else{
+			$buff_ar[] = '<li class="page"><a href="'.$url_str.'">'.$i.'</a></li>';
+		}
+
+		if( $i >= $page_max_limit ){
+			break;
+		}
+
+	}
+
+	if( $page_max_limit < $page_max ){
+			$buff_ar[] = '<li class="page"><a href="'.'?category_id='.$_GET['category_id'].'&p='.$page_max.'&mode='.$mode.'">...'.$page_max.'</a></li>';
+	}
+
+	if( $page > 1 ){
+		$url_back = '?category_id='.$category_id.'&p='.($page-1).'&mode='.$mode;
+	}else{
+		$url_back = '?category_id='.$category_id.'&p='.$page.'&mode='.$mode;
+	}
+	if( $page_max >= $page+1 ){
+		$url_next = '?category_id='.$category_id.'&p='.($page+1).'&mode='.$mode;
+	}else{
+		$url_next = '?category_id='.$category_id.'&p='.$page.'&mode='.$mode;
+	}
+
+	$page_navigation = implode('',$buff_ar).'
+	<li class="back"><a href="'.$url_back.'">前へ</a></li>
+	<li class="back"><a href="'.$url_next.'">次へ</a></li>';
+
+}else{
+	$itemlist = "<p>この商品カテゴリーには商品が登録されていません。</p>";
+	$page_navigation = "";
+}
+
+// --------------------------------------------------------------
+// ■ サイドメニュー
+// --------------------------------------------------------------
+
+$key="category_id";
+$value=mysql_real_escape_string($_GET['category_id']);
+
+// --------------------------------------------------------------
+// ■ 画面出力
+// --------------------------------------------------------------
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title><?php echo $page_title;?> | 「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。</title>
+<meta name="description" content="「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。" />
+<meta name="keywords" content="水周り商品の販売,浴室用水栓,キッチン用水栓,洗面用水栓,給水栓,継手,配管,サーモスタット" />
+<link href="../../css/main.css" rel="stylesheet" type="text/css" />
+<link href="../../css/print.css" rel="stylesheet" type="text/css" media="print" />
+
+<!--フォントアイコンの設定-->
+<link rel="stylesheet" href="../../css/fontello/css/fontello.css">
+<link rel="stylesheet" href="../../css/fontello/css/animation.css">
+<!--[if IE 7]><link rel="stylesheet" href="/css/fontello/css/fontello-ie7.css"><![endif]-->
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans">
+
+
+<script type="text/javascript" src="../../js/jquery.js"></script>
+<script type="text/javascript" src="../../js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../../js/obj.js"></script>
+
+<script type="text/javascript" src="../../js/acc.js"></script>
+
+
+<!--別ウィンドウを開く-->
+<link rel="stylesheet" type="text/css" href="../../js/shadowbox/shadowbox.css">
+<script type="text/javascript" src="../../js/shadowbox/shadowbox.js"></script>
+
+
+<!--吹き出し設定-->
+<script>
+$(function() {
+	$('.balloonbtn').balloon({ position: "top" });
+});
+</script>
+
+
+<!--画像の切り替え-->
+<script type="text/javascript" src="../../js/multihero.js"></script>
+<script type="text/javascript">
+// multihero.js Customize
+multihero.interval = 5000;
+multihero.speed = "slow";//fast
+</script>
+
+</head>
+<body id="index">
+<!--全体-->
+<div id="wrap">
+
+<a name="top"></a>
+
+
+<!--ヘッダ全体-->
+<div id="headerwrap" class="clearfix">
+<!--ヘッダ-->
+<div id="header">
+<!--ロゴ-->
+<div id="logo">
+<h1><a href="../../index.html">KVK 商品情報</a></h1>
+</div>
+<!--ロゴ-->
+
+
+
+<!--メインメニュー全体-->
+<div id="gnaviwrap">
+<!--グローバルメニュー-->
+<div id="gnavi">
+<ul class="clearfix">
+<?php include("../../common.globalmenu.php");?>
+</ul>
+</div>
+<!--/グローバルメニュー-->
+
+
+</div>
+<!--/ヘッダ-->
+</div>
+<!--/ヘッダ全体-->
+
+<!--検索-->
+<div id="headersearchwrap">
+<?php include( "../../common.search.php" ); ?>
+</div>
+<!--/検索-->
+
+</div>
+<!--/メインメニュー全体-->
+<!--ページメイン部分-->
+
+<div class="mainbodywrap">
+
+<div class="mainbody clearfix column2">
+
+
+<!--メイン-->
+<div class="main">
+
+<!--コンテンツ-->
+<div class="contents">
+
+
+<h2><strong><?php echo $page_title;?></strong></h2>
+
+<!--ぱんくず-->
+<div class="topicpath">
+<p><?php echo $topicpath;?></p>
+</div>
+<!--/ぱんくず-->
+
+<div class="sortbox">
+<p>並び替え　<a href="<?php echo '?category_id='.$category_id.'&p='.$page.'&mode='.SORT_MODE_NEW;?>" <?php if( $mode==SORT_MODE_NEW):?>class="focus"<?php endif;?> >新着順</a>　<a href="<?php echo '?category_id='.$category_id.'&p='.$page.'&mode='.SORT_MODE_ID;?>" <?php if( $mode==SORT_MODE_ID):?>class="focus"<?php endif;?> >品番順</a></p>
+</div>
+
+<?php if( $total_cnt>0 ):?>
+<div class="leftbox">
+<p><?php echo $total_cnt;?>件中　<?php echo $start;?>件～<?php echo $limit;?>件を表示</p>
+</div>
+<?php endif;?>
+
+<div class="rightbox">
+<div class="pageindex">
+<ul>
+
+<?php echo $page_navigation;?>
+
+</ul>
+</div>
+</div>
+<div class="clear"></div>
+
+
+<div class="itemlist4 fixHeight clearfix">
+
+<?php echo $itemlist;?>
+
+</div>
+
+
+<?php if( $total_cnt>0 ):?>
+<div class="leftbox">
+<p><?php echo $total_cnt;?>件中　<?php echo $start;?>件～<?php echo $limit;?>件を表示</p>
+</div>
+<?php endif;?>
+
+<div class="rightbox">
+<div class="pageindex">
+<ul>
+
+<?php echo $page_navigation;?>
+
+</ul>
+</div>
+</div>
+<div class="clear"></div>
+
+</div>
+<!--/コンテンツ-->
+
+</div>
+<!--/メイン-->
+
+<!--サイド-->
+<div class="side">
+
+<!--サイドメニュー-->
+<div class="sidemenu">
+<?php include( "../../common.sidemenu.php" ); ?>
+</div>
+<!--/サイドメニュー-->
+
+<!--サイドバナー-->
+<div class="sidebanner">
+<ul>
+<li><a href="#"><img src="../../img/banner/01.png" alt="" /></a></li>
+<li><a href="#"><img src="../../img/banner/02.png" alt="" /></a></li>
+</ul>
+</div>
+<!--サイドバナー-->
+
+</div>
+<!--/サイド-->
+
+<!--フッターメニュー-->
+<div id="pagetop" class="clearfix">
+<p><a href="#top" onclick="backToTop(); return false" onkeypress="">このページの先頭へ<i class="icon-angle-circled-up"></i></a></p>
+</div>
+<!--/フッターメニュー-->
+
+</div>
+
+
+</div>
+<!--/ページメイン部分-->
+
+
+<!--フッター全体-->
+<div id="footerwrap" class="clearfix">
+
+
+<!--フッター-->
+<div id="footer" class="clearfix">
+
+<div id="footermenu" class="clearfix">
+<ul class="clearfix">
+<li><a href="#">ご利用条件</a></li>
+<li><a href="#">プライバシーポリシー</a></li>
+</ul>
+</div>
+
+<!--コピーライト-->
+<div id="copyright" class="clearfix">
+<address>
+Copyright (c) 2015 KVK CORPORATION. All rights reserved.</address>
+</div>
+<!--/コピーライト-->
+
+</div>
+<!--/フッター-->
+
+<div class="clear"></div>
+
+
+
+</div>
+<!--フッター全体-->
+
+</div>
+<!--/全体-->
+</body>
+</html>

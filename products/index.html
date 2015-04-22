@@ -1,0 +1,250 @@
+<?php
+
+include_once('Page.php');
+include_once('class.product.php');
+include_once('class.topics.php');
+
+// --------------------------------------------------------------
+// ■ メイン処理
+// --------------------------------------------------------------
+
+$cls_product = new Product();
+$cls_topics = new Topics();
+
+// --------------------------------------------------------------
+// ■ 変数の設定
+// --------------------------------------------------------------
+
+$itemlist = $cls_product->getParentCategoryItemList();
+
+// --------------------------------------------------------------
+// ■ トピックス
+// --------------------------------------------------------------
+
+$topicsList = $cls_topics->getTopicsData();
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>株式会社KVK商品情報ページ | 「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。</title>
+<meta name="description" content="「常に使う人の身になって考えた誰にでも使いやすい水まわり商品」のモノづくりを提案します。" />
+<meta name="keywords" content="水周り商品の販売,浴室用水栓,キッチン用水栓,洗面用水栓,給水栓,継手,配管,サーモスタット" />
+<link href="css/main.css" rel="stylesheet" type="text/css" />
+<link href="css/print.css" rel="stylesheet" type="text/css" media="print" />
+
+<!--フォントアイコンの設定-->
+<link rel="stylesheet" href="css/fontello/css/fontello.css">
+<link rel="stylesheet" href="css/fontello/css/animation.css">
+<!--[if IE 7]><link rel="stylesheet" href="/css/fontello/css/fontello-ie7.css"><![endif]-->
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans">
+
+
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<script type="text/javascript" src="js/obj.js"></script>
+
+<script type="text/javascript" src="js/acc.js"></script>
+
+
+<!--別ウィンドウを開く-->
+<link rel="stylesheet" type="text/css" href="js/shadowbox/shadowbox.css">
+<script type="text/javascript" src="js/shadowbox/shadowbox.js"></script>
+
+
+<!--吹き出し設定-->
+<script>
+$(function() {
+	$('.balloonbtn').balloon({ position: "top" });
+});
+</script>
+
+
+<!--画像の切り替え-->
+<script type="text/javascript" src="js/multihero.js"></script>
+<script type="text/javascript">
+// multihero.js Customize
+multihero.interval = 5000;
+multihero.speed = "slow";//fast
+</script>
+
+</head>
+<body id="index">
+<!--全体-->
+<div id="wrap">
+
+<a name="top"></a>
+
+
+<!--ヘッダ全体-->
+<div id="headerwrap" class="clearfix">
+<!--ヘッダ-->
+<div id="header">
+<!--ロゴ-->
+<div id="logo">
+<h1><a href="index.html">KVK 商品情報</a></h1>
+</div>
+<!--ロゴ-->
+
+
+
+<!--メインメニュー全体-->
+<div id="gnaviwrap">
+<!--グローバルメニュー-->
+<div id="gnavi">
+<ul class="clearfix">
+<?php include("common.globalmenu.php");?>
+</ul>
+</div>
+<!--/グローバルメニュー-->
+
+
+</div>
+<!--/ヘッダ-->
+</div>
+<!--/ヘッダ全体-->
+
+<!--検索-->
+<div id="headersearchwrap">
+<?php include( "common.search.php" ); ?>
+</div>
+<!--/検索-->
+
+</div>
+<!--/メインメニュー全体-->
+<!--ページメイン部分-->
+
+<div class="mainbodywrap">
+
+<div class="mainbody clearfix column2">
+
+
+<!--メイン-->
+<div class="main">
+
+
+<!--メインビジュアル-->
+<div id="mainvisualwrap">
+<div id="mainvisual">
+
+<img src="img/mainvisual.jpg" alt="" />
+</div>
+</div>
+<!--メインビジュアル-->
+
+<!--コンテンツ-->
+<div class="contents">
+
+
+<h3><strong>用途検索</strong></h3>
+
+
+<div class="itemlist3 fixHeight clearfix">
+<?php echo $itemlist ;?>
+</div>
+
+<h3><strong>新着情報</strong></h3>
+
+<div class="newslist">
+	<?php foreach ( $topicsList as $key=>$value) : ?>
+		<dl class="clearbox">
+		<dt><?php echo $value['regist_date'] ?></dt>
+		<dd><a href="<?php echo $value['link'] ?>"><?php echo $value['text'] ?></a></dd>
+		</dl>
+	<?php endforeach; ?>
+</div>
+
+<div class="box01 list01 txt80">
+<h3>ご注意</h3>
+<ul>
+<li>2014年4月1日より製品希望小売価格を改定いたしました。</li>
+<li>分解図の表示価格は旧価格を含んでおります。　改定後の新価格につきましては、お近くの支社・営業所へご確認ください。</li>
+<li>また、分解図の税込価格表示は旧税率（5%）に基づく価格となっており、消費税法改正後の新税率に基づく価格とは異なりますのでご注意ください。</li>
+<li>当商品情報に掲載されている商品は2013年4月1日現在のカタログに掲載の標準品です。</li>
+<li>商品により予告なしに内容・仕様・寸法・価格など改訂する場合があり、最新の内容と異なる場合があります。</li>
+<li>また、予告なしに部品供給できない場合がありますのであらかじめご了承ください。</li>
+<li>図面および寸法表示の単位は全てmmで表示しています。</li>
+<li>商品品名で末尾に寸法表示のない商品はすべて呼び径13mm(PJ1/2)です。</li>
+<li>表示価格は商品のみのメーカー希望小売価格で、工事費は別途となります。</li>
+<li>また、カッコ内の価格は消費税を加算した金額になっております。(2013年4月1日現在)</li>
+<li>商品写真は画面での都合上、現物と色が異なる場合があります。</li>
+<li>代替品の表記については、現行品の中で最も近い商品を表記していますが、使い勝手や寸法等、同一ではありませんので、お求めの際は十分確認して選定してください。</li>
+<li> 当商品情報掲載商品の準拠する規格・基準は2013年4月1日現在のものです。</li>
+<li>無断での転載はお断りします。</li>
+</ul>
+</div>
+</div>
+<!--/コンテンツ-->
+
+</div>
+<!--/メイン-->
+
+<!--サイド-->
+<div class="side">
+
+<!--サイドメニュー-->
+<div class="sidemenu">
+<?php include( "common.sidemenu.php" ); ?>
+</div>
+<!--/サイドメニュー-->
+
+<!--サイドバナー-->
+<div class="sidebanner">
+<ul>
+<li><a href="#"><img src="img/banner/01.png" alt="" /></a></li>
+<li><a href="#"><img src="img/banner/02.png" alt="" /></a></li>
+</ul>
+</div>
+<!--サイドバナー-->
+
+</div>
+<!--/サイド-->
+
+<!--フッターメニュー-->
+<div id="pagetop" class="clearfix">
+<p><a href="#top" onclick="backToTop(); return false" onkeypress="">このページの先頭へ<i class="icon-angle-circled-up"></i></a></p>
+</div>
+<!--/フッターメニュー-->
+
+</div>
+
+
+</div>
+<!--/ページメイン部分-->
+
+
+<!--フッター全体-->
+<div id="footerwrap" class="clearfix">
+
+
+<!--フッター-->
+<div id="footer" class="clearfix">
+
+<div id="footermenu" class="clearfix">
+<ul class="clearfix">
+<li><a href="#">ご利用条件</a></li>
+<li><a href="#">プライバシーポリシー</a></li>
+</ul>
+</div>
+
+<!--コピーライト-->
+<div id="copyright" class="clearfix">
+<address>
+Copyright (c) 2015 KVK CORPORATION. All rights reserved.</address>
+</div>
+<!--/コピーライト-->
+
+</div>
+<!--/フッター-->
+
+<div class="clear"></div>
+
+
+
+</div>
+<!--フッター全体-->
+
+</div>
+<!--/全体-->
+</body>
+</html>
