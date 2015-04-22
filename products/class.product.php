@@ -338,7 +338,7 @@ class Product extends Page {
 					$buff_ar[] = '<dt><a href="'.$this->getItemDir().$item_filename.$val["id"].'"><img src="'.$img_path.'" alt="" /></a></dt>';
 					$buff_ar[] = '<dd><a href="'.$this->getItemDir().$item_filename.$val["id"].'" class="txt130">'.$val["item_name"].'</a><br />';
 					$buff_ar[] = ''.$val["item_id"].'<br />';
-					$buff_ar[] = '￥'.number_format($val["price"]).'（税込￥'.$val["price_zei"].'）';
+					$buff_ar[] = '￥'.number_format($val["price"]).'（税込￥'.number_format($val["price_zei"]).'）';
 					$buff_ar[] = '<div class="iconbox">';
 
 					if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['map_data'] ) ){
