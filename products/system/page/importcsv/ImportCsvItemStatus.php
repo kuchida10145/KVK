@@ -5,78 +5,11 @@
 			parent::__construct();
 			// 品番
 			$this->manager->validationColumns->setRule(ITEM_ID_COLUMN_ITEM_STATUS, 'required');
-			// JIS
-			$this->manager->validationColumns->setRule(JIS_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 第三者認証登録品
-			$this->manager->validationColumns->setRule(NINSYO_TOUROKU_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 第三者認証品
-			$this->manager->validationColumns->setRule(NINSYO_ITEM_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 寒冷地用
-			$this->manager->validationColumns->setRule(KANREITI_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 逆止弁付
-			$this->manager->validationColumns->setRule(GYAKUSHIBEN_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 保証書
-			$this->manager->validationColumns->setRule(HOSYOUSYO_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 新商品
-			$this->manager->validationColumns->setRule(NEW_ITEM_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// スーパーサーモ
-			$this->manager->validationColumns->setRule(SUPER_SARMO_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// eシャワー
-			$this->manager->validationColumns->setRule(E_SHOWER_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// やさしさ推奨品
-			$this->manager->validationColumns->setRule(YASASHISA_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// お湯ぴた
-			$this->manager->validationColumns->setRule(OYUPITA_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// サーモスタット式水栓
-			$this->manager->validationColumns->setRule(SARMO_STAT_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 自閉式
-			$this->manager->validationColumns->setRule(JIHEISHIKI_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// ミキシング式
-			$this->manager->validationColumns->setRule(MIXING_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 一次止水付
-			$this->manager->validationColumns->setRule(SHISUITSUKI_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// ソーラー用
-			$this->manager->validationColumns->setRule(SORLAR_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// セラミックシングル
-			$this->manager->validationColumns->setRule(SELAMIC_SINGLE_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// eレバー水栓
-			$this->manager->validationColumns->setRule(E_LEVER_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// マルチ水栓
-			$this->manager->validationColumns->setRule(MALUTI_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// センサー付
-			$this->manager->validationColumns->setRule(SENSOR_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// スーパーシングル
-			$this->manager->validationColumns->setRule(SUPER_SINGLE_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// シングルレバー式水栓
-			$this->manager->validationColumns->setRule(SINGLE_LEVER_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// NSFシャワー
-			$this->manager->validationColumns->setRule(NSF_SHOWER_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 泡沫吐水
-			$this->manager->validationColumns->setRule(AWA_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 省施工仕様
-			$this->manager->validationColumns->setRule(SHOSEKOU_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 上施工方式（省施工仕様）
-			$this->manager->validationColumns->setRule(JOUSEKOU_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 浄水器付
-			$this->manager->validationColumns->setRule(JOSUIKI_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// エコこま水栓
-			$this->manager->validationColumns->setRule(ECO_KOMA_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// プチエコ水栓
-			$this->manager->validationColumns->setRule(PUCHI_ECO_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 緊急止水機能付
-			$this->manager->validationColumns->setRule(STOP_WATER_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 節湯A1
-			$this->manager->validationColumns->setRule(SETSUYU_A1_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 節湯B1
-			$this->manager->validationColumns->setRule(SETSUYU_B1_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 節湯C1
-			$this->manager->validationColumns->setRule(SETSUYU_C1_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 節湯A
-			$this->manager->validationColumns->setRule(SETSUYU_A_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 節湯B
-			$this->manager->validationColumns->setRule(SETSUYU_B_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
-			// 節湯AB
-			$this->manager->validationColumns->setRule(SETSUYU_AB_COLUMN_ITEM_STATUS, 'numeric|digit|pnumeric');
+
+			$dbArray = $this->manager->db_manager->get('item_icon')->getAll();
+			foreach ($dbArray as $key=>$value) {
+				$this->manager->validationColumns->setRule($key + 1, 'numeric|digit|pnumeric');
+			}
 
 			// エラーメッセージ作成用配列
 			$this->msg_rules = array(
@@ -85,8 +18,8 @@
 										'digit'=>ERROR_MSG_NUM_ERROR,
 										'pnumeric'=>ERROR_MSG_NUM_ERROR
 									);
-			// csvヘッダー項目数
-			$this->headerCount = HEADER_COUNT_ITEM_STATUS;
+			// csvヘッダー項目数（品番があるので+1）
+			$this->headerCount = count($dbArray) + 1;
 		}
 
 	/**

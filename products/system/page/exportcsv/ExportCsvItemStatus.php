@@ -56,7 +56,7 @@
 
 		// csvファイル書き込み
 		$filePointer = fopen(CSV_FILE_NAME_ITEM_STATUS, 'w');
-		$headerArray = $this->csvHeader;
+		$headerArray = $this->makeHeader();
 		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
  		fputcsv($filePointer, $headerArray);
 
@@ -67,7 +67,7 @@
 		foreach ($itemCodeArray as $key=>$itemDataRow){
 			$itemStatusArray = array();
 			$csvDataArray = array();
-			$dataCount = count($this->csvHeader);
+			$dataCount = count($headerArray);
 
 			for($setCount = 0; $setCount < $dataCount; $setCount++) {
 				if($setCount == 0) {
@@ -94,6 +94,22 @@
 		header('Content-Length: ' . filesize(CSV_FILE_NAME_ITEM_STATUS));
 		readfile(CSV_FILE_NAME_ITEM_STATUS);
 		return $result;
+	}
+
+	/**
+	 * ヘッダー項目生成
+	 *
+	 * @return	array	$header	ヘッダー項目
+	 */
+	protected function makeHeader() {
+		$header = array();
+		$dbArray = $this->manager->db_manager->get('item_icon')->getAll();
+		$header[] = '品番';
+		foreach ($dbArray as $key=>$value) {
+			$header[] = $value['icon_name'];
+		}
+
+		return $header;
 	}
 }
 
