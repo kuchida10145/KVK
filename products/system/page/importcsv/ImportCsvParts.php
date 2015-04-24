@@ -57,6 +57,19 @@
 					'削除',
 					'カテゴリID'
 			);
+
+			// 出力csvファイルのヘッダー行（パーツ）
+			$this->csvHeader = array(
+					'番号',
+					'品番',
+					'品名',
+					'希望小売価格',
+					'税込',
+					'品番',
+					'分解図',
+					'備考',
+					'削除',
+			);
 		}
 
 	/**
@@ -108,9 +121,14 @@
 	 */
 	protected function csvUpload($filePath) {
 		$result = true;
+		$updateArray = array();
 
 		// ファイルアップロード
 		$result = move_uploaded_file($filePath, $this->uploadInfo);
+
+		// 更新データのみでcsvファイル作成
+		$updateArray = $this->makeCsvData();
+		$result = $this->setExport($updateArray);
 
 		if($result) {
 			// システムステータス更新
@@ -118,6 +136,164 @@
 		} else {
 			$this->{KEY_DB_CHECK_MESSAGE} = "部品CSVファイルのアップロードに失敗しました。<br>";
 		}
+
+		return $result;
+	}
+
+	/**
+	 * 更新用csvデータ取得
+	 *
+	 * @return array 更新データ
+	 */
+	protected function makeCsvData() {
+		$updateArray = array();	// 更新対象配列
+		$makePDF = array();
+		$updateCheck = false;
+		$flg = false;
+		$fileName = "";
+		$oldFileName = "";
+		$nowArray = $this->getCsvData($this->uploadInfo);
+
+		foreach($nowArray as $key=>$value) {
+			if($key == "0") {
+				continue;
+			}
+
+			$fileName = $value['5'];
+
+			if(empty($oldFileName)) {
+				$makePDF[] = $value;
+			} else {
+				if($fileName == $oldFileName){
+					$makePDF[] = $value;
+				} else {
+					$flg = $this->makePdfCheck($makePDF);
+					$updateCheck = true;
+				}
+			}
+
+			$oldFileName = $fileName;
+
+			if($updateCheck) {
+				if($flg) {
+					// 更新対象データのみ保持する
+					foreach ($makePDF as $check) {
+						$updateArray[] = $check;
+					}
+					$makePDF = array();
+					$makePDF[] = $value;
+				} else {
+					$makePDF = array();
+					$makePDF[] = $value;
+				}
+				$updateCheck = false;
+			}
+		}
+
+		return $updateArray;
+	}
+
+	/**
+	 * PDF作成チェック
+	 * @param	array	$makePDF	PDF作成予定データ
+	 * @return	boolean				PDF作成フラグ（TRUE:PDF作成/FALSE:PDF作成しない）
+	 */
+	protected function makePdfCheck($makePDF) {
+		$checkArray = array();
+		$targetArray = array();
+		$partsList = $this->manager->db_manager->get(TABLE_NAME_PARTS_LIST)->findByItemId($makePDF[0][ITEM_COLUMN_PARTS]);
+
+		if(empty($partsList)){
+			// データが無ければPDF作成
+			return true;
+		}
+
+		if(count($makePDF) != count($partsList)) {
+			return true;
+		}
+
+		foreach ($partsList as $key => $value) {
+			$targetArray = $this->convertDBdata($value);
+			$checkArray = array_diff($targetArray, $makePDF[$key]);
+			$count = count($checkArray);
+			if($count != 0){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 部品データ変換（DB⇒CSV）
+	 * @param	array	$dbParts	DB部品データ
+	 * @return	array	$checkArray	変換後配列
+	 */
+	protected function convertDBdata($dbParts) {
+		$checkArray = array(
+				// 番号（部品表示順）
+				"0"=>$dbParts[COLUMN_NAME_NO],
+				// 品番（パーツ）
+				"1"=>$dbParts[COLUMN_NAME_PARTS_ID],
+				// 品名（パーツ）
+				"2"=>$dbParts[COLUMN_NAME_PARTS_NAME],
+				// 希望小売価格
+				"3"=>$dbParts[COLUMN_NAME_PRICE],
+				// 希望小売価格（税込み）
+				"4"=>$dbParts[COLUMN_NAME_PRICE_ZEI],
+				// 品番（商品）
+				"5"=>$dbParts[COLUMN_NAME_ITEM_ID],
+				// ファイル名
+				"6"=>$dbParts[COLUMN_NAME_FILE_NAME],
+				// 表示フラグ
+				"7"=>$dbParts[COLUMN_NAME_NOTE],
+				// 備考
+				"8"=>$dbParts[COLUMN_NAME_VIEW_STATUS],
+		);
+		return $checkArray;
+	}
+
+	/**
+	 * csvファイル出力メイン処理
+	 * @param	array()		csv保存対象データ
+	 * @return	$result		出力結果（true：csv取込成功	false：csv取込失敗）
+	 */
+	protected function setExport($updateArray) {
+		$filePointer = "";			// ファイルポインタ
+		$headerArray = array();		// csvヘッダー行
+		$result = true;
+		$makeFilePath = $this->uploadInfo;
+
+		// csvファイル書き込み
+		$filePointer = fopen($makeFilePath, 'w');
+		$headerArray = $this->csvHeader;
+		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
+		fputcsv($filePointer, $headerArray);
+
+		foreach ($updateArray as $itemDataRow){
+			$csvDataArray = array(
+					// 番号
+					$itemDataRow[NO_COLUMN_PARTS],
+					// 品番
+					$itemDataRow[PARTS_ID_COLUMN_PARTS],
+					// 品名
+					$itemDataRow[PARTS_NAME_COLUMN_PARTS],
+					// 希望小売価格
+					$itemDataRow[PRICE_COLUMN_PARTS],
+					// 税込
+					$itemDataRow[PRICE_ZEI_COLUMN_PARTS],
+					// 品番
+					$itemDataRow[ITEM_COLUMN_PARTS],
+					// 分解図
+					$itemDataRow[FILE_COLUMN_PARTS],
+					// 備考
+					$itemDataRow[NOTE_COLUMN_PARTS],
+					// 削除
+					$itemDataRow[DELETE_COLUMN_PARTS],
+			);
+			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
+			fputcsv($filePointer, $csvDataArray);
+		}
+		fclose($filePointer);
 
 		return $result;
 	}

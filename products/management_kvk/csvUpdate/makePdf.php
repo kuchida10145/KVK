@@ -23,6 +23,7 @@
 	$today			= date("Y/m/d");
 	$resultMessage	= "";	// 実行結果
 	$errorMessage	= "";	// エラーメッセージ
+	$result = true;
 
 	$viewArray = $makePdf->getViewData();
 	// PDF作成日時取得
@@ -30,8 +31,6 @@
 
 	// csv取込処理実行
 	if(isset($_POST['mode']) && $_POST['mode'] == "step1"){
-		$result = false;
-
 		// pdf作成時間解除
 		if(isset($_POST['unset_button']) && $_POST['unset_button'] == "unset") {
 			$result = $makePdf->unsetSystemStatus($viewArray[COLUMN_NAME_SYSTEM_STATUS]);
@@ -58,13 +57,13 @@
 //			$result = $makePdf->itemUpdateDebug();
 		}
 
-		// メッセージ取得
-		$resultMessage	= $makePdf->getResultMessage($result);
-		$errorMessage	= $makePdf->getErrorMessage();
-
 		// 画面表示データ取得
 		$makePdf->getMakePdfTime();
 	}
+
+	// メッセージ取得
+	$resultMessage	= $makePdf->getResultMessage(true);
+	$errorMessage	= $makePdf->getErrorMessage();
 
 	$pdfDay = $makePdf->dayVal;
 	$pdfHour = $makePdf->dayHour;
