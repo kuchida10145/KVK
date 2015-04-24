@@ -357,7 +357,7 @@ class Product extends Page {
 						$buff_ar[] = '<br />';
 					}
 
-					if( $val['bunkai_data'] || $val['shower_data'] ){
+					if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['bunkai_data']) || is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['shower_data']) ){
 
 						$buff_ar[] = '分解図<br />';
 
