@@ -97,17 +97,12 @@
 		}
 		$itemStatus = substr($itemStatus, 0, -1);   //最後の「,」を削除
 
-		// 商品IDから商品データを取得
-		$getItemArray = COLUMN_NAME_ITEM_ID.' = "'.$targetArray[ITEM_ID_COLUMN_ITEM_STATUS].'"';
-		$itemArray = $this->manager->db_manager->get($table)->search($getItemArray, $limit, $order);
-		$itemRow = $itemArray[0];
-
 		// 商品データ更新
 		$itemRow[COLUMN_NAME_ITEM_STATUS] = $itemStatus;			// 商品ステータス
 		$itemRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
 
 		// where句生成
-		$where = COLUMN_NAME_ITEM_ID." = '".$itemRow[COLUMN_NAME_ITEM_ID]."' AND ".COLUMN_NAME_CATEGORY_ID." = '".$itemRow[COLUMN_NAME_CATEGORY_ID]."'";
+		$where = COLUMN_NAME_ITEM_ID." = '".$targetArray[ITEM_ID_COLUMN_ITEM_STATUS]."'";
 
 		$dbCheck = $this->manager->db_manager->get($table)->update($itemRow, $where);
 

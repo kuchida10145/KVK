@@ -3,46 +3,6 @@
 	class ExportCsvItemStatus extends AbstractExportCsv {
 		function __construct() {
 			parent::__construct();
-			// 出力csvファイルのヘッダー行
-			$this->csvHeader = array(
-				'品番',
-				'JIS',
-				'※第三者認証登録品',
-				'第三者認証品',
-				'寒冷地用',
-				'逆止弁付',
-				'保証書',
-				'新商品',
-				'スーパーサーモ',
-				'eシャワー',
-				'やさしさ推奨品',
-				'定量止水',
-				'サーモスタット式水栓',
-				'自閉式',
-				'ミキシング式',
-				'一次止水付',
-				'ソーラー用',
-				'セラミックシングル',
-				'eレバー水栓',
-				'マルチ水栓',
-				'センサー付',
-				'スーパーシングル',
-				'シングルレバー式水栓',
-				'NSFシャワー',
-				'泡沫吐水',
-				'省施工仕様',
-				'上施工方式（省施工仕様）',
-				'浄水器用',
-				'エコこま水栓',
-				'プチエコ水栓',
-				'緊急止水機能付',
-				'節湯A1',
-				'節湯B1',
-				'節湯C1',
-				'節湯A',
-				'節湯B',
-				'節湯AB',
-			);
 		}
 
 	/**
@@ -65,6 +25,9 @@
 
 		// csv書き込みデータ生成
 		foreach ($itemCodeArray as $key=>$itemDataRow){
+			if ($this->{$itemDataRow['item_id']} != null) {
+				continue;
+			}
 			$itemStatusArray = array();
 			$csvDataArray = array();
 			$dataCount = count($headerArray);
