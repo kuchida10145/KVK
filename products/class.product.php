@@ -23,6 +23,21 @@ class Product extends Page {
 	 *
 	 * @return String オプションタグ
 	 */
+	public function getGlobalMenu(){
+		$parentcategory = $this->manager->db_manager->get('parent_category')->getAllEnabled();
+		$buff_ar = array();
+
+		foreach ( $parentcategory as $row ) {
+
+			$buff_ar[] = '<li><a href="/products/parent/?parent_id='.$row['parent_id'].'">'.$row['parent_name'].'</a></li>';
+
+		}
+		return implode( PHP_EOL , $buff_ar );
+	}
+
+	/**
+	 *
+	 */
 	public function getSearchMenu(){
 
 		// 親カテゴリ
@@ -130,10 +145,26 @@ class Product extends Page {
 		$buff_ar = array();
 		foreach ( $parentcategory as $row ) {
 			// データ件数取得
-			$itemCount = $this->manager->db_manager->get('item')->findByParentCount($row['parent_id']);
-			$buff_ar[] = '<dt><a href="/products/parent/?parent_id='.$row['parent_id'].'">'.$row['parent_name']."(".$itemCount.")".'</a></dt>';
+			//$itemCount = $this->manager->db_manager->get('item')->findByParentCount($row['parent_id']);
+			$temp=array();
+			$itemCount=0;
 			if( $this->checkParentId( $row['parent_id'] ) ){
-				$buff_ar[] = $this->getSidemenuSubcategory( $row['parent_id'] );
+				//$buff_ar[] = $this->getSidemenuSubcategory( $row['parent_id'] );
+				$temp=$this->getSidemenuSubcategory( $row['parent_id'] );
+				$itemCount=$temp[1];
+
+			}else{
+				$temp=$this->getSidemenuSubcategory( $row['parent_id'] );
+				$itemCount=$temp[1];
+				//var_dump($itemCount);
+			}
+
+			if($this->checkParentId( $row['parent_id'])){
+				$buff_ar[]='<dt><a href="/products/parent/?parent_id='.$row['parent_id'].'">'.$row['parent_name']."(".$itemCount.")".'</a></dt>';
+				$buff_ar[]=implode( PHP_EOL , $temp[0] );
+			}else{
+
+				$buff_ar[] = '<dt><a href="/products/parent/?parent_id='.$row['parent_id'].'">'.$row['parent_name']."(".$itemCount.")".'</a></dt>';
 			}
 		}
 		return implode( PHP_EOL , $buff_ar );
@@ -150,16 +181,24 @@ class Product extends Page {
 
 		if( $childcategory ){
 			$buff_ar = array();
+			$childnum=0;
 			foreach ( $childcategory as $row ) {
 				// データ件数取得
 				$itemCount = $this->manager->db_manager->get('item')->findByCategoryCount($row['category_id']);
+				$childnum+=$itemCount;
 			// 20150401
 //				$buff_ar[] = '<dd><a href="/kvk/products/parent/category/?category_id='.$row['category_id'].'">'.$row['category_name'].'</a></dd>';
 				$buff_ar[] = '<dd><a href="/products/parent/category/?category_id='.$row['category_id'].'&parent_id='.$parent_id.'">'.$row['category_name']."(".$itemCount.")".'</a></dd>';
 			}
-			return implode( PHP_EOL , $buff_ar );
+			//new coed made in 2015.04.24
+			$buff_result=array();
+			$buff_result[0]=$buff_ar;
+			$buff_result[1]=$childnum;
+			//var_dump($childnum);
+			return $buff_result;
+			//new end
 		}else{
-			return "";
+			return NULL;
 		}
 
 	}
@@ -268,7 +307,6 @@ class Product extends Page {
 	 * 子カテゴリ一覧ページと検索結果ページで共通となる
 	 * ページ処理に必要なデータはメンバー変数に保存
 	 *
-	 * @param Integer $parent_id 親カテゴリID
 	 * @param Integer $category_id カテゴリID
 	 * @param Integer $page ページ番号
 	 * @param Integer $mode 検索ソート
@@ -276,7 +314,7 @@ class Product extends Page {
 	 * @param Integer $parent_id 子カテゴリID
 	 * @return String 出力HTML
 	 */
-	public function getProductItemList( $parent , $category_id , $page , $mode , $word=NULL , $parent_id=NULL ){
+	public function getProductItemList($category_id , $page , $mode , $word=NULL , $parent_id=NULL ){
 		if( $word != NULL ){
 			$search_mode_enabled = true;
 		}else{

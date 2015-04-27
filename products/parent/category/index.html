@@ -42,12 +42,7 @@ if( isset($_GET['category_id']) && is_numeric($_GET['category_id']) ){
 	exit;
 }
 
-if( isset($_GET['parent_id']) && is_numeric($_GET['parent_id']) ){
-	$parent_id = $_GET['parent_id'];
-}else{
-	$cls_product->error('親カテゴリーIDが指定されていません');
-	exit;
-}
+
 
 if( isset($_GET['p']) && is_numeric($_GET['p']) && $_GET['p'] > 0 ){
 	$page = $_GET['p'];
@@ -74,7 +69,7 @@ if( isset($_GET['mode']) ){
 
 $cls_product->getChildCategoryData( $category_id  );
 $page_title = $cls_product->childCategory_data['category_name'];
-$itemlist = $cls_product->getProductItemList( $parent_id, $category_id , $page , $mode );
+$itemlist = $cls_product->getProductItemList($category_id , $page , $mode );
 $topicpath = $cls_product->getTopicPath( $category_id , true );
 
 $total_cnt = $cls_product->cnt;
