@@ -149,7 +149,12 @@ multihero.speed = "slow";//fast
 	<?php foreach ( $topicsList as $key=>$value) : ?>
 		<dl class="clearbox">
 		<dt><?php echo $value['regist_date'] ?></dt>
-		<dd><a href="<?php echo $value['link'] ?>"><?php echo $value['text'] ?></a></dd>
+		<?php if(empty($value['link'])) : ?>
+			<dd><?php echo $value['text'] ?></dd>
+		<?php else : ?>
+			<dd><a href="<?php echo $value['link'] ?>"><?php echo $value['text'] ?></a></dd>
+		<?php endif; ?>
+
 		</dl>
 	<?php endforeach; ?>
 </div>
