@@ -44,8 +44,9 @@ if( isset( $_GET['category_id'] ) && !preg_match( '/[^0-9_]/' , $_GET['category_
 				$category_id = NULL;//$ids[0];
 				break;
 			case 2:
-				$parent_id = NULL;//$ids[0];
+				$parent_id = $ids[0];
 				$category_id = $ids[1];
+				$cls_product->getChildCategoryData( $category_id  );
 				break;
 			default:
 				$cls_product->error('カテゴリーIDが無効です。');
@@ -81,7 +82,7 @@ if( isset($_GET['mode']) ){
 	$mode = SORT_MODE_NEW;
 }
 
-//$cls_product->getChildCategoryData( $category_id  );
+
 
 
 
@@ -92,7 +93,8 @@ if( isset($_GET['mode']) ){
 // --------------------------------------------------------------
 
 $page_title = '検索結果';
-$itemlist = $cls_product->getProductItemList( $parent_id, $category_id , $page , $mode , mysql_real_escape_string($word) , $parent_id );
+//$itemlist = $cls_product->getProductItemList( $parent_id, $category_id , $page , $mode , mysql_real_escape_string($word) , $parent_id );
+$itemlist = $cls_product->getSearchItemList( $parent_id, $category_id , $page , $mode , mysql_real_escape_string($word) , $parent_id );
 //$topicpath = $cls_product->getTopicPath( $_GET['category_id'] , true );
 $topicpath = '<a href="/products/">商品情報 </a> &gt; 検索結果';
 $total_cnt = $cls_product->cnt;

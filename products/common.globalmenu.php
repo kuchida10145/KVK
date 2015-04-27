@@ -5,4 +5,4 @@
 <li id="gn5"><a href="/products/parent/?parent_id=4">給水栓</a></li>
 <li id="gn6"><a href="/products/parent/?parent_id=5">継手・配管部材</a></li>
 <li id="gn7"><a href="/products/parent/?parent_id=6">パーツ</a></li>
-<li id="gn8"><a href="/products/parent/?parent_id=7">お問い合わせ</a></li>
+<li id="gn8"><a href="../contact/index.html" >お問い合わせ</a></li>

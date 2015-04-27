@@ -312,6 +312,41 @@ class MakePDF extends Page{
 	}
 
 	/**
+	 * 商品データ（分解図ファイル名更新）
+	 * @param	array	$partsData	更新した部品情報
+	 * @result	array	$errorID	更新が失敗した商品ID
+	 */
+	protected function itemDB($partsData) {
+		// 品番取得
+		$errorMsg = array();
+		$result = true;
+		$itemID = $partsData[0][5];
+		$itemIDArray = explode("・", $itemID);
+
+		foreach ($itemIDArray as $key=>$value) {
+			$where = COLUMN_NAME_ITEM_ID." = '".$value."'";
+			$dataFlg = $this->manager->db_manager->get(TABLE_NAME_ITEM)->checkData($where);
+			if($dataFlg) {
+				$dataArray = array(
+						'bunkai_data'=>$this->pdfFileName,
+				);
+				// 分解図データ更新
+				$result = $this->manager->db_manager->get(TABLE_NAME_ITEM)->update($dataArray, $where);
+			}
+
+			if(!$result) {
+				$errorMsg[] = "商品データの更新に失敗しました。品番：[$value]"."<br>";
+			}
+		}
+
+		if(!empty($errorMsg)) {
+			foreach ($errorMsg as $value) {
+				$this->{KEY_ERROR_MESSAGE} = $this->{KEY_ERROR_MESSAGE}.$value;
+			}
+		}
+	}
+
+	/**
 	 * 商品データ更新
 	 * @param	$path					csvアップロードフォルダ
 	 * @return	$result					データ更新結果

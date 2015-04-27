@@ -277,7 +277,7 @@ class Product extends Page {
 	 * @return String 出力HTML
 	 */
 	public function getProductItemList( $parent , $category_id , $page , $mode , $word=NULL , $parent_id=NULL ){
-		if( $word !== NULL ){
+		if( $word != NULL ){
 			$search_mode_enabled = true;
 		}else{
 			$search_mode_enabled = false;
@@ -378,6 +378,106 @@ class Product extends Page {
 			}else{
 				return '';
 			}
+		}
+	}
+
+	/**
+	 * 商品検索
+	 *
+	 * @param Integer $parent_id 親カテゴリID
+	 * @param Integer $category_id カテゴリID
+	 * @param Integer $page ページ番号
+	 * @param Integer $mode 検索ソート
+	 * @param String  $word ワード
+	 * @param Integer $parent_id 子カテゴリID
+	 * @return String 出力HTML
+	 */
+	public function getSearchItemList( $parent , $category_id , $page , $mode , $word=NULL , $parent_id=NULL ){
+		if( $word != NULL ){
+			$search_mode_enabled = true;
+		}else{
+			$search_mode_enabled = false;
+		}
+
+		if(empty($category_id) || $search_mode_enabled){
+			// 検索実行
+			$ListData = $this->manager->db_manager->get('item')->getItemListBySearch($category_id,$page,$mode,$word,$parent_id);
+		} else {
+			// 子カテゴリからアイテム取得
+			$ListData = $this->manager->db_manager->get('item')->getItemListByCategoryId($category_id,$page,$mode);
+		}
+
+		// データ
+		$res = $ListData['data'];
+
+		// ページ管理に必要なデータ
+		$this->page = $ListData['page'];
+		$this->cnt = $ListData['cnt'];
+		$this->limit = $ListData['limit'];
+		$this->start = $ListData['start'];
+		$this->page_max = $ListData['page_max'];
+
+		//var_dump( $res[0] );exit;
+
+		$item_filename= "item.html?id=";
+
+		if( $res ){
+			//var_dump($res);exit;
+			$buff_ar = array();
+			foreach( $res as $val ){
+
+				$img_ar = explode(',',$val['item_image']);
+
+				if( is_file($_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$img_ar[0]) ){
+					$img_path = DIR_UPLOAD.$img_ar[0];
+				}else{
+					$img_path = DIR_UPLOAD.'blank_item_thumbnail.jpg';
+				}
+
+				$buff_ar[] = '<!--1件-->';
+				$buff_ar[] = '<dl>';
+				$buff_ar[] = '<dt><a href="'.$this->getItemDir().$item_filename.$val["id"].'"><img src="'.$img_path.'" alt="" /></a></dt>';
+				$buff_ar[] = '<dd><a href="'.$this->getItemDir().$item_filename.$val["id"].'" class="txt130">'.$val["item_name"].'</a><br />';
+				$buff_ar[] = ''.$val["item_id"].'<br />';
+				$buff_ar[] = '￥'.number_format($val["price"]).'（税込￥'.number_format($val["price_zei"]).'）';
+				$buff_ar[] = '<div class="iconbox">';
+
+				if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['map_data'] ) ){
+					$buff_ar[] = '<a href="/products/parent/category/item/authentication.html?file='.$val['map_data'].'" class="icondrawing balloonbtn" title="商品の外観図面をPDF形式で表示します" rel="shadowbox;width=720">図面</a>';
+				}
+				if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['torisetsu_data'] ) ){
+					$buff_ar[] = '<a href="/products/parent/category/item/authentication.html?file='.$val['torisetsu_data'].'" class="iconmanual balloonbtn" title="商品の取扱説明書をPDF形式で表示します" rel="shadowbox;width=720">取扱説明書</a>';
+				}
+				if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['kousetsu_data'] ) ){
+					$buff_ar[] = '<a href="/products/parent/category/item/authentication.html?file='.$val['kousetsu_data'].'" class="iconconstruction balloonbtn" title="商品の施工説明書をPDF形式で表示します" rel="shadowbox;width=720">施工説明書</a>';
+				}
+				if( $val['buy_status'] ){
+					$buff_ar[] = '<a href="'.$val['buy_status'].'" class="iconbuy balloonbtn" title="商品のご購入窓口にリンクします">購入</a>';
+				}
+				if( $val['map_data'] || $val['torisetsu_data'] || $val['kousetsu_data'] || $val['buy_status'] ){
+					$buff_ar[] = '<br />';
+				}
+
+				if( is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['bunkai_data']) || is_file( $_SERVER['DOCUMENT_ROOT'].DIR_UPLOAD.$val['shower_data']) ){
+
+					$buff_ar[] = '分解図<br />';
+
+					if( $val['bunkai_data'] ){
+						$buff_ar[] = '<a href="/products/parent/category/item/map.html?id='.$val["id"].'&file='.$val['bunkai_data'].'" class="iconfaucet balloonbtn" title="水栓です">水栓</a>';
+					}
+					if( $val['shower_data'] ){
+						$buff_ar[] = '<a href="/products/parent/category/item/map.html?id='.$val["id"].'&file='.$val['shower_data'].'" class="iconshower balloonbtn" title="シャワーです">シャワー</a>';
+					}
+				}
+				$buff_ar[] = '</div>';
+
+				$buff_ar[] = '</dd>';
+				$buff_ar[] = '</dl>';
+				$buff_ar[] = '<!--/1件-->';
+			}
+			return implode( PHP_EOL , $buff_ar );
+		}else{
+			return '';
 		}
 	}
 
