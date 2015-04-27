@@ -10,9 +10,9 @@
 			// 写真
 			$this->manager->validationColumns->setRule(ITEM_ID_COLUMN_ITEM, 'required');
 			// 価格
-			$this->manager->validationColumns->setRule(PRICE_COLUMN_ITEM, 'required');
+			$this->manager->validationColumns->setRule(PRICE_COLUMN_ITEM, 'required|numeric|digit|pnumeric');
 			// 価格（税込）
-			$this->manager->validationColumns->setRule(PRICE_ZEI_COLUMN_ITEM, 'required');
+			$this->manager->validationColumns->setRule(PRICE_ZEI_COLUMN_ITEM, 'required|numeric|digit|pnumeric');
 			// バリエーション順序
 			$this->manager->validationColumns->setRule(VARIATION_NO_COLUMN_ITEM, 'numeric|digit|pnumeric');
 			// カタログ年度

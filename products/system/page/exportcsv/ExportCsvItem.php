@@ -62,7 +62,7 @@
 			$fileName = explode(".",$itemDataRow[COLUMN_NAME_CATALOG_LINK]);
 			$catalogYear = explode("-",$fileName[0]);
 			$catalogPage = explode("_",$catalogYear[1]);
-
+		
 			$csvDataArray = array(
 					// 品番
 					$itemDataRow[COLUMN_NAME_ITEM_ID],
