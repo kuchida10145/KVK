@@ -567,52 +567,6 @@ class MakePDF extends Page{
 	}
 
 	/**
-	 * csvファイル出力メイン処理
-	 * @param	array()		csv保存対象データ
-	 * @return	$result		出力結果（true：csv取込成功	false：csv取込失敗）
-	 */
-	protected function setExport($updateArray, $executePath) {
-		$filePointer = "";			// ファイルポインタ
-		$headerArray = array();		// csvヘッダー行
-		$result = true;
-		$makeFilePath = $this->makingPdfCsvInfo;
-
-		// csvファイル書き込み
-		$filePointer = fopen($makeFilePath, 'w');
-		$headerArray = $this->csvHeader;
-		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
-		fputcsv($filePointer, $headerArray);
-
-		foreach ($updateArray as $itemDataRow){
-			$csvDataArray = array(
-					// 番号
-					$itemDataRow[NO_COLUMN_PARTS],
-					// 品番
-					$itemDataRow[PARTS_ID_COLUMN_PARTS],
-					// 品名
-					$itemDataRow[PARTS_NAME_COLUMN_PARTS],
-					// 希望小売価格
-					$itemDataRow[PRICE_COLUMN_PARTS],
-					// 税込
-					$itemDataRow[PRICE_ZEI_COLUMN_PARTS],
-					// 品番
-					$itemDataRow[ITEM_COLUMN_PARTS],
-					// 分解図
-					$itemDataRow[FILE_COLUMN_PARTS],
-					// 備考
-					$itemDataRow[NOTE_COLUMN_PARTS],
-					// 削除
-					$itemDataRow[DELETE_COLUMN_PARTS],
-			);
-			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
-			fputcsv($filePointer, $csvDataArray);
-		}
-		fclose($filePointer);
-
-		return $result;
-	}
-
-	/**
 	 * csvファイル出力メイン処理(商品)
 	 * @param	array()		csv保存対象データ
 	 * @return	$result		出力結果（true：csv取込成功	false：csv取込失敗）

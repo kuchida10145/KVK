@@ -12,6 +12,7 @@ abstract class AbstractImportCsv extends Page{
 	protected abstract function csvUpload($targetFile);						// ファイルアップロード処理実行
 	protected abstract function fileCheck($csvLineData);					// 取込データで指定されたファイルの有無をチェック
 	protected abstract function runValidation($csvLineData, $lineCount);	// バリデーションチェックを実行する
+	protected abstract function moveFile($csvData, $filePath);				// csvデータを仮置き場に保存する。
 
 	/**
 	 * csvファイル取込メイン処理
@@ -37,7 +38,7 @@ abstract class AbstractImportCsv extends Page{
 		// 拡張子チェック
 		$result = $this->checkExtension($fileName);
 		if(!$result) {
-			$this->{KEY_ERROR_MESSAGE} =  ERROR_MSG_FILE_ERROR;
+			$this->{KEY_ERROR_MESSAGE} =  "「{$fileName}」は取り込めません、".ERROR_MSG_FILE_ERROR;
 			return $result;
 		}
 		// CSVデータ取得

@@ -10,20 +10,13 @@
 | データベース設定
 |--------------------------------------------------------------------------
  */
-if( $_SERVER['HTTP_HOST'] == 'test.kvk01.dpg.mmrs.jp' ){
-	define('DB_NAME','dpg_kvk1_test');
-	define('DB_USER','dpg_kvk1');
-	define('DB_PASS','tEVYgtu.');
-	define('DB_HOST','db1.dpg.mmrs.jp');
-	define('DB_CHARSET','utf8');
-} else {
-	define('DB_NAME','kvk');
-	define('DB_USER','root');
-	define('DB_PASS','yuki10145');
-	define('DB_HOST','localhost');
-	//define('DB_HOST','203.138.100.12');
-	define('DB_CHARSET','utf8');
-}
+
+define('DB_NAME','kvk');
+define('DB_USER','root');
+define('DB_PASS','yuki10145');
+define('DB_HOST','localhost');
+//define('DB_HOST','203.138.100.12');
+define('DB_CHARSET','utf8');
 
 /*
 |--------------------------------------------------------------------------

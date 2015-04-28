@@ -396,6 +396,239 @@
 
 		return $errorMessage;
 	}
+
+	/**
+	 * csvデータを仮置き場に保存
+	 * @param	$filePath	保存対象ファイルパス
+	 * @return	$result		アップロード実行結果
+	 */
+	protected function moveFile($csvData, $filePath) {
+		$result = true;
+		$csvArray = array();
+		$backupArray = array();
+		$checkArray = array();
+		$uploadArray = array();
+		$uploadFlg = true;
+
+		// 更新データ選別
+		$uploadArray = $this->selectData($csvData);
+
+		// ファイルアップロード
+		$result = move_uploaded_file($filePath, $this->uploadInfo);
+		// 		}
+
+		if($result) {
+			// システムステータス更新
+			$result = $this->systemUpdate(SYSTEM_STATUS_PDF_WAIT, $this->pdfTime);
+		} else {
+			$this->{KEY_DB_CHECK_MESSAGE} = "商品CSVファイルのアップロードに失敗しました。<br>";
+		}
+
+		return $result;
+	}
+
+	/**
+	 * 更新対象商品データ選別
+	 * @param	Array	$csvData	保存対象ファイルパス
+	 * @return	Array	$updateData	更新対象データ
+	 */
+	protected function moveFile($csvData) {
+		$dbData = array();
+		$checkArray = array();
+		$updateData = array();
+		$result = false;
+
+		$dbData = $this->getDbData();
+		$dbCount = count($dbData);
+
+		foreach ($csvData as $key=>$targetArray) {
+			if($key == 0) {
+				continue;
+			}
+
+			if($key < $dbCount) {
+				$checkArray = array_diff($targetArray, $dbData[$key]);
+				$count = count($checkArray);
+				if($count != 0){
+					$result =  true;
+				}
+			} else {
+				$result =  true;
+			}
+
+			if($result) {
+				$updateData[] = $targetArray;
+			}
+		}
+
+		if(!empty($updateData)){
+
+		}
+	}
+
+	/**
+	 * 商品データ取得(DB)
+	 *
+	 * @return	Array	$getArray	商品データ
+	 */
+	protected function getDbData() {
+		$getArray = array();
+		$itemCodeArray = array();
+		// データ取得
+		$itemCodeArray = $this->manager->db_manager->get(TABLE_NAME_ITEM)->getAll();
+
+		foreach ($itemCodeArray as $itemDataRow){
+			// カタログページ分割
+			$fileName = explode(".",$itemDataRow[COLUMN_NAME_CATALOG_LINK]);
+			$catalogYear = explode("-",$fileName[0]);
+			$catalogPage = explode("_",$catalogYear[1]);
+
+			$csvDataArray = array(
+					// 品番
+					$itemDataRow[COLUMN_NAME_ITEM_ID],
+					// 品名
+					$itemDataRow[COLUMN_NAME_ITEM_NAME],
+					// 写真
+					$itemDataRow[COLUMN_NAME_ITEM_IMAGE],
+					// 図面
+					$itemDataRow[COLUMN_NAME_MAP_DATA],
+					// 取説
+					$itemDataRow[COLUMN_NAME_TORISETSU_DATA],
+					// 施工
+					$itemDataRow[COLUMN_NAME_KOUSETSU_DATA],
+					// 分解図本体
+					$itemDataRow[COLUMN_NAME_BUNKAI_DATA],
+					// 分解図_シャワー
+					$itemDataRow[COLUMN_NAME_SHOWER_DATA],
+					// 購入
+					$itemDataRow[COLUMN_NAME_BUY_STATUS],
+					// 価格
+					$itemDataRow[COLUMN_NAME_PRICE],
+					// 価格（税込み）
+					$itemDataRow[COLUMN_NAME_PRICE_ZEI],
+					// 備考
+					$itemDataRow[COLUMN_NAME_NOTE],
+					// 商品イメージ
+					$itemDataRow[COLUMN_NAME_ITEM_IMAGE],
+					// バリエーション親品番
+					$itemDataRow[COLUMN_NAME_PARENT_VARIATION],
+					// バリエーション順序
+					$itemDataRow[COLUMN_NAME_VARIATION_NO],
+					// カタログ年度
+					$catalogYear[0],
+					// カタログページ
+					$catalogPage[1],
+					// 検索ワード
+					$itemDataRow[COLUMN_NAME_SEARCH_WORD],
+					// 分岐金具
+					$itemDataRow[COLUMN_NAME_BUNKI_KANAGU_1],
+					// 分岐金具
+					$itemDataRow[COLUMN_NAME_BUNKI_KANAGU_2],
+					// 分岐金具
+					$itemDataRow[COLUMN_NAME_BUNKI_KANAGU_3],
+					// 発売時期
+					$itemDataRow[COLUMN_NAME_SELL_TIME],
+					// 代替品
+					$itemDataRow[COLUMN_NAME_SUB_ITEM],
+					// 本体取付穴
+					$itemDataRow[COLUMN_NAME_SUNPOU],
+					// ピッチ
+					$itemDataRow[COLUMN_NAME_PITCH],
+					// シャワーS取付穴
+					$itemDataRow[COLUMN_NAME_SHOWER_SUNPOU],
+					// 削除
+					$itemDataRow[COLUMN_NAME_VIEW_STATUS],
+					// カテゴリID
+					$itemDataRow[COLUMN_NAME_PARENT_ID].$itemDataRow[COLUMN_NAME_CATEGORY_ID]
+			);
+			$getArray[] = $csvDataArray;
+		}
+		return $getArray;
+	}
+
+	/**
+	 * csvファイル出力メイン処理(商品)
+	 * @param	array()		csv保存対象データ
+	 * @return	$result		出力結果（true：csv取込成功	false：csv取込失敗）
+	 */
+	protected function setExportItem($updateArray) {
+		$filePointer = "";			// ファイルポインタ
+		$headerArray = array();		// csvヘッダー行
+		$result = true;
+		$makeFilePath = $this->makingPdfCsvInfoItem;
+
+		// csvファイル書き込み
+		$filePointer = fopen($makeFilePath, 'w');
+		$headerArray = $this->csvHeaderItem;
+		mb_convert_variables(CSV_CODE, SYSTEM_CODE, $headerArray);
+		fputcsv($filePointer, $headerArray);
+
+		foreach ($updateArray as $itemDataRow){
+			$csvDataArray = array(
+					// 品番
+					$itemDataRow[ITEM_ID_COLUMN_ITEM],
+					// 品名
+					$itemDataRow[ITEM_NAME_COLUMN_ITEM],
+					// 写真
+					$itemDataRow[ITEM_PHOTO_COLUMN_ITEM],
+					// 図面
+					$itemDataRow[MAP_COLUMN_ITEM],
+					// 取説
+					$itemDataRow[TORISETSU_COLUMN_ITEM],
+					// 施工
+					$itemDataRow[SEKOU_COLUMN_ITEM],
+					// 分解図本体
+					$itemDataRow[BUNKAI_COLUMN_ITEM],
+					// 分解図_シャワー
+					$itemDataRow[SHOWER_COLUMN_ITEM],
+					// 購入
+					$itemDataRow[BUY_STATUS_COLUMN_ITEM],
+					// 価格
+					$itemDataRow[PRICE_COLUMN_ITEM],
+					// 価格（税込み）
+					$itemDataRow[PRICE_ZEI_COLUMN_ITEM],
+					// 備考
+					$itemDataRow[NOTE_COLUMN_ITEM],
+					// 商品イメージ
+					$itemDataRow[ITEM_IMAGE_COLUMN_ITEM],
+					// バリエーション親品番
+					$itemDataRow[VARIATION_NAME_COLUMN_ITEM],
+					// バリエーション順序
+					$itemDataRow[VARIATION_NO_COLUMN_ITEM],
+					// カタログ年度
+					$itemDataRow[CATALOG_YEAR_COLUMN_ITEM],
+					// カタログページ
+					$itemDataRow[CATALOG_PAGE_COLUMN_ITEM],
+					// 検索ワード
+					$itemDataRow[SEARCH_WORD_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_1_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_2_COLUMN_ITEM],
+					// 分岐金具
+					$itemDataRow[BUNKI_KANAGU_3_COLUMN_ITEM],
+					// 発売時期
+					$itemDataRow[SELL_KIKAN_COLUMN_ITEM],
+					// 代替品
+					$itemDataRow[DAIGAE_COLUMN_ITEM],
+					// 本体取付穴
+					$itemDataRow[SUNPOU_COLUMN_ITEM],
+					// ピッチ
+					$itemDataRow[PITCH_COLUMN_ITEM],
+					// シャワーS取付穴
+					$itemDataRow[SHOWER_SUNPOU_COLUMN_ITEM],
+					// 削除
+					$itemDataRow[DELETE_COLUMN_ITEM],
+					// カテゴリID
+					$itemDataRow[CATEGORY_ID_COLUMN_ITEM],
+			);
+			mb_convert_variables(CSV_CODE, SYSTEM_CODE, $csvDataArray);
+			fputcsv($filePointer, $csvDataArray);
+		}
+		fclose($filePointer);
+
+		return $result;
+	}
 }
 
 ?>

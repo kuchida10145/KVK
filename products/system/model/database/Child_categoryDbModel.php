@@ -109,7 +109,7 @@ class Child_categoryDbModel extends DbModel
 		$sql = "SELECT * FROM {$table} WHERE ".$where;
 		$dataCount = $this->db->getCount($sql);
 
-		if($dataCount == 0) {
+		if(count($dataCount) == 0) {
 			$result = false;
 		}
 		return $result;
