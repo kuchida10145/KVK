@@ -1,0 +1,88 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+      <title>フォームの入力エラーを吹き出しで教えてくれるサンプル</title>
+      <script type="text/javascript" src="util.js"></script>
+      <script type="text/javascript" src="validator.js"></script>
+      <link rel="stylesheet" href="default.css" type="text/css">
+   </head>
+
+   <body>
+      <p><a href="http://espion.just-size.jp/archives/07/035231221.html">フォームの入力エラーを吹き出しで教えてくれる JavaScript のサンプル</a></p>
+
+      <h1> 一般的なフォーム </h1>
+      <form action="" method="post" onSubmit="return Validator.submit(this)">
+         <table border>
+            <tr>
+               <td>お名前:</td> <td><input type="text" name="name" value="" onBlur="Validator.check(this)"></td>
+            </tr>
+            <tr>
+               <td>メールアドレス:</td> <td><input type="text" name="name" value="" onBlur="Validator.check(this, 'mail')"></td>
+            </tr>
+         </table>
+         <p> <input type="submit" value="submit"> </p>
+      </form>
+
+      <hr>
+
+      <h1> 色々サンプル </h1>
+      <form action="../../../js/form_check/confirm" method="post" onSubmit="return Validator.submit(this)">
+         <p> <input type="submit" value="submit"> </p>
+
+         <h2> 普通のやつ </h2>
+         <input type="text" name="name" value="" onBlur="Validator.check(this)"> 必須入力 <br>
+         <input type="text" name="mail" value="" onBlur="Validator.check(this, 'mail')"> メールアドレス (mail) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'kana')"> 全角カタカナ (kana) <br>
+
+         <input type="password" name="pass1" value="" onBlur="Validator.check(this, 'equal', 'pass2')"> 他のフィールドと同じ値を入力する (equal) <br>
+         <input type="password" name="pass2" value="" onBlur="Validator.check(this, 'equal', 'pass1')"> 他のフィールドと同じ値を入力する (equal) <br>
+
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'count5-10')"> 文字数の制限 - 5〜10文字 (count5-10) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'count5-')"> 文字数の制限 - 5文字以上 (count5-) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'count-10')"> 文字数の制限 - 10文字以下 (count-10) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'count10')"> 文字数の制限 - 10文字 (count10) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'num')"> 数字のみ (num) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'num100-200')"> 数値範囲の制限 - 100〜200 (num100-200) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'num100-')"> 数値範囲の制限 - 100以上 (num100-) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'num-200')"> 数値範囲の制限 - 200以下 (num-200) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'alphabet')"> アルファベット (alphabet) <br>
+
+         <h2> 複合したやつ </h2>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, 'alphabet count5-10')"> アルファベット5〜10文字 (alphabet count5-10) <br>
+         <input type="text" name="eq1" value="" onBlur="Validator.check(this, 'equal mail', 'eq2')"> メールアドレス (equal mail) <br>
+         <input type="text" name="eq2" value="" onBlur="Validator.check(this, 'equal mail', 'eq1')"> 確認用メールアドレス (equal mail) <br>
+
+         <h2> 必須じゃない </h2>
+         <input type="text" name="mail" value="" onBlur="Validator.check(this, '!mail')"> メールアドレス (!mail) <br>
+         <input type="text" name="name" value="" onBlur="Validator.check(this, '!alphabet count5-10')"> アルファベット5〜10文字 (!alphabet count5-10) <br>
+
+         <h2> ラジオボタンとか </h2>
+         <input type="radio" name="rd1" value="">
+         <input type="radio" name="rd1" value="" onBlur="Validator.check(this)">
+         <input type="radio" name="rd1" value=""> <br>
+
+         <input type="checkbox" name="ck1" value="hoge">
+         <input type="checkbox" name="ck1" value="hoge">
+         <input type="checkbox" name="ck1" value="hoge" onBlur="Validator.check(this)"> <br>
+
+         <input type="checkbox" name="ck2" value="hoge">
+         <input type="checkbox" name="ck2" value="hoge">
+         <input type="checkbox" name="ck2" value="hoge">
+         <input type="checkbox" name="ck2" value="hoge">
+         <input type="checkbox" name="ck2" value="hoge" onBlur="Validator.check(this, 'check2-')"> 二つ以上チェックして下さい<br>
+
+         <textarea cols="50" rows="3" onBlur="Validator.check(this)"></textarea><br>
+
+         <select onBlur="Validator.check(this)">
+            <option></option>
+            <option>select1</option>
+            <option>select2</option>
+            <option>select3</option>
+         </select><br>
+
+         <p> <input type="submit" value="submit"> </p>
+      </form>
+   </body>
+</html>
+

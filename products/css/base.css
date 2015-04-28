@@ -1,0 +1,349 @@
+@charset "utf-8";
+
+/* common
+-------------------------------------*/
+
+* {
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	line-height:160%;
+}
+
+a img {
+	border: 0px;
+	vertical-align:bottom;
+}
+img{
+	vertical-align:bottom;
+}
+a,area{outline: none;}
+
+hr {
+	display: none;
+}
+
+option {
+	padding: 0 5px 0 0;
+}
+
+/* title
+-------------------------------------*/
+h1, h2, h3, h4, h5, h6 {
+
+}
+
+/* character setting
+-------------------------------------*/
+strong {
+	font-weight: 800;
+}
+
+em {
+	font-style: normal;
+}
+
+address {
+	font-style: normal;
+}
+
+/* list
+-------------------------------------*/
+ul{
+	list-style-type: none;
+}
+ol {
+	padding:0 10px 10px 20px;
+}
+ol li {
+	padding:0 0 4px 0px;
+}
+
+/* table
+-------------------------------------*/
+table,
+th,
+td {
+	padding:3px;
+}
+
+caption {
+	text-align: left;
+}
+
+/* align
+-------------------------------------*/
+.alnleft {
+	text-align: left;
+}
+
+.alncenter {
+	text-align: center;
+}
+
+.alnright {
+	text-align: right;
+}
+
+.fltleft {
+	float: left;
+}
+
+.fltright {
+	float: right;
+}
+
+/* font-size
+-------------------------------------*/
+.txtxxsmall { font-size: xx-small}
+.txtxsmall { font-size: x-small}
+.txtsmall { font-size: small}
+.txtsmaller { font-size: smaller}
+.txtxxlarge { font-size: xx-large}
+.txtxlarge { font-size: x-large}
+.txtlarge { font-size: large}
+.txtlarger { font-size: larger}
+.txtmed { font-size: medium}
+.txt09 { font-size: 9px;}
+.txt10 { font-size: 10px;}
+.txt11 { font-size: 11px;}
+.txt12 { font-size: 12px;}
+.txt13 { font-size: 13px;}
+.txt14 { font-size: 14px;}
+.txt15 { font-size: 15px;}
+.txt16 { font-size: 16px;}
+.txt17 { font-size: 17px;}
+.txt18 { font-size: 18px;}
+.txt19 { font-size: 19px;}
+.txt20 { font-size: 20px;}
+.txt21 { font-size: 21px;}
+.txt22 { font-size: 22px;}
+.txt23 { font-size: 23px;}
+.txt24 { font-size: 24px;}
+.txt25 { font-size: 25px;}
+.txt26 { font-size: 26px;}
+.txt70{font-size:70%; line-height:140%;}
+.txt80{font-size:80%; line-height:150%;}
+.txt90{font-size:90%; line-height:150%;}
+.txt110{font-size:110%;}
+.txt120{font-size:120%;}
+.txt130{font-size:130%;}
+.txt140{font-size:140%;}
+.txt150{font-size:150%;}
+
+/* color
+-------------------------------------*/
+.clrred { color: #da423e;}
+.clrblue { color: #337cb3;}
+.clryellow { color: #FC0;}
+.clrorange { color: #F90;}
+.clrgreen { color: #8cc220;}
+.clrgreen2 { color: #6FB4BA;}
+.clrpink { color: #fc63a3;}
+.clrwhite { color: #FFF;}
+.clr333 { color: #333;}
+.clr666 { color: #666;}
+.clr999 { color: #999;}
+.clrCCC { color: #CCC;}
+.clrfacebbok {color:#36558f;}
+
+
+/* background
+-------------------------------------*/
+.bg01 { background: #F8FBFD;}
+.bg02 { background: #ADDBFA;}
+.bg03 { background: #DEF0FB;}
+.bg04 { background: #FEF9E9;}
+.bg05 { background: #D3F1A0;}
+.bg06 { background: #f8d9d8;}
+.bg07 { background: #A0A9F1;}
+.bg08 { background: #da423e; color:#fff;}
+.bg09 { background: #FDE297;}
+.bg10 { background: #EFEFEF;}
+.bg11 { background: #F4F4F4;}
+.bg12 { background: #EEEEDC;}
+.bg13 { background: #F6F6EE;}
+.bg14 { background: #776655;}
+.bg15 { background: #EDF3FE;}
+.bg16 { background: #F9F9F9;}
+.bg17 { background: #7161C4;}
+.bg18 { background: #2ABE0F;}
+.bg19 { background: #FF0B0B;}
+.bg20 { background: #FFB82B;}
+.bg21 { background: #7CA20A;}
+.bgfff { background: #FFF;}
+
+/* float
+-------------------------------------*/
+.fltleft { float: left;}
+.fltright { float: right;}
+
+/*clear*/
+.clear {
+	clear: both;
+	font-size: 1px;
+}
+
+/*margin
+------------------------------------*/
+.ma20 { margin: 20px;}
+.ma10 { margin: 10px;}
+.ma05 { margin: 5px;}
+.mt20 {	margin: 20px 0px 0px 0px;}
+.mt10 { margin: 10px 0px 0px 0px;}
+.mt05 { margin: 5px 0px 0px 0px;}
+.mb20 { margin: 0px 0px 20px 0px;}
+.mb10 { margin: 0px 0px 10px 0px;}
+.mb05 { margin: 0px 0px 5px 0px;}
+.mr20 { margin: 0px 20px 0px 0px;}
+.mr10 { margin: 0px 10px 0px 0px;}
+.mr05 { margin: 0px 5px 0px 0px;}
+.ml20 { margin: 0px 0px 0px 20px;}
+.ml15 { margin: 0px 0px 0px 15px;}
+.ml10 { margin: 0px 0px 0px 10px;}
+.ml05 { margin: 0px 0px 0px 5px;}
+.mtb20 { margin: 20px 0;}
+.mtb10 { margin: 10px 0;}
+.mtb05 { margin: 5px 0;}
+
+/*padding
+------------------------------------*/
+.pa20 { padding: 20px;}
+.pa10 { padding: 10px;}
+.pa05 { padding: 5px;}
+.pt20 { padding-top: 20px;}
+.pt10 { padding-top: 10px;}
+.pt05 { padding-top: 5px;}
+.pb20 { padding-bottom:20px;}
+.pb10 { padding-bottom:10px;}
+.pb05 { padding-bottom: 5px;}
+.pr20 { padding-right: 20px;}
+.pr10 { padding-right: 10px;}
+.pr05 { padding-right: 5px;}
+.pl20 { padding-left:20px;}
+.pl10 { padding-left: 10px;}
+.pl05 { padding-left:5px;}
+
+/*--------------------------------------------------------------------------
+*/
+/* floatさせたボックスが親ボックスの外にはみ出す現象を回避（ここから） */
+.clearbox,
+.clearfix{
+ min-height:1px;　/* IE 7対策 */
+}
+.clearbox:after,
+.clearfix:after {
+ content:".";
+ display:block;
+ height:0px;
+ clear:both;
+ visibility:hidden;
+ font-size: 0.1em;
+ line-height: 0; 
+
+}
+.clearbox,
+.clearfix { display:inline-table; }
+/* Mac IE には適用させない \*/
+* html .clearbox,
+* html .clearfix { height:1px; }
+.clearbox,
+.clearfix { display:block; }
+/* */
+/* floatさせたボックスが親ボックスの外にはみ出す現象を回避（ここまで） */
+/*--------------------------------------------------------------------------
+*/
+/*----上へ戻る----*/
+/*.gotop{
+	padding:10px 0 20px 0;
+
+}
+.contents .gotop p{
+	clear:both;
+	text-align:right;
+	background:url(../img/bg_gotop.gif) no-repeat right 5px;
+	padding:0 15px 0 0px;
+}
+.gotop p a:hover{
+
+}*/
+/*----位置の指定----*/
+.alncenter{
+	text-align:center;
+}
+.alnleft{
+	text-align:left;
+}
+.alnright{
+	text-align:right;
+}
+.fltleft{
+	float:left;
+}
+.fltright{
+	float:right;
+}
+.marginauto{
+	margin-left:auto;
+	margin-right:auto;
+}
+.clear{
+	clear:both;
+}
+.valntop{
+	vertical-align:top;
+}
+.valnmiddle{
+	vertical-align:middle;
+}
+.valnbottom{
+	vertical-align:bottom;
+}
+.indent{
+	text-indent:-10000px;
+}
+.justify{
+	text-align:justify;
+	text-justify: distribute-all-lines;
+}
+/*----ディスプレイ----*/
+.none{
+	display:none;
+}
+.block{
+	display:block;
+}
+.inline{
+	display:inline;
+}
+
+
+.cap,
+.contents .cap{
+	padding-left:1em;
+	text-indent:-1em;
+}
+.cap2,
+.contents .cap2{
+	padding-left:2em;
+	text-indent:-2em;
+}
+
+.contents .cap,
+.contents .cap2{
+	margin:0 0 0 10px;
+	padding-bottom:10px;
+}
+/*a:hover img{
+	opacity:0.5;
+	filter: alpha(opacity=50);
+}*/
+
+.weight400{
+	font-weight:400;
+}
+.weight800{
+	font-weight:800;
+}

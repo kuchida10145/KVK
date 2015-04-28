@@ -1,0 +1,417 @@
+@charset "shift_jis";
+
+/*ƒ^ƒCƒgƒ‹
+------------------------------------------------*/
+.contents h2{
+	font-size:180%;
+	padding:20px;
+	margin:0 0 30px 0;
+	font-weight:400;
+	color:#fff;
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+	background:url(../img/bg_contents_h2.jpg) no-repeat right center #000;
+
+}
+.contents h3{
+	font-size:100%;
+	margin:0 0px 20px 0px;
+	padding:5px 0 5px 25px;
+	background :url(../img/bg_contents_h3.gif) no-repeat center left ;
+	border-bottom:1px solid #ccc;
+}
+.contents h3 strong{
+	font-size:130%;
+	font-style:italic;
+	margin:0 10px 0 0;
+}
+
+.contents h4{
+	font-size:150%;	
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+	padding:0 0 20px 0;
+	font-style:italic;
+
+}
+
+
+.contents h5{
+	padding:0px 0 10px 0px;
+	font-size:120%;
+	margin:0 0 0 0px;
+}
+
+.contents h6{
+	font-size:100%;	
+	padding:5px 0 5px 15px;
+	margin:0 0 10px 0;
+}
+
+
+/*’i—Ž
+------------------------------------------------*/
+.contents{
+	padding:0 0px 20px 0px;
+}
+.contents p{
+	padding:0 0px 15px 0px;
+}
+.contents p img{
+
+}
+
+/*ƒŠƒXƒg
+------------------------------------------------*/
+.contents ul {
+	padding:0 10px 8px 10px;
+	list-style-type:none;
+}
+
+
+
+.list01{
+	padding:5px;
+	border-top:1px dotted #ccc;
+
+}
+
+
+/*ƒe[ƒuƒ‹
+------------------------------------------------*/
+.table01{
+	border-collapse:collapse;
+	width:100%;
+	margin:0 0px 20px 0px;	
+	background:#fff;
+}
+.table01 td,
+.table01 th{
+	padding:10px;
+	border-bottom:1px solid #d7d7d7;
+	
+}
+.table01 th{
+border-bottom:1px solid #d7d7d7;
+	
+}
+.table01 .noborder{
+	border:none;
+}
+
+
+
+.table02{
+	border-collapse:collapse;
+	width:100%;
+	margin:0 0px 20px 0px;	
+}
+.table02 td,
+.table02 th{
+	padding:5px;
+	border:1px solid #ccc;
+}
+.table02 th{
+	background:#eee;
+	font-weight:400;
+}
+
+
+/*ƒuƒ‰ƒ“ƒh‚Ìƒ^ƒCƒgƒ‹
+------------------------------------------------*/
+.brandmain{
+	background:url(../img/bg_brandmain.jpg) no-repeat top;
+	color:#fff;
+	padding:0 20px;
+}
+.brandmain img{
+	float:right;
+}
+.contents .brandmain h2{
+	background:none;
+	font-size:270%;
+	padding:0 0 0px 0;
+	line-height:130%;
+
+}
+.contents .freetag {
+	padding:50px 0 20px 0;
+}
+
+.brandmain strong{
+	background:#2f5e2c;
+	padding:10px;
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+	font-size:130%;
+-moz-border-radius: 5px;		
+	border-radius: 5px;
+	
+}
+.brandintro{
+	background:#253d14;
+	padding:20px;
+	margin:0 0 20px 0;
+	color:#fff;
+}
+.btn01 a{
+	background:#c5ac00;
+	text-align:center;
+	-moz-border-radius: 99px;		
+	border-radius: 99px;
+	font-size:200%;
+	padding:15px;
+	font-weight:800;
+	display:block;
+	color:#fff;
+}
+.btn02 a{
+	background:#264a1c;
+	text-align:center;
+	-moz-border-radius: 99px;		
+	border-radius: 99px;
+	font-size:150%;
+	padding:10px;
+	font-weight:800;
+	display:block;
+	color:#fff;
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+}
+.contents .brandintro h3{
+	font-size:130%;
+	border:none;
+	background:none;
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+	padding:0;
+
+}
+.box01{
+	background:url(../img/box01.png) no-repeat top left;
+	padding:40px 30px 20px 30px;
+	border-bottom:1px solid #dddddd;
+	margin:0 0 20px 0;
+
+}
+.contents .box01 h2{
+	background:none;
+	color:#666;
+	padding:0;
+	font-size:250%;
+}
+.box02{
+	background:url(../img/box02.png) no-repeat top center;
+	padding:30px 10px;
+	border:1px solid #dddddd;
+	margin:0 0 20px 0;
+			box-shadow: 0 7px 6px -6px #999;
+}
+.box02 h3{
+	font-size:140%;	
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+	background:none;
+	padding:0 0 10px 0;
+	color:#166905;
+}
+
+.sateistafflist dl{
+	width:130px;
+	float:left;
+	margin:0 2px;
+	text-align:center;
+}
+.sateistafflist img{
+	padding:4px;
+	border:1px solid #ccc;
+}
+.box03{
+	background:#f6f7ee;
+	border:1px solid #b6c8b2;
+	padding:10px;
+	margin:0 0 20px 0;	
+}
+.box03 h3{
+	font-size:150%;	
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+	background:#166905;
+	border:none;
+	-moz-border-radius: 5px;		
+	border-radius: 5px;
+	color:#fff;
+	padding:10px ;
+	text-align:center;
+}
+.contents .badphoto{
+	padding:0 0 10px 0;
+}
+.badphoto img{
+	width:165px;
+}
+.badphoto dl{
+	float:left;
+	width:165px;
+	background:#166905;	
+	color:#fff;
+	text-align:center;
+	margin:0 2px;
+}
+
+
+/*ŠÓ’èŽmÐ‰î*/
+.staffbox dl{
+	background:url(../img/box02.png) no-repeat top center;
+	padding:30px 20px;
+	border:1px solid #dddddd;
+	margin:0 0 20px 0;
+	box-shadow: 0 7px 6px -6px #999;
+}
+.staffbox dt{
+	width:170px;
+	float:left;
+}
+.staffbox dt img{
+	width:160px;
+	padding:4px;
+	border:1px solid #ccc;
+}
+.staffbox dd{
+	float:right;
+	width:460px;
+}
+.contents .staffbox dd h4{
+	border-bottom:1px solid #ccc;
+	padding:0 0 5px 0;
+	margin:0 0 10px 0;
+}
+
+/*Ž¿–â*/
+.faqbox dl{
+	border:1px solid #ccc;
+	padding:20px;
+	margin:0 0 20px 0;
+	background:#fefefe;
+	
+	box-shadow: 0 7px 6px -6px #999;
+}
+.faqbox dt{
+	border-bottom:1px dotted #ccc;
+	padding:0 0 5px 0;
+	margin:0 0 5px 35px;
+	text-indent:-35px;
+	font-size:120%;
+	font-weight:800;
+	color:#223a12;
+}
+.faqbox dt:before{
+	content:"Q";
+	font-size:200%;	
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+	padding:5px;
+	font-weight:800;
+	color:#264a1c;
+
+	margin:0 10px 0 0px;
+
+}
+.faqbox dd{
+	text-indent:-35px;
+	margin:0 0 0 35px;
+}
+
+.faqbox dd:before{
+	content:"A";
+	font-size:200%;	
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+	padding:5px;
+	font-weight:800;
+	color:#212b71;
+
+	margin:0 10px 0 0;
+}
+
+.faqbox dd table{
+	text-indent:0px;
+	margin:0 0 0 0px;
+}
+
+
+
+
+
+
+
+.steptag{
+	font-size:170%;
+}
+.contents .brandindex ul{
+	margin:0 -0px 0 0;
+	padding:0;
+	margin:0 -0px 0 0;
+}
+
+
+.brandindex li {
+	width:174px;
+	float:left;
+background:#f2f1f1;	
+	/*margin:0 0 1px 1px;*/
+	border-top:1px solid #fff;
+	border-right:1px solid #fff;
+}
+
+.brandindex li a{
+	display:block;
+	padding:10px 0px;
+
+	color:#000;
+	font-size:80%;
+	background:#f2f1f1;
+	text-align:center;
+
+}
+.brandindex li a:after{
+	content:">";
+	padding:0 0 0 5px;
+	color:#666;
+
+}
+
+
+.telmumber{
+	font-size:320%;
+	color:#264a1c;
+	font-family:"ƒqƒ‰ƒMƒm–¾’© Pro W3", "Hiragino Mincho Pro", "HGS–¾’©E", "‚l‚r ‚o–¾’©", serif;
+}
+
+
+
+.sitemapbox h2{
+	display:none;
+}
+.sitemapbox a{
+	color:#666;
+}
+.sitemapbox ul{
+	background:#fff;
+}
+.sitemapbox li{
+	font-size:120%;
+	padding:5px;
+}
+.sitemapbox li a:before{
+	content:">";
+	color:#ccc;
+	padding:0 5px 0 0;
+}
+.sitemapbox li a:hover{
+	background:#fff;
+}
+.sitemapbox li ul{
+	padding:10px 0 0 10px;
+
+}
+.sitemapbox li li{
+	font-size:80%;
+	float:left;
+	width:30%;
+}
+
+.bannerquo{
+	display:none;
+}
