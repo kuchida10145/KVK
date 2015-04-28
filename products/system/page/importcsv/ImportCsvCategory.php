@@ -144,6 +144,33 @@
 		$result = true;
 		return $result;
 	}
+
+	/**
+	 * バリデーション実行
+	 * @param  Array	$csvLineData	csvの1行データ
+	 * @return String	$errorMessage	エラーメッセージ
+	 */
+	protected function runValidation($csvLineData, $lineCount) {
+		$errorMessage = "";
+
+		$this->manager->validationColumns->resetError();
+		if(!$this->manager->validationColumns->run($csvLineData)) {
+			$errorMessage = $this->manager->validationColumns->getErrorMessageColumn($lineCount, $this->msg_rules);
+		}
+
+		return $errorMessage;
+	}
+
+	/**
+	 * ファイル確認
+	 * @param  Array	$csvLineData	csvの1行データ
+	 * @return String	$errorMessage	エラーメッセージ
+	 */
+	protected function fileCheck($csvLineData) {
+		$errorMessage = "";
+
+		return $errorMessage;
+	}
 }
 
 ?>

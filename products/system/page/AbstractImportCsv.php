@@ -10,6 +10,8 @@ abstract class AbstractImportCsv extends Page{
 	protected abstract function dataPrimaryCheck($checkData, $lineCount); 	// CSVデータ重複データチェック
 	protected abstract function runDB($targetData);							// DB関連の処理実行
 	protected abstract function csvUpload($targetFile);						// ファイルアップロード処理実行
+	protected abstract function fileCheck($csvLineData);					// 取込データで指定されたファイルの有無をチェック
+	protected abstract function runValidation($csvLineData, $lineCount);	// バリデーションチェックを実行する
 
 	/**
 	 * csvファイル取込メイン処理
@@ -191,11 +193,12 @@ abstract class AbstractImportCsv extends Page{
 				}
 
 				// データ型チェック
-				$this->manager->validationColumns->resetError();
-				if(!$this->manager->validationColumns->run($row)) {
-					$errorMessage[] = $this->manager->validationColumns->getErrorMessageColumn($errorLineCount, $this->msg_rules);
+				$validationError = $this->runValidation($row, $errorLineCount);
+				if(!empty($validationError)) {
+					$errorMessage[] = $validationError;
 					$result = false;
 				}
+
 				// 重複データチェック
 				if(!$this->dataPrimaryCheck($row, $errorLineCount)) {
 					$errorMessage[] = "{$this->{DUPLICATION_LINE}}行目とデータが重複しています。 {$errorLineCount}行目<br>";
@@ -203,6 +206,16 @@ abstract class AbstractImportCsv extends Page{
 					$line_count++;
 					continue;
 				}
+
+				// ファイルチェック
+				$fileCheckError = $this->fileCheck($row);
+				if(!empty($fileCheckError)) {
+					$errorMessage[] = $fileCheckError;
+					$result = false;
+					$line_count++;
+					continue;
+				}
+
 				// DBチェック
 				if(!$this->dataDBCheck($row, $line_count)) {
 					$errorMessage[] = $this->{KEY_DB_CHECK_MESSAGE};

@@ -97,12 +97,17 @@
 		}
 		$itemStatus = substr($itemStatus, 0, -1);   //最後の「,」を削除
 
+		// 商品IDから商品データを取得
+		$getItemArray = COLUMN_NAME_ITEM_ID.' = "'.$targetArray[ITEM_ID_COLUMN_ITEM_STATUS].'"';
+		$itemArray = $this->manager->db_manager->get($table)->search($getItemArray, $limit, $order);
+		$itemRow = $itemArray[0];
+
 		// 商品データ更新
 		$itemRow[COLUMN_NAME_ITEM_STATUS] = $itemStatus;			// 商品ステータス
 		$itemRow[COLUMN_NAME_UPDATE_DATE] = date("Y-m-d H:i:s");	// 更新日
 
 		// where句生成
-		$where = COLUMN_NAME_ITEM_ID." = '".$targetArray[ITEM_ID_COLUMN_ITEM_STATUS]."'";
+		$where = COLUMN_NAME_ITEM_ID." = '".$itemRow[COLUMN_NAME_ITEM_ID]."' AND ".COLUMN_NAME_CATEGORY_ID." = '".$itemRow[COLUMN_NAME_CATEGORY_ID]."'";
 
 		$dbCheck = $this->manager->db_manager->get($table)->update($itemRow, $where);
 
@@ -118,6 +123,33 @@
 		// 処理なし
 		$result = true;
 		return $result;
+	}
+
+	/**
+	 * バリデーション実行
+	 * @param  Array	$csvLineData	csvの1行データ
+	 * @return String	$errorMessage	エラーメッセージ
+	 */
+	protected function runValidation($csvLineData, $lineCount) {
+		$errorMessage = "";
+
+		$this->manager->validationColumns->resetError();
+		if(!$this->manager->validationColumns->run($csvLineData)) {
+			$errorMessage = $this->manager->validationColumns->getErrorMessageColumn($lineCount, $this->msg_rules);
+		}
+
+		return $errorMessage;
+	}
+
+	/**
+	 * ファイル確認
+	 * @param  Array	$csvLineData	csvの1行データ
+	 * @return String	$errorMessage	エラーメッセージ
+	 */
+	protected function fileCheck($csvLineData) {
+		$errorMessage = "";
+
+		return $errorMessage;
 	}
 }
 

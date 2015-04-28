@@ -5,6 +5,12 @@
 			parent::__construct();
 			// 品番（部品）
 			$this->manager->validationColumns->setRule(PARTS_ID_COLUMN_PARTS, 'required');
+			// 品名（部品）
+			$this->manager->validationColumns->setRule(PARTS_NAME_COLUMN_PARTS, 'required');
+			// 希望小売価格（税抜）
+			$this->manager->validationColumns->setRule(PRICE_COLUMN_PARTS, 'required|numeric|digit|pnumeric');
+			// 希望小売価格（税込）
+			$this->manager->validationColumns->setRule(PRICE_ZEI_COLUMN_PARTS, 'required|numeric|digit|pnumeric');
 			// 品番（対象商品）
 			$this->manager->validationColumns->setRule(ITEM_COLUMN_PARTS, 'required');
 			// ファイル名
@@ -403,6 +409,72 @@
 		fclose($filePointer);
 
 		return $result;
+	}
+
+	/**
+	 * ファイル確認
+	 * @param  Array	$csvLineData	csvの1行データ
+	 * @return String	$errorMessage	エラーメッセージ
+	 */
+	protected function fileCheck($csvLineData) {
+		$errorMessage = "";
+		$fileName = $csvLineData[FILE_COLUMN_PARTS];
+
+		if(!file_exists(CSV_FOLDER.$fileName)) {
+			$errorMessage = "`$fileName`がアップロードフォルダにありません。<br>";
+		}
+
+		if ($this->{$errorMessage} == null) {
+			$this->{$errorMessage} = $errorMessage;
+		} else {
+			$errorMessage = "";
+		}
+
+		return $errorMessage;
+	}
+
+	/**
+	 * バリデーション実行
+	 * @param  Array	$csvLineData	csvの1行データ
+	 * @return String	$errorMessage	エラーメッセージ
+	 */
+	protected function runValidation($csvLineData, $lineCount) {
+		$errorMessage = "";
+
+		if(empty($csvLineData[NO_COLUMN_PARTS])) {
+			$errorMessage = $this->titleLineCheck($csvLineData, $lineCount);
+		} else {
+			$this->manager->validationColumns->resetError();
+			if(!$this->manager->validationColumns->run($csvLineData)) {
+				$errorMessage = $this->manager->validationColumns->getErrorMessageColumn($lineCount, $this->msg_rules);
+			}
+		}
+
+		return $errorMessage;
+	}
+
+
+	/**
+	 * タイトル行チェック
+	 * @param  Array	$csvLineData	csvの1行データ
+	 * @return String	$errorMessage	エラーメッセージ
+	 */
+	protected function titleLineCheck($csvLineData, $lineCount) {
+		$errorMessage = "";
+		// 品名
+		if(!empty($csvLineData[PARTS_NAME_COLUMN_PARTS])) {
+			$errorMessage = $errorMessage."番号が未入力のデータに、品名が入力されています。'$lineCount'行目<br>";
+		}
+		// 価格（税抜）
+		if(!empty($csvLineData[PRICE_COLUMN_PARTS])) {
+			$errorMessage = $errorMessage."番号が未入力のデータに、希望小売価格が入力されています。'$lineCount'行目<br>";
+		}
+		// 価格（税込）
+		if(!empty($csvLineData[PRICE_COLUMN_PARTS])) {
+			$errorMessage = $errorMessage."番号が未入力のデータに、税込が入力されています。'$lineCount'行目<br>";
+		}
+
+		return $errorMessage;
 	}
 }
 

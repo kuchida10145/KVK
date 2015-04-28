@@ -145,7 +145,7 @@
 								<input type="file" class="hidden" id="upload" name="file" value="<?php echo $viewFilePath ?>">
 								<!-- 代わりに input[type=text] と ボタンを表示 -->
 								<div class="input-group">
-									<input type="text" id="filepath" name="filepath" class="form-control" value="<?php echo $viewFilePath ?>">
+									<input type="text" id="filepath" name="filepath" class="form-control" value="<?php echo $viewFilePath ?>" placeholder="item_master.csv">
 									<span class="input-group-btn">
 										<!-- ボタンを押したときに input[type=file] を押したことにする -->
 										<a class="btn btn-default" onclick="document.getElementById('upload').click()">ファイル選択</a>
